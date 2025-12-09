@@ -1,0 +1,152 @@
+{
+  "name": "mdx-writer",
+  "version": "1.0.0",
+  "description": "Creates high-quality MDX files for technical documentation with proper metadata, code examples, and exercises",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "content-generation",
+  "parameters": {
+    "chapter_title": {
+      "type": "string",
+      "required": true,
+      "description": "Title of the chapter"
+    },
+    "module_number": {
+      "type": "integer",
+      "required": true,
+      "description": "Module number (1-4)",
+      "minimum": 1,
+      "maximum": 4
+    },
+    "learning_objectives": {
+      "type": "array",
+      "required": true,
+      "description": "Array of learning objectives for the chapter",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "content_outline": {
+      "type": "string",
+      "required": true,
+      "description": "Structured chapter content in markdown format with section headings"
+    },
+    "code_examples": {
+      "type": "object",
+      "required": false,
+      "description": "Configuration for code examples to include",
+      "properties": {
+        "include": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to include code examples"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["python", "cpp", "bash", "yaml", "xml"]
+          },
+          "default": ["python"],
+          "description": "Programming languages for code examples"
+        },
+        "show_output": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include expected output for code examples"
+        }
+      }
+    },
+    "exercises": {
+      "type": "object",
+      "required": false,
+      "description": "Configuration for exercises to include",
+      "properties": {
+        "include": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to include exercises"
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced", "mixed"],
+          "default": "mixed",
+          "description": "Difficulty level of exercises"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3,
+          "description": "Number of exercises to include"
+        }
+      }
+    },
+    "chapter_id": {
+      "type": "string",
+      "required": false,
+      "description": "Unique chapter identifier (auto-generated from title if not provided)"
+    },
+    "sidebar_position": {
+      "type": "integer",
+      "required": false,
+      "description": "Navigation position in sidebar (auto-calculated based on module if not provided)"
+    }
+  },
+  "outputs": {
+    "mdx_file_path": {
+      "type": "string",
+      "description": "Path to the created MDX file"
+    },
+    "frontmatter": {
+      "type": "object",
+      "description": "MDX frontmatter metadata",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "sidebar_position": {
+          "type": "integer"
+        },
+        "chapter_id": {
+          "type": "string"
+        },
+        "module": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "learning_objectives_count": {
+      "type": "integer",
+      "description": "Number of learning objectives included"
+    },
+    "code_examples_count": {
+      "type": "integer",
+      "description": "Number of code examples included"
+    },
+    "exercises_count": {
+      "type": "integer",
+      "description": "Number of exercises included"
+    },
+    "word_count": {
+      "type": "integer",
+      "description": "Approximate word count of the chapter"
+    }
+  },
+  "dependencies": [
+    "gray-matter",
+    "@docusaurus/mdx-loader"
+  ],
+  "integrations": {
+    "docusaurus-init": "Creates MDX files in the Docusaurus docs directory",
+    "content-adapter": "Generated MDX can be personalized using content-adapter"
+  },
+  "tags": ["mdx", "documentation", "content-generation", "education", "robotics"]
+}

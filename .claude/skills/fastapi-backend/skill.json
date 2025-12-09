@@ -6,64 +6,113 @@
   "tags": ["fastapi", "backend", "api", "rest", "rag", "auth"],
   "category": "backend",
   "main": "index.js",
+  "type": "backend",
+  "license": "MIT",
   "parameters": {
-    "type": "object",
-    "properties": {
-      "endpoint_type": {
-        "type": "string",
-        "enum": ["rag_query", "user_auth", "personalization"],
-        "description": "Type of endpoint to create"
-      },
-      "route_path": {
-        "type": "string",
-        "description": "Route path for the endpoint (e.g., '/query', '/auth/login')"
-      },
-      "request_model": {
-        "type": "string",
-        "description": "Pydantic model definition for request body"
-      },
-      "response_model": {
-        "type": "string",
-        "description": "Pydantic model definition for response body"
-      },
-      "http_method": {
-        "type": "string",
-        "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
-        "default": "POST",
-        "description": "HTTP method for the endpoint"
-      },
-      "auth_required": {
-        "type": "boolean",
-        "default": true,
-        "description": "Whether JWT authentication is required for this endpoint"
-      }
+    "endpoint_type": {
+      "type": "string",
+      "required": true,
+      "enum": ["rag_query", "user_profile", "personalization", "translation", "chat_history"],
+      "description": "Type of endpoint to create"
     },
-    "required": ["endpoint_type", "route_path"]
-  },
-  "output": {
-    "type": "object",
-    "properties": {
-      "router_file": {
-        "type": "string",
-        "description": "Path to the created router file"
+    "route_path": {
+      "type": "string",
+      "required": true,
+      "description": "Route path for the endpoint (e.g., '/api/query', '/api/profile')"
+    },
+    "http_method": {
+      "type": "string",
+      "required": false,
+      "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      "default": "POST",
+      "description": "HTTP method for the endpoint"
+    },
+    "auth_required": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Whether JWT authentication is required for this endpoint"
+    },
+    "rate_limit": {
+      "type": "object",
+      "required": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "requests_per_minute": {
+          "type": "integer",
+          "default": 60
+        }
       },
-      "models_file": {
-        "type": "string",
-        "description": "Path to the created models file"
-      },
-      "main_file": {
-        "type": "string",
-        "description": "Path to the main FastAPI application file"
-      },
-      "config_file": {
-        "type": "string",
-        "description": "Path to the configuration file"
-      },
-      "requirements_file": {
-        "type": "string",
-        "description": "Path to the requirements.txt file"
-      }
+      "description": "Rate limiting configuration"
+    },
+    "cors_enabled": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Enable CORS for frontend integration"
     }
+  },
+  "outputs": {
+    "router_file": {
+      "type": "string",
+      "description": "Path to the created router file"
+    },
+    "models_file": {
+      "type": "string",
+      "description": "Path to the Pydantic models file"
+    },
+    "main_file": {
+      "type": "string",
+      "description": "Path to the main FastAPI application file"
+    },
+    "middleware_file": {
+      "type": "string",
+      "description": "Path to authentication middleware"
+    },
+    "requirements_file": {
+      "type": "string",
+      "description": "Path to the requirements.txt file"
+    },
+    "dockerfile": {
+      "type": "string",
+      "description": "Path to Dockerfile for containerization"
+    }
+  },
+  "environment": {
+    "AUTH_SECRET": {
+      "description": "JWT secret for token validation (must match better-auth-setup)",
+      "required": true
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string",
+      "required": true
+    },
+    "QDRANT_URL": {
+      "description": "Qdrant vector database URL",
+      "required": true
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for RAG",
+      "required": true
+    }
+  },
+  "dependencies": [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "python-jose",
+    "passlib",
+    "python-multipart",
+    "slowapi"
+  ],
+  "integrations": {
+    "better-auth-setup": "Validates JWT tokens from frontend auth",
+    "neon-postgres": "Connects to PostgreSQL for data operations",
+    "qdrant-vectorstore": "Queries vector database for RAG",
+    "openai-agents-sdk": "Generates AI responses"
   },
   "examples": [
     {

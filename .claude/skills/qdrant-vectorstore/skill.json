@@ -1,0 +1,187 @@
+{
+  "name": "qdrant-vectorstore",
+  "version": "1.0.0",
+  "description": "Vector database operations for semantic search and RAG (Retrieval-Augmented Generation) chatbot support with automatic embeddings",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "vectorstore",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["create_collection", "upsert", "search", "delete", "get_collection_info", "update_metadata"],
+      "description": "Vector store operation to perform"
+    },
+    "collection_name": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the Qdrant collection (e.g., 'robotics_textbook', 'chapter_embeddings')"
+    },
+    "documents": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique document ID (auto-generated if not provided)"
+          },
+          "text": {
+            "type": "string",
+            "description": "Document text to embed"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Document metadata (chapter_id, module, title, etc.)"
+          }
+        },
+        "required": ["text"]
+      },
+      "description": "Array of documents to embed and store (for upsert operation)"
+    },
+    "query": {
+      "type": "string",
+      "required": false,
+      "description": "Search query text (for search operation) - will be automatically embedded"
+    },
+    "top_k": {
+      "type": "integer",
+      "required": false,
+      "default": 5,
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Number of results to return (for search operation)"
+    },
+    "score_threshold": {
+      "type": "number",
+      "required": false,
+      "default": 0.7,
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Minimum similarity score threshold (0-1) for search results"
+    },
+    "filter": {
+      "type": "object",
+      "required": false,
+      "description": "Metadata filters for search (e.g., {module: 1, chapter_id: 'intro-to-ros'})"
+    },
+    "vector_size": {
+      "type": "integer",
+      "required": false,
+      "default": 1536,
+      "description": "Embedding vector dimension (1536 for OpenAI text-embedding-3-small)"
+    },
+    "distance_metric": {
+      "type": "string",
+      "required": false,
+      "default": "Cosine",
+      "enum": ["Cosine", "Euclidean", "Dot"],
+      "description": "Distance metric for similarity comparison"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "required": false,
+      "description": "Document IDs for delete operation"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the operation succeeded"
+    },
+    "collection_info": {
+      "type": "object",
+      "description": "Collection details (for create_collection and get_collection_info)",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "vector_size": {
+          "type": "integer"
+        },
+        "points_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "upserted_count": {
+      "type": "integer",
+      "description": "Number of documents inserted/updated (for upsert)"
+    },
+    "search_results": {
+      "type": "array",
+      "description": "Search results with scores and metadata (for search)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "deleted_count": {
+      "type": "integer",
+      "description": "Number of documents deleted (for delete)"
+    },
+    "error": {
+      "type": "object",
+      "description": "Error details if operation failed",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "environment": {
+    "QDRANT_URL": {
+      "description": "Qdrant server URL (e.g., http://localhost:6333 or https://xyz.qdrant.io)",
+      "required": true
+    },
+    "QDRANT_API_KEY": {
+      "description": "Qdrant API key (required for cloud deployments)",
+      "required": false
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for generating embeddings",
+      "required": true
+    },
+    "EMBEDDING_MODEL": {
+      "description": "OpenAI embedding model to use",
+      "required": false,
+      "default": "text-embedding-3-small"
+    }
+  },
+  "error_handling": {
+    "connection_failures": "Retries up to 3 times with exponential backoff",
+    "rate_limiting": "Implements rate limiting for embedding API calls",
+    "invalid_vectors": "Validates vector dimensions before upsert"
+  },
+  "dependencies": [
+    "@qdrant/js-client-rest",
+    "openai"
+  ],
+  "integrations": {
+    "openai-agents-sdk": "Provides context retrieval for RAG chatbot",
+    "content-indexer": "Receives documents from content indexer for storage",
+    "fastapi-backend": "Serves search results to backend API"
+  },
+  "tags": ["vectorstore", "qdrant", "embeddings", "semantic-search", "rag", "openai"]
+}

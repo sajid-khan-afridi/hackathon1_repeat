@@ -1,0 +1,138 @@
+{
+  "name": "rag-pipeline",
+  "version": "1.0.0",
+  "description": "End-to-end RAG (Retrieval-Augmented Generation) pipeline orchestrating vector search, context retrieval, and AI response generation",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "orchestration",
+  "parameters": {
+    "user_query": {
+      "type": "string",
+      "required": true,
+      "description": "User's question or query"
+    },
+    "user_id": {
+      "type": "string",
+      "required": false,
+      "description": "User ID for personalized responses and chat history"
+    },
+    "collection_name": {
+      "type": "string",
+      "required": false,
+      "default": "robotics_textbook",
+      "description": "Qdrant collection to search"
+    },
+    "top_k": {
+      "type": "integer",
+      "required": false,
+      "default": 5,
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Number of context chunks to retrieve"
+    },
+    "filters": {
+      "type": "object",
+      "required": false,
+      "description": "Metadata filters for context retrieval (e.g., {module: 1})"
+    },
+    "include_chat_history": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Include previous chat messages for context"
+    },
+    "stream_response": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Stream the AI response in real-time"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the pipeline succeeded"
+    },
+    "answer": {
+      "type": "string",
+      "description": "AI-generated answer to the query"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chapter_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "excerpt": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Retrieved source documents with metadata"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence score for the answer"
+    },
+    "chat_id": {
+      "type": "string",
+      "description": "Chat session ID for follow-up queries"
+    },
+    "tokens_used": {
+      "type": "object",
+      "properties": {
+        "retrieval": {
+          "type": "integer"
+        },
+        "generation": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "description": "Token usage breakdown"
+    }
+  },
+  "workflow": [
+    "1. Validate user query and parameters",
+    "2. Retrieve chat history from neon-postgres (if enabled)",
+    "3. Search Qdrant vectorstore for relevant context",
+    "4. Rank and filter retrieved documents",
+    "5. Generate AI response using openai-agents-sdk",
+    "6. Save chat exchange to neon-postgres",
+    "7. Return formatted response with sources"
+  ],
+  "dependencies": [],
+  "integrations": {
+    "qdrant-vectorstore": "Performs semantic search for context retrieval",
+    "openai-agents-sdk": "Generates AI responses with retrieved context",
+    "neon-postgres": "Stores and retrieves chat history",
+    "fastapi-backend": "Exposed as /api/query endpoint"
+  },
+  "environment": {
+    "QDRANT_URL": {
+      "description": "Qdrant server URL",
+      "required": true
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key",
+      "required": true
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string",
+      "required": true
+    }
+  },
+  "tags": ["rag", "pipeline", "orchestration", "chatbot", "semantic-search"]
+}

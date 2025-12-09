@@ -1,0 +1,123 @@
+{
+  "name": "neon-postgres",
+  "version": "1.0.0",
+  "description": "Comprehensive PostgreSQL database operations for user management, profiles, chat history, and personalization caching with built-in security",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "database",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["select", "insert", "update", "delete", "execute", "transaction"],
+      "description": "Database operation to perform"
+    },
+    "table_name": {
+      "type": "string",
+      "required": true,
+      "enum": ["users", "user_profiles", "chat_history", "personalization_cache", "translation_cache"],
+      "description": "Target table for the operation"
+    },
+    "data": {
+      "type": "object",
+      "required": false,
+      "description": "Data object for insert/update operations (keys are column names, values are data)"
+    },
+    "where": {
+      "type": "object",
+      "required": false,
+      "description": "WHERE clause conditions as key-value pairs (e.g., {user_id: '123', active: true}). Used for select/update/delete operations. All conditions are combined with AND."
+    },
+    "select_columns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "required": false,
+      "description": "Columns to select (defaults to all columns if not specified). Used with 'select' operation."
+    },
+    "order_by": {
+      "type": "object",
+      "required": false,
+      "description": "Ordering for select queries (e.g., {created_at: 'DESC', name: 'ASC'})"
+    },
+    "limit": {
+      "type": "integer",
+      "required": false,
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Maximum number of rows to return (for select operations)"
+    },
+    "offset": {
+      "type": "integer",
+      "required": false,
+      "minimum": 0,
+      "description": "Number of rows to skip (for pagination in select operations)"
+    },
+    "sql": {
+      "type": "string",
+      "required": false,
+      "description": "Raw SQL query for 'execute' operation. IMPORTANT: Use parameterized queries to prevent SQL injection."
+    },
+    "params": {
+      "type": "array",
+      "required": false,
+      "description": "Parameters for parameterized SQL queries (used with 'execute' operation)"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the operation succeeded"
+    },
+    "data": {
+      "type": "array",
+      "description": "Query results (for select operations) or inserted/updated rows (with RETURNING clause)"
+    },
+    "rows_affected": {
+      "type": "integer",
+      "description": "Number of rows affected by insert/update/delete operations"
+    },
+    "error": {
+      "type": "object",
+      "description": "Error details if operation failed",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "environment": {
+    "DATABASE_URL": {
+      "description": "Neon PostgreSQL connection string (format: postgres://user:password@host/database)",
+      "required": true
+    },
+    "DATABASE_POOL_MAX": {
+      "description": "Maximum number of database connections in pool",
+      "required": false,
+      "default": "10"
+    }
+  },
+  "security": {
+    "sql_injection_prevention": "All operations use parameterized queries. NEVER concatenate user input into SQL strings.",
+    "connection_pooling": "Uses connection pooling to prevent connection exhaustion",
+    "error_handling": "Sensitive database errors are sanitized before returning to client"
+  },
+  "dependencies": [
+    "@neondatabase/serverless"
+  ],
+  "integrations": {
+    "user-profiling": "Stores and retrieves user profile data",
+    "content-adapter": "Uses personalization_cache table",
+    "urdu-translator": "Uses translation_cache table",
+    "better-auth-setup": "Uses users table for authentication"
+  },
+  "tags": ["database", "postgresql", "neon", "user-management", "caching", "security"]
+}

@@ -1,23 +1,84 @@
 {
   "name": "contextual-keyword-chips",
-  "description": "Implements contextual keyword chips (tap-to-search suggestions) beneath AI-generated answers",
+  "description": "Implements contextual keyword chips (tap-to-search suggestions) beneath AI-generated answers using NLP",
   "version": "1.0.0",
-  "type": "ui",
-  "tags": ["ui", "nlp", "keywords", "chips", "context"],
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "ui-component",
+  "tags": ["ui", "nlp", "keywords", "chips", "context", "react"],
   "main": "index.js",
-  "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "framer-motion": "^10.16.0",
-    "clsx": "^2.0.0"
+  "parameters": {
+    "text_content": {
+      "type": "string",
+      "required": true,
+      "description": "Text content to extract keywords from"
+    },
+    "max_keywords": {
+      "type": "integer",
+      "required": false,
+      "default": 5,
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Maximum number of keyword chips to display"
+    },
+    "filter_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["technical_terms", "topics", "concepts", "tools", "all"]
+      },
+      "default": ["all"],
+      "description": "Types of keywords to extract"
+    },
+    "on_chip_click": {
+      "type": "string",
+      "required": false,
+      "default": "search",
+      "enum": ["search", "filter", "navigate", "custom"],
+      "description": "Action to perform when keyword chip is clicked"
+    }
   },
-  "optionalDependencies": {
-    "compromise": "^14.10.0",
-    "node-nlp": "^4.27.0"
+  "outputs": {
+    "component_path": {
+      "type": "string",
+      "description": "Path to generated KeywordChips React component"
+    },
+    "hook_path": {
+      "type": "string",
+      "description": "Path to useKeywordExtraction hook"
+    },
+    "styles_path": {
+      "type": "string",
+      "description": "Path to component styles"
+    },
+    "extracted_keywords": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "relevance": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "List of extracted keywords with metadata"
+    }
   },
-  "templates": {
-    "component": "templates/KeywordChips.tsx",
-    "styles": "templates/styles.css",
-    "hook": "templates/useKeywordExtraction.ts"
+  "dependencies": [
+    "react",
+    "react-dom",
+    "framer-motion",
+    "clsx",
+    "compromise"
+  ],
+  "integrations": {
+    "openai-agents-sdk": "Extracts keywords from chatbot responses",
+    "react-components": "Can be integrated into other React components"
   }
 }

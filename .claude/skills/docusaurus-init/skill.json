@@ -1,0 +1,43 @@
+{
+  "name": "docusaurus-init",
+  "version": "1.0.0",
+  "description": "Initialize a Docusaurus v3 project with TypeScript, MDX support, and custom theming",
+  "author": "Claude Code",
+  "license": "MIT",
+  "main": "index.js",
+  "type": "module",
+  "keywords": ["docusaurus", "documentation", "typescript", "mdx"],
+  "inputs": [
+    {
+      "name": "project_name",
+      "type": "string",
+      "required": true,
+      "description": "Name of the Docusaurus project directory"
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "description": "Title of the documentation site"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "required": true,
+      "description": "Description of the documentation site"
+    },
+    {
+      "name": "github_org",
+      "type": "string",
+      "required": false,
+      "description": "GitHub organization or username for deployment"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "project_path",
+      "type": "string",
+      "description": "Path to the created Docusaurus project"
+    }
+  ]
+}

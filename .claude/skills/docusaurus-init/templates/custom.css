@@ -1,0 +1,173 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Dark theme variables */
+[data-theme='dark'] {
+  --ifm-color-primary: #4cad80;
+  --ifm-color-primary-dark: #479a73;
+  --ifm-color-primary-darker: #42916c;
+  --ifm-color-primary-darkest: #35775a;
+  --ifm-color-primary-light: #54c08b;
+  --ifm-color-primary-lighter: #5bc391;
+  --ifm-color-primary-lightest: #6dd0a3;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media only screen and (max-width: 996px) {
+  .navbar__toggle {
+    display: block;
+  }
+}
+
+@media only screen and (max-width: 736px) {
+  .navbar__title {
+    font-size: 1.2rem;
+  }
+
+  .footer__link-item {
+    font-size: 0.9rem;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-emphasis-400);
+}
+
+/* Code block improvements */
+.theme-code-block {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Table of Contents improvements */
+.table-of-contents {
+  font-size: 0.9rem;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+}
+
+.table-of-contents__link {
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.table-of-contents__link:hover {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+/* Admonition improvements */
+.admonition {
+  border-radius: 8px;
+  border: none;
+}
+
+/* Mermaid diagram improvements */
+.mermaid {
+  background-color: var(--ifm-background-surface-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Image improvements */
+img {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero section improvements */
+.hero__title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--ifm-color-primary) 0%, var(--ifm-color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero__subtitle {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-700);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Button improvements */
+.button {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.button--primary {
+  box-shadow: 0 4px 14px 0 rgba(46, 133, 85, 0.3);
+}
+
+.button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(46, 133, 85, 0.4);
+}
+
+/* Card improvements */
+.card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Feature list improvements */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .footer,
+  .pagination-nav {
+    display: none !important;
+  }
+
+  main {
+    max-width: 100% !important;
+  }
+}

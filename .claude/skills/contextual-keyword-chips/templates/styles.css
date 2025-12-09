@@ -1,0 +1,206 @@
+/* Keyword Chips Styles */
+
+.keyword-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.keyword-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.keyword-chip:active {
+  transform: translateY(0);
+}
+
+.keyword-chip .chip-icon {
+  font-size: 1em;
+  line-height: 1;
+}
+
+/* Chip type variants */
+.keyword-chip.entity {
+  background: linear-gradient(135deg, #f3e7fc, #e9d5ff);
+  color: #6b21a8;
+  border-color: #c084fc;
+}
+
+.keyword-chip.noun {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border-color: #60a5fa;
+}
+
+.keyword-chip.action {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border-color: #34d399;
+}
+
+.keyword-chip.question {
+  background: linear-gradient(135deg, #fed7aa, #fdba74);
+  color: #9a3412;
+  border-color: #fb923c;
+}
+
+.keyword-chip.tech {
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  color: #312e81;
+  border-color: #818cf8;
+}
+
+.keyword-chip.proper {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  color: #1f2937;
+  border-color: #9ca3af;
+}
+
+.keyword-chip.adjective {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  color: #9f1239;
+  border-color: #f472b6;
+}
+
+/* Loading skeleton */
+.keyword-chips-skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skeleton-chip {
+  height: 2rem;
+  width: 6rem;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 9999px;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Category view */
+.keyword-chips-category {
+  margin-bottom: 1rem;
+}
+
+.keyword-chips-category-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* Compact variant */
+.keyword-chip.compact {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Expanded variant */
+.keyword-chip.expanded {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+}
+
+/* Focus styles */
+.keyword-chip:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .keyword-chip.entity {
+    background: linear-gradient(135deg, #581c87, #6b21a8);
+    color: #e9d5ff;
+    border-color: #9333ea;
+  }
+
+  .keyword-chip.noun {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
+    color: #bfdbfe;
+    border-color: #2563eb;
+  }
+
+  .keyword-chip.action {
+    background: linear-gradient(135deg, #064e3b, #065f46);
+    color: #a7f3d0;
+    border-color: #059669;
+  }
+
+  .keyword-chip.question {
+    background: linear-gradient(135deg, #9a3412, #b45309);
+    color: #fed7aa;
+    border-color: #ea580c;
+  }
+
+  .keyword-chip.tech {
+    background: linear-gradient(135deg, #312e81, #3730a3);
+    color: #ddd6fe;
+    border-color: #6366f1;
+  }
+
+  .keyword-chip.proper {
+    background: linear-gradient(135deg, #111827, #1f2937);
+    color: #f3f4f6;
+    border-color: #4b5563;
+  }
+
+  .keyword-chip.adjective {
+    background: linear-gradient(135deg, #9f1239, #be123c);
+    color: #fce7f3;
+    border-color: #db2777;
+  }
+}
+
+/* Animation utilities */
+.fade-enter {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}

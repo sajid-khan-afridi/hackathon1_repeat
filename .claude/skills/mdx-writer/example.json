@@ -1,0 +1,99 @@
+{
+  "chapter_title": "Introduction to Kinematics and Dynamics",
+  "module_number": 1,
+  "learning_objectives": [
+    "Understand forward and inverse kinematics for robotic manipulators",
+    "Apply Newton-Euler equations for dynamic analysis",
+    "Implement coordinate transformations in 3D space",
+    "Calculate Jacobian matrices for velocity analysis"
+  ],
+  "content_outline": "## Basic Kinematics
+
+Forward kinematics determines the position and orientation of the end-effector given joint configurations. For a serial manipulator, we use the Denavit-Hartenberg (DH) parameters to define coordinate transformations.
+
+:::tip[Remember]
+The DH convention provides a systematic way to assign coordinate frames to each joint of a robotic manipulator.
+
+:::
+
+### Denavit-Hartenberg Parameters
+
+The transformation between consecutive links is defined by four parameters:
+
+1. **Link twist (α)**: Angle between joint axes zᵢ and zᵢ₋₁
+2. **Link length (a)**: Distance between joint axes along the common normal
+3. **Joint angle (θ)**: Angle between normals xᵢ₋₁ and xᵢ
+4. **Joint offset (d)**: Distance along joint axis zᵢ from xᵢ₋₁ to xᵢ
+
+```python
+def dh_transformation(theta, d, a, alpha):
+    """Create DH transformation matrix"""
+    ct = np.cos(theta)
+    st = np.sin(theta)
+    ca = np.cos(alpha)
+    sa = np.sin(alpha)
+
+    T = np.array([
+        [ct, -st*ca, st*sa, a*ct],
+        [st, ct*ca, -ct*sa, a*st],
+        [0, sa, ca, d],
+        [0, 0, 0, 1]
+    ])
+    return T
+```
+
+## Inverse Kinematics
+
+Inverse kinematics solves for joint angles given a desired end-effector pose. This is generally more complex than forward kinematics.
+
+:::warning[Multiple Solutions]
+Inverse kinematics may have multiple solutions or no solution at all, depending on the workspace and robot configuration.
+
+:::
+
+### Numerical Methods
+
+For complex manipulators, numerical methods are often required:
+
+```python
+def inverse_kinematics_iterative(robot, target_pose, initial_guess=None):
+    """Iterative IK solver using Jacobian"""
+    if initial_guess is None:
+        q = np.zeros(robot.num_joints)
+    else:
+        q = initial_guess.copy()
+
+    for i in range(max_iterations):
+        # Current pose
+        current_pose = robot.forward_kinematics(q)
+
+        # Error
+        error = pose_error(target_pose, current_pose)
+
+        if np.linalg.norm(error) < tolerance:
+            return q
+
+        # Jacobian
+        J = robot.jacobian(q)
+
+        # Update
+        q += np.linalg.pinv(J) @ error
+
+    return None  # No solution found
+```
+
+## Dynamics
+
+Robot dynamics describe the relationship between forces/torques and motion.
+
+:::important[Dynamic Equations]
+The equations of motion for a robot can be written as: M(q)q̈ + C(q,q̇)q̇ + G(q) = τ
+
+:::where:
+- M(q) is the mass matrix
+- C(q,q̇) represents Coriolis and centrifugal effects
+- G(q) is the gravity vector
+- τ is the joint torque vector",
+  "code_examples": true,
+  "chapter_id": "kinematics-dynamics-intro"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "mdx-writer-skill",
+  "version": "1.0.0",
+  "description": "MDX writer skill for Physical AI & Humanoid Robotics textbook",
+  "main": "skill.ts",
+  "type": "module",
+  "scripts": {
+    "test": "node --loader ts-node/esm test/test.ts",
+    "lint": "eslint skill.ts",
+    "validate": "ts-node validate.ts"
+  },
+  "keywords": [
+    "mdx",
+    "documentation",
+    "robotics",
+    "physical-ai",
+    "humanoid-robotics"
+  ],
+  "author": "Claude AI Assistant",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@docusaurus/core": "^3.0.0"
+  }
+}

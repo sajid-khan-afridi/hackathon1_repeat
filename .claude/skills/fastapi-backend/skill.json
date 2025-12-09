@@ -1,0 +1,103 @@
+{
+  "name": "fastapi-backend",
+  "description": "Create FastAPI backend services for REST API endpoints, user management, and RAG chatbot functionality",
+  "version": "1.0.0",
+  "author": "Claude Code",
+  "tags": ["fastapi", "backend", "api", "rest", "rag", "auth"],
+  "category": "backend",
+  "main": "index.js",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "endpoint_type": {
+        "type": "string",
+        "enum": ["rag_query", "user_auth", "personalization"],
+        "description": "Type of endpoint to create"
+      },
+      "route_path": {
+        "type": "string",
+        "description": "Route path for the endpoint (e.g., '/query', '/auth/login')"
+      },
+      "request_model": {
+        "type": "string",
+        "description": "Pydantic model definition for request body"
+      },
+      "response_model": {
+        "type": "string",
+        "description": "Pydantic model definition for response body"
+      },
+      "http_method": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        "default": "POST",
+        "description": "HTTP method for the endpoint"
+      },
+      "auth_required": {
+        "type": "boolean",
+        "default": true,
+        "description": "Whether JWT authentication is required for this endpoint"
+      }
+    },
+    "required": ["endpoint_type", "route_path"]
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "router_file": {
+        "type": "string",
+        "description": "Path to the created router file"
+      },
+      "models_file": {
+        "type": "string",
+        "description": "Path to the created models file"
+      },
+      "main_file": {
+        "type": "string",
+        "description": "Path to the main FastAPI application file"
+      },
+      "config_file": {
+        "type": "string",
+        "description": "Path to the configuration file"
+      },
+      "requirements_file": {
+        "type": "string",
+        "description": "Path to the requirements.txt file"
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "RAG Query Endpoint",
+      "parameters": {
+        "endpoint_type": "rag_query",
+        "route_path": "/query",
+        "request_model": "QueryRequest(question: str, context: Optional[str] = None)",
+        "response_model": "QueryResponse(answer: str, sources: List[str], confidence: float)",
+        "http_method": "POST",
+        "auth_required": true
+      }
+    },
+    {
+      "name": "User Authentication",
+      "parameters": {
+        "endpoint_type": "user_auth",
+        "route_path": "/auth/login",
+        "request_model": "LoginRequest(email: str, password: str)",
+        "response_model": "TokenResponse(access_token: str, token_type: str = 'bearer')",
+        "http_method": "POST",
+        "auth_required": false
+      }
+    },
+    {
+      "name": "Personalization Settings",
+      "parameters": {
+        "endpoint_type": "personalization",
+        "route_path": "/user/preferences",
+        "request_model": "PreferencesUpdate(theme: str, language: str, notifications: bool)",
+        "response_model": "UserPreferences(user_id: str, preferences: dict)",
+        "http_method": "PUT",
+        "auth_required": true
+      }
+    }
+  ]
+}

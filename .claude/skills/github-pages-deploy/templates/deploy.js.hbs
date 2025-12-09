@@ -1,0 +1,89 @@
+#!/usr/bin/env node
+
+/**
+ * Deployment script for Docusaurus to GitHub Pages
+ * This script prepares and deploys the Docusaurus build to GitHub Pages
+ */
+
+const { execSync } = require('child_process')
+const fs = require('fs')
+const path = require('path')
+
+// Configuration from environment variables
+const config = {
+  repoName: process.env.REPO_NAME || '{{repo_name}}',
+  githubOrg: process.env.GITHUB_ORG || '{{github_org}}',
+  baseUrl: process.env.BASE_URL || '{{base_url}}',
+  buildDir: './build',
+  deployBranch: process.env.DEPLOY_BRANCH || '{{branch}}',
+}
+
+console.log('🚀 Starting Docusaurus deployment to GitHub Pages...')
+console.log(`Repository: ${config.githubOrg}/${config.repoName}`)
+console.log(`Base URL: ${config.baseUrl}`)
+console.log(`Deploy branch: ${config.deployBranch}`)
+
+// Validate build directory exists
+if (!fs.existsSync(config.buildDir)) {
+  console.error(`❌ Build directory not found: ${config.buildDir}`)
+  console.error('Please run "npm run build" first')
+  process.exit(1)
+}
+
+// Check if git is available
+try {
+  execSync('git --version', { stdio: 'ignore' })
+} catch (error) {
+  console.error('❌ Git is not available')
+  process.exit(1)
+}
+
+// Initialize git if not already done
+try {
+  console.log('📝 Initializing git repository...')
+  execSync('git init', { stdio: 'inherit' })
+  execSync('git config user.name "github-actions[bot]"', { stdio: 'inherit' })
+  execSync('git config user.email "github-actions[bot]@users.noreply.github.com"', { stdio: 'inherit' })
+} catch (error) {
+  console.log('Git repository already initialized')
+}
+
+// Add build directory to git
+try {
+  console.log('📦 Adding build files to git...')
+  execSync('git add -A', { cwd: config.buildDir, stdio: 'inherit' })
+} catch (error) {
+  console.error('❌ Failed to add files to git')
+  process.exit(1)
+}
+
+// Commit the build
+try {
+  console.log('💾 Committing build files...')
+  const commitMessage = `Deploy to GitHub Pages - ${new Date().toISOString()}`
+  execSync(`git commit -m "${commitMessage}"`, { cwd: config.buildDir, stdio: 'inherit' })
+} catch (error) {
+  console.log('No changes to commit')
+}
+
+// Push to GitHub Pages
+try {
+  console.log(`🚀 Pushing to ${config.deployBranch} branch...`)
+  const remoteUrl = `https://github.com/${config.githubOrg}/${config.repoName}.git`
+
+  // Check if remote exists
+  try {
+    execSync(`git remote get-url origin`, { cwd: config.buildDir, stdio: 'ignore' })
+  } catch (error) {
+    execSync(`git remote add origin ${remoteUrl}`, { cwd: config.buildDir, stdio: 'inherit' })
+  }
+
+  execSync(`git push -f origin HEAD:${config.deployBranch}`, { cwd: config.buildDir, stdio: 'inherit' })
+} catch (error) {
+  console.error('❌ Failed to push to GitHub Pages')
+  console.error('Make sure you have the correct permissions and the repository exists')
+  process.exit(1)
+}
+
+console.log('✅ Deployment successful!')
+console.log(`📖 Your site should be available at: https://${config.githubOrg}.github.io${config.baseUrl}`)

@@ -1,0 +1,48 @@
+{
+  "name": "better-auth-setup",
+  "version": "1.0.0",
+  "description": "Complete Better-Auth authentication setup with user profiling questions",
+  "type": "auth",
+  "parameters": {
+    "auth_providers": {
+      "type": "array",
+      "description": "Authentication providers to enable",
+      "items": { "type": "string" },
+      "default": ["email"]
+    },
+    "profile_questions": {
+      "type": "array",
+      "description": "User profile questions to collect",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string" },
+          "type": { "type": "string", "enum": ["select", "text", "textarea"] },
+          "options": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "callback_urls": {
+      "type": "object",
+      "description": "Redirect URLs after auth",
+      "properties": {
+        "success": { "type": "string" },
+        "failure": { "type": "string" }
+      }
+    }
+  },
+  "dependencies": [
+    "better-auth",
+    "react",
+    "react-dom",
+    "@types/react",
+    "@types/react-dom"
+  ],
+  "outputs": [
+    "Better-Auth configuration",
+    "React auth components",
+    "Database schema",
+    "Session hooks"
+  ],
+  "tags": ["auth", "authentication", "better-auth", "profile", "react"]
+}

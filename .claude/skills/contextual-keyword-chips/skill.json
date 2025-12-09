@@ -1,0 +1,23 @@
+{
+  "name": "contextual-keyword-chips",
+  "description": "Implements contextual keyword chips (tap-to-search suggestions) beneath AI-generated answers",
+  "version": "1.0.0",
+  "type": "ui",
+  "tags": ["ui", "nlp", "keywords", "chips", "context"],
+  "main": "index.js",
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "framer-motion": "^10.16.0",
+    "clsx": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "compromise": "^14.10.0",
+    "node-nlp": "^4.27.0"
+  },
+  "templates": {
+    "component": "templates/KeywordChips.tsx",
+    "styles": "templates/styles.css",
+    "hook": "templates/useKeywordExtraction.ts"
+  }
+}

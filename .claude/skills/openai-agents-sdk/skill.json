@@ -1,0 +1,37 @@
+{
+  "name": "openai-agents-sdk",
+  "description": "Integrate OpenAI Agents SDK for building intelligent RAG chatbot for Physical AI textbook",
+  "author": "Claude Code",
+  "version": "1.0.0",
+  "license": "MIT",
+  "tags": ["openai", "agents", "rag", "chatbot", "qdrant"],
+  "dependencies": {
+    "openai": "^4.71.0",
+    "@openai/agents": "^0.1.0",
+    "qdrant-js": "^1.12.0",
+    "uuid": "^10.0.0"
+  },
+  "exports": {
+    "default": "./index.js",
+    "types": "./index.d.ts"
+  },
+  "inputs": {
+    "agent_config": {
+      "type": "object",
+      "properties": {
+        "name": "string",
+        "instructions": "string",
+        "model": "string",
+        "tools": "array"
+      }
+    },
+    "query": "string",
+    "context": "string",
+    "chat_history": "array"
+  },
+  "outputs": {
+    "agent": "OpenAI Agent instance",
+    "response": "Streaming response handler",
+    "usage": "Token usage tracking"
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "name": "user-profiling",
+  "version": "1.0.0",
+  "description": "Collects and manages user profile information for content personalization and learning path recommendations",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "user-management",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["collect", "retrieve", "update", "analyze", "delete"],
+      "description": "Profile operation to perform"
+    },
+    "user_id": {
+      "type": "string",
+      "required": true,
+      "description": "Unique user identifier"
+    },
+    "profile_data": {
+      "type": "object",
+      "required": false,
+      "description": "User profile data (see shared/types/UserProfile.ts for structure)",
+      "$ref": "#/definitions/UserProfile"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the operation succeeded"
+    },
+    "profile": {
+      "type": "object",
+      "description": "User profile data with all fields",
+      "$ref": "#/definitions/UserProfileWithMetadata"
+    },
+    "analysis": {
+      "type": "object",
+      "description": "Profile analysis with persona and recommendations",
+      "$ref": "#/definitions/ProfileAnalysis"
+    },
+    "profile_hash": {
+      "type": "string",
+      "description": "Hash of profile for cache key generation"
+    },
+    "error": {
+      "type": "object",
+      "description": "Error details if operation failed",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UserProfile": {
+      "type": "object",
+      "description": "References shared UserProfile type from shared/types/UserProfile.ts",
+      "properties": {
+        "experience_level": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"]
+        },
+        "ros_familiarity": {
+          "type": "string",
+          "enum": ["none", "basic", "proficient"]
+        },
+        "hardware_access": {
+          "type": "string",
+          "enum": ["simulation_only", "partial_lab", "full_lab"]
+        },
+        "learning_goal": {
+          "type": "string",
+          "enum": ["career", "research", "hobby"]
+        },
+        "preferred_language": {
+          "type": "string",
+          "enum": ["python", "cpp", "both"]
+        },
+        "content_language": {
+          "type": "string",
+          "enum": ["en", "ur"]
+        }
+      },
+      "required": ["experience_level", "ros_familiarity", "hardware_access", "learning_goal", "preferred_language"]
+    },
+    "UserProfileWithMetadata": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/UserProfile"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string"
+            },
+            "profile_hash": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      ]
+    },
+    "ProfileAnalysis": {
+      "type": "object",
+      "properties": {
+        "persona": {
+          "type": "string",
+          "description": "e.g., 'Beginner Hobbyist', 'Advanced Researcher'"
+        },
+        "content_level": {
+          "type": "string",
+          "enum": ["simplified", "standard", "advanced"]
+        },
+        "recommended_modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "estimated_completion_time": {
+          "type": "string",
+          "description": "e.g., '12 weeks', '16 weeks'"
+        },
+        "personalization_hints": {
+          "type": "object",
+          "properties": {
+            "show_prerequisites": {
+              "type": "boolean"
+            },
+            "include_research_papers": {
+              "type": "boolean"
+            },
+            "hardware_specific_content": {
+              "type": "string",
+              "enum": ["simulation", "jetson", "full-lab"]
+            },
+            "code_language_filter": {
+              "type": "string",
+              "enum": ["python", "cpp", "both"]
+            },
+            "show_advanced_topics": {
+              "type": "boolean"
+            },
+            "ros_basics_sidebar": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "dependencies": [],
+  "integrations": {
+    "neon-postgres": "Uses neon-postgres skill for database operations on user_profiles table",
+    "better-auth-setup": "Receives user_id from authentication",
+    "content-adapter": "Provides profile data for content personalization"
+  },
+  "tags": ["user-profiling", "personalization", "learning-paths", "recommendations"]
+}

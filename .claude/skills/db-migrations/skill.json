@@ -1,0 +1,179 @@
+{
+  "name": "db-migrations",
+  "version": "1.0.0",
+  "description": "Manage PostgreSQL database schema migrations for users, profiles, chat history, and caching tables",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "database",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["create_migration", "run_migrations", "rollback", "status", "generate_schema"],
+      "description": "Migration operation to perform"
+    },
+    "migration_name": {
+      "type": "string",
+      "required": false,
+      "description": "Name for the new migration (for create_migration)"
+    },
+    "target_version": {
+      "type": "string",
+      "required": false,
+      "description": "Target migration version (for rollback)"
+    },
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["users", "user_profiles", "chat_history", "personalization_cache", "translation_cache", "all"]
+      },
+      "required": false,
+      "default": ["all"],
+      "description": "Tables to include in migration"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether operation succeeded"
+    },
+    "migrations_applied": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "List of applied migrations"
+    },
+    "migration_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Paths to created migration files"
+    },
+    "schema_file": {
+      "type": "string",
+      "description": "Path to generated schema file"
+    },
+    "current_version": {
+      "type": "string",
+      "description": "Current database schema version"
+    }
+  },
+  "schema_definitions": {
+    "users": {
+      "description": "User authentication and account information",
+      "columns": [
+        "id UUID PRIMARY KEY",
+        "email VARCHAR(255) UNIQUE NOT NULL",
+        "password_hash VARCHAR(255)",
+        "name VARCHAR(255)",
+        "created_at TIMESTAMP DEFAULT NOW()",
+        "updated_at TIMESTAMP DEFAULT NOW()"
+      ],
+      "indexes": [
+        "CREATE INDEX idx_users_email ON users(email)"
+      ]
+    },
+    "user_profiles": {
+      "description": "User profile data for personalization",
+      "columns": [
+        "id UUID PRIMARY KEY",
+        "user_id UUID REFERENCES users(id) ON DELETE CASCADE",
+        "experience_level VARCHAR(20) CHECK (experience_level IN ('beginner', 'intermediate', 'advanced'))",
+        "ros_familiarity VARCHAR(20) CHECK (ros_familiarity IN ('none', 'basic', 'proficient'))",
+        "hardware_access VARCHAR(20) CHECK (hardware_access IN ('simulation_only', 'partial_lab', 'full_lab'))",
+        "learning_goal VARCHAR(20) CHECK (learning_goal IN ('career', 'research', 'hobby'))",
+        "preferred_language VARCHAR(10) CHECK (preferred_language IN ('python', 'cpp', 'both'))",
+        "content_language VARCHAR(5) DEFAULT 'en' CHECK (content_language IN ('en', 'ur'))",
+        "profile_hash VARCHAR(64)",
+        "created_at TIMESTAMP DEFAULT NOW()",
+        "updated_at TIMESTAMP DEFAULT NOW()"
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_user_profiles_user_id ON user_profiles(user_id)",
+        "CREATE INDEX idx_user_profiles_hash ON user_profiles(profile_hash)"
+      ]
+    },
+    "chat_history": {
+      "description": "Chat conversation history for RAG chatbot",
+      "columns": [
+        "id UUID PRIMARY KEY",
+        "user_id UUID REFERENCES users(id) ON DELETE CASCADE",
+        "chat_id UUID NOT NULL",
+        "role VARCHAR(20) CHECK (role IN ('user', 'assistant', 'system'))",
+        "content TEXT NOT NULL",
+        "sources JSONB",
+        "tokens_used INTEGER",
+        "created_at TIMESTAMP DEFAULT NOW()"
+      ],
+      "indexes": [
+        "CREATE INDEX idx_chat_history_user_id ON chat_history(user_id)",
+        "CREATE INDEX idx_chat_history_chat_id ON chat_history(chat_id)",
+        "CREATE INDEX idx_chat_history_created_at ON chat_history(created_at DESC)"
+      ]
+    },
+    "personalization_cache": {
+      "description": "Cached personalized content",
+      "columns": [
+        "id UUID PRIMARY KEY",
+        "chapter_id VARCHAR(255) NOT NULL",
+        "profile_hash VARCHAR(64) NOT NULL",
+        "content TEXT NOT NULL",
+        "metadata JSONB",
+        "created_at TIMESTAMP DEFAULT NOW()",
+        "expires_at TIMESTAMP"
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_personalization_cache_key ON personalization_cache(chapter_id, profile_hash)",
+        "CREATE INDEX idx_personalization_cache_expires ON personalization_cache(expires_at)"
+      ]
+    },
+    "translation_cache": {
+      "description": "Cached translations",
+      "columns": [
+        "id UUID PRIMARY KEY",
+        "chapter_id VARCHAR(255) NOT NULL",
+        "source_language VARCHAR(5) NOT NULL",
+        "target_language VARCHAR(5) NOT NULL",
+        "content_hash VARCHAR(64) NOT NULL",
+        "translated_content TEXT NOT NULL",
+        "created_at TIMESTAMP DEFAULT NOW()"
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_translation_cache_key ON translation_cache(chapter_id, target_language, content_hash)"
+      ]
+    }
+  },
+  "dependencies": [
+    "alembic"
+  ],
+  "integrations": {
+    "neon-postgres": "Applies migrations to Neon PostgreSQL database",
+    "better-auth-setup": "Creates users table for authentication",
+    "user-profiling": "Creates user_profiles table",
+    "rag-pipeline": "Creates chat_history table",
+    "content-adapter": "Creates personalization_cache table",
+    "urdu-translator": "Creates translation_cache table"
+  },
+  "environment": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string",
+      "required": true
+    }
+  },
+  "tags": ["database", "migrations", "schema", "postgresql", "alembic"]
+}

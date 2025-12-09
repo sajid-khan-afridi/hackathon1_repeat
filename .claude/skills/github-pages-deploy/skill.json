@@ -1,42 +1,61 @@
 {
-  "name": "GitHub Pages Deploy for Docusaurus",
-  "description": "Automate the CI/CD pipeline for building and deploying the Docusaurus book to GitHub Pages with proper caching and build optimization.",
+  "name": "github-pages-deploy",
   "version": "1.0.0",
+  "description": "Automate the CI/CD pipeline for building and deploying the Docusaurus book to GitHub Pages with proper caching and build optimization",
   "author": "Claude Code",
-  "category": "deployment",
+  "license": "MIT",
+  "type": "deployment",
   "tags": ["github-pages", "docusaurus", "cicd", "deployment"],
-  "inputs": {
-    "properties": {
-      "repo_name": {
-        "type": "string",
-        "description": "The name of the GitHub repository",
-        "required": true
-      },
-      "github_org": {
-        "type": "string",
-        "description": "The GitHub organization or username",
-        "required": true
-      },
-      "branch": {
-        "type": "string",
-        "description": "The target branch for deployment",
-        "default": "gh-pages"
-      },
-      "node_version": {
-        "type": "string",
-        "description": "Node.js version to use for builds",
-        "default": "20"
-      },
-      "base_url": {
-        "type": "string",
-        "description": "Base URL for the deployed site (e.g., /hackathon-1-book/)",
-        "required": true
-      }
+  "parameters": {
+    "repo_name": {
+      "type": "string",
+      "required": true,
+      "description": "The name of the GitHub repository"
+    },
+    "github_org": {
+      "type": "string",
+      "required": true,
+      "description": "The GitHub organization or username"
+    },
+    "branch": {
+      "type": "string",
+      "required": false,
+      "default": "gh-pages",
+      "description": "The target branch for deployment"
+    },
+    "node_version": {
+      "type": "string",
+      "required": false,
+      "default": "20",
+      "description": "Node.js version to use for builds"
+    },
+    "base_url": {
+      "type": "string",
+      "required": true,
+      "description": "Base URL for the deployed site (e.g., /hackathon-1-book/)"
     }
   },
-  "output_files": [
-    ".github/workflows/deploy.yml",
-    "docusaurus.config.ts",
-    "scripts/deploy.js"
-  ]
+  "outputs": {
+    "workflow_file": {
+      "type": "string",
+      "description": "Path to .github/workflows/deploy.yml"
+    },
+    "updated_config": {
+      "type": "string",
+      "description": "Path to updated docusaurus.config.ts"
+    },
+    "deploy_script": {
+      "type": "string",
+      "description": "Path to scripts/deploy.js"
+    }
+  },
+  "dependencies": {
+    "docusaurus-init": "Requires Docusaurus to be initialized first"
+  },
+  "environment": {
+    "GITHUB_TOKEN": {
+      "description": "GitHub token for deployment (auto-provided by GitHub Actions)",
+      "required": true
+    }
+  }
 }

@@ -1,0 +1,143 @@
+{
+  "name": "env-setup",
+  "version": "1.0.0",
+  "description": "Generate and validate .env files with all required environment variables for the project",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "configuration",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["generate", "validate", "update", "template"],
+      "description": "Environment setup operation"
+    },
+    "environment": {
+      "type": "string",
+      "required": false,
+      "enum": ["development", "production", "test"],
+      "default": "development",
+      "description": "Target environment"
+    },
+    "output_path": {
+      "type": "string",
+      "required": false,
+      "default": ".env",
+      "description": "Path to .env file"
+    },
+    "overwrite": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Overwrite existing .env file"
+    },
+    "include_comments": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Include descriptive comments in .env file"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether operation succeeded"
+    },
+    "env_file_path": {
+      "type": "string",
+      "description": "Path to created/updated .env file"
+    },
+    "template_path": {
+      "type": "string",
+      "description": "Path to .env.example template file"
+    },
+    "validation_results": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean"
+        },
+        "missing_vars": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invalid_values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Validation results for existing .env"
+    }
+  },
+  "required_variables": {
+    "DATABASE_URL": {
+      "description": "Neon PostgreSQL connection string",
+      "format": "postgres://user:password@host/database",
+      "required": true,
+      "example": "postgres://user:pass@ep-cool-darkness-123456.us-east-2.aws.neon.tech/neondb"
+    },
+    "QDRANT_URL": {
+      "description": "Qdrant vector database URL",
+      "format": "URL",
+      "required": true,
+      "example": "http://localhost:6333"
+    },
+    "QDRANT_API_KEY": {
+      "description": "Qdrant API key (optional for local, required for cloud)",
+      "format": "string",
+      "required": false,
+      "example": "your-qdrant-api-key"
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for embeddings and chat completions",
+      "format": "sk-...",
+      "required": true,
+      "example": "sk-proj-xxxxxxxxxxxxxxxxxxxxx"
+    },
+    "AUTH_SECRET": {
+      "description": "Secret key for JWT token signing (32+ characters)",
+      "format": "base64",
+      "required": true,
+      "example": "Run: openssl rand -base64 32"
+    },
+    "AUTH_URL": {
+      "description": "Base URL for authentication callbacks",
+      "format": "URL",
+      "required": true,
+      "example": "http://localhost:3000"
+    },
+    "DATABASE_POOL_MAX": {
+      "description": "Maximum database connection pool size",
+      "format": "integer",
+      "required": false,
+      "default": "10",
+      "example": "10"
+    },
+    "EMBEDDING_MODEL": {
+      "description": "OpenAI embedding model to use",
+      "format": "string",
+      "required": false,
+      "default": "text-embedding-3-small",
+      "example": "text-embedding-3-small"
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "format": "string",
+      "required": false,
+      "default": "development",
+      "example": "development"
+    }
+  },
+  "dependencies": [],
+  "integrations": {
+    "neon-postgres": "Requires DATABASE_URL and DATABASE_POOL_MAX",
+    "qdrant-vectorstore": "Requires QDRANT_URL and QDRANT_API_KEY",
+    "openai-agents-sdk": "Requires OPENAI_API_KEY",
+    "better-auth-setup": "Requires AUTH_SECRET and AUTH_URL"
+  },
+  "tags": ["environment", "configuration", "dotenv", "setup"]
+}

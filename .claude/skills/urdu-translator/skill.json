@@ -1,27 +1,84 @@
 {
   "name": "urdu-translator",
-  "description": "Translate technical content to Urdu while preserving code blocks and technical terms",
+  "description": "Translate technical content to Urdu while preserving code blocks, technical terms, and MDX syntax",
   "version": "1.0.0",
   "author": "Claude Code",
   "license": "MIT",
-  "tools": [
-    "translate-to-urdu"
-  ],
+  "type": "translation",
+  "parameters": {
+    "content": {
+      "type": "string",
+      "required": true,
+      "description": "Content to translate (MDX, markdown, or plain text)"
+    },
+    "source_language": {
+      "type": "string",
+      "required": false,
+      "default": "en",
+      "enum": ["en"],
+      "description": "Source language (currently only English supported)"
+    },
+    "preserve_terms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "required": false,
+      "default": ["ROS", "Python", "C++", "API", "SDK", "Gazebo", "URDF", "Isaac Sim"],
+      "description": "Technical terms to preserve in English"
+    },
+    "preserve_code_blocks": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Keep code blocks in original language"
+    },
+    "use_cache": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Use translation cache from database"
+    },
+    "chapter_id": {
+      "type": "string",
+      "required": false,
+      "description": "Chapter ID for caching translations"
+    }
+  },
+  "outputs": {
+    "translated_content": {
+      "type": "string",
+      "description": "Translated content in Urdu"
+    },
+    "word_count": {
+      "type": "integer",
+      "description": "Number of words translated"
+    },
+    "cache_hit": {
+      "type": "boolean",
+      "description": "Whether translation was retrieved from cache"
+    },
+    "preserved_terms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of terms that were preserved in English"
+    }
+  },
   "environment": {
     "OPENAI_API_KEY": {
-      "description": "OpenAI API key for GPT-4 translation",
+      "description": "OpenAI API key for GPT-4o translation",
       "required": true
     }
   },
-  "tags": ["translation", "urdu", "technical", "mdx"],
-  "examples": [
-    {
-      "prompt": "Translate this ROS tutorial to Urdu",
-      "tool": "translate-to-urdu",
-      "parameters": {
-        "content": "# ROS Tutorial\n\nThis is a tutorial on ROS (Robot Operating System).",
-        "preserve_terms": ["ROS", "Robot Operating System"]
-      }
-    }
-  ]
+  "dependencies": [
+    "openai",
+    "gray-matter"
+  ],
+  "integrations": {
+    "neon-postgres": "Uses translation_cache table for caching",
+    "content-adapter": "Called when content_language is 'ur'"
+  },
+  "tags": ["translation", "urdu", "technical", "mdx", "localization"]
 }

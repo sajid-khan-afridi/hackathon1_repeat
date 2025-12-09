@@ -1,34 +1,71 @@
 {
   "name": "better-auth-setup",
   "version": "1.0.0",
-  "description": "Complete Better-Auth authentication setup with user profiling questions",
+  "description": "Complete Better-Auth authentication setup with user profiling questions and database integration",
+  "author": "Claude Code",
+  "license": "MIT",
   "type": "auth",
   "parameters": {
     "auth_providers": {
       "type": "array",
       "description": "Authentication providers to enable",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string",
+        "enum": ["email", "google", "github", "credentials"]
+      },
       "default": ["email"]
     },
-    "profile_questions": {
-      "type": "array",
-      "description": "User profile questions to collect",
-      "items": {
-        "type": "object",
-        "properties": {
-          "field": { "type": "string" },
-          "type": { "type": "string", "enum": ["select", "text", "textarea"] },
-          "options": { "type": "array", "items": { "type": "string" } }
-        }
-      }
+    "include_profile_questions": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include user profiling questions after signup"
     },
     "callback_urls": {
       "type": "object",
       "description": "Redirect URLs after auth",
       "properties": {
-        "success": { "type": "string" },
-        "failure": { "type": "string" }
+        "success": {
+          "type": "string",
+          "default": "/dashboard"
+        },
+        "failure": {
+          "type": "string",
+          "default": "/login"
+        },
+        "profile_completion": {
+          "type": "string",
+          "default": "/profile/setup"
+        }
       }
+    },
+    "session_duration": {
+      "type": "integer",
+      "default": 604800,
+      "description": "Session duration in seconds (default: 7 days)"
+    }
+  },
+  "outputs": {
+    "auth_config_file": {
+      "type": "string",
+      "description": "Path to Better-Auth configuration file"
+    },
+    "auth_components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of generated React auth components (LoginForm, SignupForm, ProfileQuestions, etc.)"
+    },
+    "database_schema": {
+      "type": "string",
+      "description": "Path to database schema for users and sessions tables"
+    },
+    "auth_hooks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of React hooks for auth (useAuth, useSession, useProfile)"
     }
   },
   "dependencies": [
@@ -36,13 +73,23 @@
     "react",
     "react-dom",
     "@types/react",
-    "@types/react-dom"
+    "@types/react-dom",
+    "jose"
   ],
-  "outputs": [
-    "Better-Auth configuration",
-    "React auth components",
-    "Database schema",
-    "Session hooks"
-  ],
-  "tags": ["auth", "authentication", "better-auth", "profile", "react"]
+  "integrations": {
+    "neon-postgres": "Creates users and sessions tables in database",
+    "user-profiling": "Triggers profile collection after signup",
+    "fastapi-backend": "Shares JWT tokens for API authentication"
+  },
+  "environment": {
+    "AUTH_SECRET": {
+      "description": "Secret key for JWT token signing (generate with: openssl rand -base64 32)",
+      "required": true
+    },
+    "AUTH_URL": {
+      "description": "Base URL for auth callbacks (e.g., http://localhost:3000)",
+      "required": true
+    }
+  },
+  "tags": ["auth", "authentication", "better-auth", "profile", "react", "jwt"]
 }

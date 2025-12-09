@@ -1,37 +1,136 @@
 {
   "name": "openai-agents-sdk",
-  "description": "Integrate OpenAI Agents SDK for building intelligent RAG chatbot for Physical AI textbook",
+  "description": "Integrate OpenAI Chat Completions API for building intelligent RAG chatbot for Physical AI textbook",
   "author": "Claude Code",
   "version": "1.0.0",
   "license": "MIT",
+  "type": "ai-agent",
   "tags": ["openai", "agents", "rag", "chatbot", "qdrant"],
-  "dependencies": {
-    "openai": "^4.71.0",
-    "@openai/agents": "^0.1.0",
-    "qdrant-js": "^1.12.0",
-    "uuid": "^10.0.0"
-  },
-  "exports": {
-    "default": "./index.js",
-    "types": "./index.d.ts"
-  },
-  "inputs": {
-    "agent_config": {
-      "type": "object",
-      "properties": {
-        "name": "string",
-        "instructions": "string",
-        "model": "string",
-        "tools": "array"
-      }
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["chat", "stream_chat", "get_embedding"],
+      "description": "Operation to perform"
     },
-    "query": "string",
-    "context": "string",
-    "chat_history": "array"
+    "messages": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["system", "user", "assistant"]
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Chat messages history"
+    },
+    "system_prompt": {
+      "type": "string",
+      "required": false,
+      "default": "You are a helpful robotics tutor assistant for a Physical AI textbook.",
+      "description": "System prompt for the agent"
+    },
+    "user_query": {
+      "type": "string",
+      "required": false,
+      "description": "User's question or query"
+    },
+    "context": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "string"
+      },
+      "description": "Retrieved context from RAG vector search"
+    },
+    "model": {
+      "type": "string",
+      "required": false,
+      "default": "gpt-4o-mini",
+      "enum": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
+      "description": "OpenAI model to use"
+    },
+    "temperature": {
+      "type": "number",
+      "required": false,
+      "default": 0.7,
+      "minimum": 0,
+      "maximum": 2,
+      "description": "Sampling temperature"
+    },
+    "max_tokens": {
+      "type": "integer",
+      "required": false,
+      "default": 1000,
+      "minimum": 1,
+      "maximum": 4096,
+      "description": "Maximum tokens in response"
+    },
+    "text_to_embed": {
+      "type": "string",
+      "required": false,
+      "description": "Text to generate embeddings for (used with get_embedding operation)"
+    }
   },
   "outputs": {
-    "agent": "OpenAI Agent instance",
-    "response": "Streaming response handler",
-    "usage": "Token usage tracking"
+    "success": {
+      "type": "boolean",
+      "description": "Whether operation succeeded"
+    },
+    "response": {
+      "type": "string",
+      "description": "Agent's text response (for chat operation)"
+    },
+    "stream": {
+      "type": "object",
+      "description": "Streaming response handler (for stream_chat operation)"
+    },
+    "embedding": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Vector embedding (for get_embedding operation)"
+    },
+    "usage": {
+      "type": "object",
+      "properties": {
+        "prompt_tokens": {
+          "type": "integer"
+        },
+        "completion_tokens": {
+          "type": "integer"
+        },
+        "total_tokens": {
+          "type": "integer"
+        }
+      },
+      "description": "Token usage statistics"
+    },
+    "finish_reason": {
+      "type": "string",
+      "enum": ["stop", "length", "content_filter", "function_call"],
+      "description": "Reason for completion"
+    }
+  },
+  "dependencies": [
+    "openai"
+  ],
+  "environment": {
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for chat completions and embeddings",
+      "required": true
+    }
+  },
+  "integrations": {
+    "qdrant-vectorstore": "Receives context from vector search for RAG",
+    "fastapi-backend": "Powers the /query endpoint",
+    "neon-postgres": "Stores chat history in chat_history table"
   }
 }

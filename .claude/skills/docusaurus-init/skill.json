@@ -5,39 +5,51 @@
   "author": "Claude Code",
   "license": "MIT",
   "main": "index.js",
-  "type": "module",
+  "type": "infrastructure",
   "keywords": ["docusaurus", "documentation", "typescript", "mdx"],
-  "inputs": [
-    {
-      "name": "project_name",
+  "parameters": {
+    "project_name": {
       "type": "string",
       "required": true,
       "description": "Name of the Docusaurus project directory"
     },
-    {
-      "name": "title",
+    "title": {
       "type": "string",
       "required": true,
       "description": "Title of the documentation site"
     },
-    {
-      "name": "description",
+    "description": {
       "type": "string",
       "required": true,
       "description": "Description of the documentation site"
     },
-    {
-      "name": "github_org",
+    "github_org": {
       "type": "string",
       "required": false,
       "description": "GitHub organization or username for deployment"
     }
-  ],
-  "outputs": [
-    {
-      "name": "project_path",
+  },
+  "outputs": {
+    "project_path": {
       "type": "string",
       "description": "Path to the created Docusaurus project"
+    },
+    "config_file": {
+      "type": "string",
+      "description": "Path to docusaurus.config.ts"
+    },
+    "package_json": {
+      "type": "string",
+      "description": "Path to package.json with dependencies"
     }
-  ]
+  },
+  "dependencies": [
+    "@docusaurus/core",
+    "@docusaurus/preset-classic",
+    "@docusaurus/module-type-aliases",
+    "@docusaurus/tsconfig",
+    "react",
+    "react-dom"
+  ],
+  "tags": ["docusaurus", "documentation", "typescript", "mdx", "infrastructure"]
 }

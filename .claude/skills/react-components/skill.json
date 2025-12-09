@@ -4,44 +4,85 @@
   "description": "Generate custom React components for Docusaurus book including interactive features like chatbot widgets, personalization buttons, translation toggles, and authentication modals.",
   "author": "Claude Code",
   "license": "MIT",
+  "type": "ui-component",
   "keywords": ["react", "components", "docusaurus", "typescript", "accessibility"],
   "parameters": {
     "component_type": {
       "type": "string",
-      "enum": ["ChatbotWidget", "PersonalizeButton", "TranslateButton", "AuthModal", "TextSelector", "ProfileBadge"],
+      "enum": ["ChatbotWidget", "PersonalizeButton", "TranslateButton", "AuthModal", "TextSelector", "ProfileBadge", "RAGChatInterface"],
       "required": true,
       "description": "The type of React component to generate"
     },
     "props_schema": {
       "type": "object",
+      "required": false,
       "description": "Object defining additional props and their types",
       "default": {}
     },
     "styling": {
       "type": "string",
+      "required": false,
       "enum": ["tailwind", "css_modules", "styled_components"],
       "default": "css_modules",
       "description": "Styling approach for the component"
     },
     "accessibility_level": {
       "type": "string",
+      "required": false,
       "enum": ["AA", "AAA"],
       "default": "AA",
       "description": "WCAG accessibility compliance level"
+    },
+    "generate_tests": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Generate unit tests for the component"
+    },
+    "generate_types": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Generate TypeScript .d.ts type definition file"
+    },
+    "generate_storybook": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Generate Storybook story for the component"
     }
   },
   "outputs": {
     "component_file": {
-      "description": "Generated React component file (.tsx)"
+      "type": "string",
+      "description": "Path to generated React component file (.tsx)"
+    },
+    "types_file": {
+      "type": "string",
+      "description": "Path to TypeScript type definitions (.d.ts)"
     },
     "style_file": {
-      "description": "Component-specific CSS file"
+      "type": "string",
+      "description": "Path to component-specific CSS/SCSS file"
     },
     "test_file": {
-      "description": "Unit tests for the component"
+      "type": "string",
+      "description": "Path to unit test file (.test.tsx)"
     },
     "storybook_file": {
-      "description": "Storybook story for the component"
+      "type": "string",
+      "description": "Path to Storybook story (.stories.tsx)"
     }
+  },
+  "dependencies": [
+    "react",
+    "react-dom",
+    "@types/react",
+    "@types/react-dom",
+    "clsx"
+  ],
+  "integrations": {
+    "docusaurus-init": "Components are created in Docusaurus src/components directory",
+    "contextual-keyword-chips": "KeywordChips can be integrated into chatbot responses"
   }
 }

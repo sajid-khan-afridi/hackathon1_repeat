@@ -1,0 +1,140 @@
+{
+  "name": "content-indexer",
+  "version": "1.0.0",
+  "description": "Indexes MDX chapter content into Qdrant vector database for semantic search and RAG chatbot",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "data-processing",
+  "parameters": {
+    "operation": {
+      "type": "string",
+      "required": true,
+      "enum": ["index_chapter", "index_directory", "reindex_all", "delete_chapter"],
+      "description": "Indexing operation to perform"
+    },
+    "chapter_path": {
+      "type": "string",
+      "required": false,
+      "description": "Path to MDX chapter file (for index_chapter and delete_chapter)"
+    },
+    "directory_path": {
+      "type": "string",
+      "required": false,
+      "description": "Path to directory containing MDX files (for index_directory)"
+    },
+    "collection_name": {
+      "type": "string",
+      "required": false,
+      "default": "robotics_textbook",
+      "description": "Qdrant collection to index into"
+    },
+    "chunk_size": {
+      "type": "integer",
+      "required": false,
+      "default": 500,
+      "minimum": 100,
+      "maximum": 2000,
+      "description": "Maximum number of words per chunk"
+    },
+    "chunk_overlap": {
+      "type": "integer",
+      "required": false,
+      "default": 50,
+      "minimum": 0,
+      "maximum": 200,
+      "description": "Number of overlapping words between chunks"
+    },
+    "preserve_code_blocks": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Keep code blocks as separate chunks"
+    },
+    "extract_metadata": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Extract chapter metadata (title, module, tags)"
+    }
+  },
+  "outputs": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether indexing succeeded"
+    },
+    "indexed_chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chapter_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "chunks_created": {
+            "type": "integer"
+          },
+          "word_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "List of indexed chapters with statistics"
+    },
+    "total_chunks": {
+      "type": "integer",
+      "description": "Total number of chunks created"
+    },
+    "total_tokens": {
+      "type": "integer",
+      "description": "Total embedding tokens used"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "List of files that failed to index"
+    }
+  },
+  "workflow": [
+    "1. Read MDX file(s) and parse frontmatter",
+    "2. Extract metadata (chapter_id, module, title, tags)",
+    "3. Split content into semantic chunks",
+    "4. Preserve code blocks as separate chunks",
+    "5. Generate embeddings using OpenAI",
+    "6. Upsert chunks to Qdrant with metadata",
+    "7. Return indexing statistics"
+  ],
+  "dependencies": [
+    "gray-matter",
+    "remark",
+    "remark-mdx"
+  ],
+  "integrations": {
+    "qdrant-vectorstore": "Stores generated embeddings and metadata",
+    "openai-agents-sdk": "Generates embeddings for content chunks",
+    "mdx-writer": "Indexes MDX files created by mdx-writer"
+  },
+  "environment": {
+    "QDRANT_URL": {
+      "description": "Qdrant server URL",
+      "required": true
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for embeddings",
+      "required": true
+    }
+  },
+  "tags": ["indexing", "embeddings", "qdrant", "mdx", "content-processing"]
+}

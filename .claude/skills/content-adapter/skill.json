@@ -1,0 +1,115 @@
+{
+  "name": "content-adapter",
+  "version": "1.0.0",
+  "description": "Dynamically adapts MDX chapter content based on user profiles to provide personalized learning experiences",
+  "author": "Claude Code",
+  "license": "MIT",
+  "type": "content-processing",
+  "parameters": {
+    "chapter_content": {
+      "type": "string",
+      "required": true,
+      "description": "MDX chapter content to adapt"
+    },
+    "user_profile": {
+      "type": "object",
+      "required": true,
+      "description": "User profile for content personalization (see shared/types/UserProfile.ts)",
+      "$ref": "#/definitions/UserProfile"
+    },
+    "chapter_id": {
+      "type": "string",
+      "required": false,
+      "description": "Chapter identifier for cache lookup and personalization caching"
+    },
+    "use_cache": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Whether to use personalization cache from database"
+    }
+  },
+  "outputs": {
+    "adapted_content": {
+      "type": "string",
+      "description": "Personalized MDX content with adapted difficulty, examples, and language"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Adaptation metadata including difficulty level, estimated reading time, and applied adaptations",
+      "properties": {
+        "difficulty": {
+          "type": "string",
+          "enum": ["simplified", "standard", "advanced"]
+        },
+        "reading_time_minutes": {
+          "type": "number"
+        },
+        "applied_adaptations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "code_language": {
+          "type": "string",
+          "enum": ["python", "cpp", "both"]
+        }
+      }
+    },
+    "cache_hit": {
+      "type": "boolean",
+      "description": "Whether content was retrieved from cache"
+    },
+    "cache_key": {
+      "type": "string",
+      "description": "Cache key used for storing/retrieving personalized content"
+    }
+  },
+  "definitions": {
+    "UserProfile": {
+      "type": "object",
+      "description": "References shared UserProfile type from shared/types/UserProfile.ts",
+      "properties": {
+        "experience_level": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"]
+        },
+        "ros_familiarity": {
+          "type": "string",
+          "enum": ["none", "basic", "proficient"]
+        },
+        "hardware_access": {
+          "type": "string",
+          "enum": ["simulation_only", "partial_lab", "full_lab"]
+        },
+        "learning_goal": {
+          "type": "string",
+          "enum": ["career", "research", "hobby"]
+        },
+        "preferred_language": {
+          "type": "string",
+          "enum": ["python", "cpp", "both"]
+        },
+        "content_language": {
+          "type": "string",
+          "enum": ["en", "ur"]
+        }
+      },
+      "required": ["experience_level", "ros_familiarity", "hardware_access", "learning_goal", "preferred_language"]
+    }
+  },
+  "dependencies": [
+    "gray-matter",
+    "remark",
+    "remark-mdx",
+    "unified",
+    "node-cache"
+  ],
+  "integrations": {
+    "neon-postgres": "Uses personalization_cache table for caching adapted content",
+    "urdu-translator": "Calls translation when content_language is 'ur'",
+    "user-profiling": "Receives user profile data"
+  },
+  "tags": ["content-adaptation", "personalization", "mdx", "education"]
+}

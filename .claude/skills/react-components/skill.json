@@ -1,0 +1,47 @@
+{
+  "name": "react-components",
+  "version": "1.0.0",
+  "description": "Generate custom React components for Docusaurus book including interactive features like chatbot widgets, personalization buttons, translation toggles, and authentication modals.",
+  "author": "Claude Code",
+  "license": "MIT",
+  "keywords": ["react", "components", "docusaurus", "typescript", "accessibility"],
+  "parameters": {
+    "component_type": {
+      "type": "string",
+      "enum": ["ChatbotWidget", "PersonalizeButton", "TranslateButton", "AuthModal", "TextSelector", "ProfileBadge"],
+      "required": true,
+      "description": "The type of React component to generate"
+    },
+    "props_schema": {
+      "type": "object",
+      "description": "Object defining additional props and their types",
+      "default": {}
+    },
+    "styling": {
+      "type": "string",
+      "enum": ["tailwind", "css_modules", "styled_components"],
+      "default": "css_modules",
+      "description": "Styling approach for the component"
+    },
+    "accessibility_level": {
+      "type": "string",
+      "enum": ["AA", "AAA"],
+      "default": "AA",
+      "description": "WCAG accessibility compliance level"
+    }
+  },
+  "outputs": {
+    "component_file": {
+      "description": "Generated React component file (.tsx)"
+    },
+    "style_file": {
+      "description": "Component-specific CSS file"
+    },
+    "test_file": {
+      "description": "Unit tests for the component"
+    },
+    "storybook_file": {
+      "description": "Storybook story for the component"
+    }
+  }
+}

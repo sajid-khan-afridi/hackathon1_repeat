@@ -1,0 +1,27 @@
+{
+  "name": "urdu-translator",
+  "description": "Translate technical content to Urdu while preserving code blocks and technical terms",
+  "version": "1.0.0",
+  "author": "Claude Code",
+  "license": "MIT",
+  "tools": [
+    "translate-to-urdu"
+  ],
+  "environment": {
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for GPT-4 translation",
+      "required": true
+    }
+  },
+  "tags": ["translation", "urdu", "technical", "mdx"],
+  "examples": [
+    {
+      "prompt": "Translate this ROS tutorial to Urdu",
+      "tool": "translate-to-urdu",
+      "parameters": {
+        "content": "# ROS Tutorial\n\nThis is a tutorial on ROS (Robot Operating System).",
+        "preserve_terms": ["ROS", "Robot Operating System"]
+      }
+    }
+  ]
+}

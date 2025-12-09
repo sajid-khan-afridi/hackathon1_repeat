@@ -1,0 +1,85 @@
+{
+  "name": "content-adapter",
+  "version": "1.0.0",
+  "description": "Dynamically adjusts MDX chapter content based on user profile",
+  "author": "Claude Code",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.0.1",
+    "unified": "^11.0.4",
+    "mdast-util-to-string": "^4.0.0",
+    "mdast-util-from-markdown": "^2.0.0",
+    "node-cache": "^5.1.2"
+  },
+  "keywords": ["content", "personalization", "MDX", "adaptation", "education"],
+  "skill": {
+    "category": "content-processing",
+    "inputs": [
+      {
+        "name": "chapter_content",
+        "type": "string",
+        "description": "MDX chapter content to adapt"
+      },
+      {
+        "name": "user_profile",
+        "type": "object",
+        "description": "User profile with experience, ROS familiarity, hardware access, and language preferences",
+        "properties": {
+          "experience_level": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced"],
+            "description": "User's robotics experience level"
+          },
+          "ros_familiarity": {
+            "type": "string",
+            "enum": ["none", "basic", "proficient"],
+            "description": "User's ROS knowledge level"
+          },
+          "hardware_access": {
+            "type": "string",
+            "enum": ["simulation_only", "partial_lab", "full_lab"],
+            "description": "Hardware resources available to user"
+          },
+          "preferred_language": {
+            "type": "string",
+            "description": "User's preferred programming language",
+            "default": "python"
+          }
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "name": "adapted_content",
+        "type": "string",
+        "description": "Personalized MDX content"
+      },
+      {
+        "name": "metadata",
+        "type": "object",
+        "description": "Adaptation metadata including difficulty badge and reading time",
+        "properties": {
+          "difficulty": {
+            "type": "string",
+            "description": "Difficulty indicator badge"
+          },
+          "reading_time_minutes": {
+            "type": "number",
+            "description": "Estimated reading time in minutes"
+          },
+          "adaptations_applied": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of adaptations that were applied"
+          }
+        }
+      }
+    ]
+  }
+}

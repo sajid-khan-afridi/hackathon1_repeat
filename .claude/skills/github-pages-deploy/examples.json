@@ -1,0 +1,53 @@
+{
+  "examples": [
+    {
+      "name": "Standard Documentation Site",
+      "description": "Deploy a standard documentation site with default settings",
+      "input": {
+        "repo_name": "my-project-docs",
+        "github_org": "mycompany",
+        "base_url": "/my-project-docs/"
+      }
+    },
+    {
+      "name": "Organization Documentation",
+      "description": "Deploy documentation for an organization repository",
+      "input": {
+        "repo_name": "engineering-handbook",
+        "github_org": "techcorp",
+        "base_url": "/engineering-handbook/"
+      }
+    },
+    {
+      "name": "Personal Blog",
+      "description": "Deploy a personal Docusaurus blog",
+      "input": {
+        "repo_name": "my-blog",
+        "github_org": "johndoe",
+        "base_url": "/",
+        "branch": "gh-pages",
+        "node_version": "20"
+      }
+    },
+    {
+      "name": "Custom Branch Deployment",
+      "description": "Deploy to a custom branch instead of gh-pages",
+      "input": {
+        "repo_name": "docs-site",
+        "github_org": "startup",
+        "base_url": "/docs/",
+        "branch": "documentation"
+      }
+    },
+    {
+      "name": "Multi-tenant Documentation",
+      "description": "Deploy documentation in a subdirectory",
+      "input": {
+        "repo_name": "platform-docs",
+        "github_org": "enterprise",
+        "base_url": "/platform/docs/",
+        "node_version": "18"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "GitHub Pages Deploy for Docusaurus",
+  "description": "Automate the CI/CD pipeline for building and deploying the Docusaurus book to GitHub Pages with proper caching and build optimization.",
+  "version": "1.0.0",
+  "author": "Claude Code",
+  "category": "deployment",
+  "tags": ["github-pages", "docusaurus", "cicd", "deployment"],
+  "inputs": {
+    "properties": {
+      "repo_name": {
+        "type": "string",
+        "description": "The name of the GitHub repository",
+        "required": true
+      },
+      "github_org": {
+        "type": "string",
+        "description": "The GitHub organization or username",
+        "required": true
+      },
+      "branch": {
+        "type": "string",
+        "description": "The target branch for deployment",
+        "default": "gh-pages"
+      },
+      "node_version": {
+        "type": "string",
+        "description": "Node.js version to use for builds",
+        "default": "20"
+      },
+      "base_url": {
+        "type": "string",
+        "description": "Base URL for the deployed site (e.g., /hackathon-1-book/)",
+        "required": true
+      }
+    }
+  },
+  "output_files": [
+    ".github/workflows/deploy.yml",
+    "docusaurus.config.ts",
+    "scripts/deploy.js"
+  ]
+}

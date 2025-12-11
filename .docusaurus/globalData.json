@@ -1,0 +1,58 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/hackathon1_repeat/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/hackathon1_repeat/docs",
+          "mainDocId": "intro",
+          "docs": [
+            {
+              "id": "github-pages-deployment-research",
+              "path": "/hackathon1_repeat/docs/github-pages-deployment-research",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "intro",
+              "path": "/hackathon1_repeat/docs/intro",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2-fundamentals/chapter-1-publishers",
+              "path": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-publishers",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-isaac-sim/chapter-1-introduction",
+              "path": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/module-1-ros-2-fundamentals",
+              "path": "/hackathon1_repeat/docs/category/module-1-ros-2-fundamentals",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/module-2-nvidia-isaac-sim",
+              "path": "/hackathon1_repeat/docs/category/module-2-nvidia-isaac-sim",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/hackathon1_repeat/docs/intro",
+                "label": "intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

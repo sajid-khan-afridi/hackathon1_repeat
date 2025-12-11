@@ -1,0 +1,234 @@
+/**
+ * CSS for Physical AI & Humanoid Robotics Textbook
+ * Using logical properties for RTL readiness
+ */
+
+/* Light theme colors - robotics-inspired palette */
+:root {
+  --ifm-color-primary: #2563eb; /* Blue for technology */
+  --ifm-color-primary-dark: #1d4ed8;
+  --ifm-color-primary-darker: #1e40af;
+  --ifm-color-primary-darkest: #1e3a8a;
+  --ifm-color-primary-light: #3b82f6;
+  --ifm-color-primary-lighter: #60a5fa;
+  --ifm-color-primary-lightest: #93bbfc;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(37, 99, 235, 0.1);
+
+  /* Custom colors for robotics theme */
+  --robotics-accent: #10b981; /* Emerald green for success/active */
+  --robotics-warning: #f59e0b; /* Amber for warnings */
+  --robotics-danger: #ef4444; /* Red for errors */
+}
+
+/* Dark theme colors with WCAG AA contrast */
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93bbfc;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+  --docusaurus-highlighted-code-line-bg: rgba(96, 165, 250, 0.2);
+
+  /* Dark theme custom colors with WCAG AA contrast */
+  --robotics-accent: #34d399;
+  --robotics-warning: #fbbf24;
+  --robotics-danger: #f87171;
+
+  /* Enhanced dark theme colors for better contrast */
+  --ifm-background-color: #1a1a1a;
+  --ifm-background-surface-color: #242424;
+  --ifm-color-content: #e6e6e6;
+  --ifm-color-content-secondary: #b3b3b3;
+  --ifm-color-emphasis-300: #404040;
+  --ifm-color-emphasis-600: #808080;
+  --ifm-color-emphasis-700: #999999;
+  --ifm-color-emphasis-900: #cccccc;
+}
+
+/* Responsive design with logical properties */
+@media (max-width: 996px) {
+  .navbar__toggle {
+    margin-inline-end: 1rem;
+  }
+
+  .main-wrapper {
+    padding-inline: 1rem;
+  }
+}
+
+/* Tablet styles (768px - 996px) */
+@media (max-width: 996px) and (min-width: 768px) {
+  .markdown {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .codeBlockContent {
+    margin-block: 1.5rem;
+  }
+}
+
+/* Mobile styles (max-width: 767px) */
+@media (max-width: 767px) {
+  .docSidebarContainer {
+    inset-inline-start: -100%;
+    transition: inset-inline-start 0.3s ease;
+  }
+
+  .docSidebarContainer--open {
+    inset-inline-start: 0;
+  }
+
+  .main-wrapper {
+    padding-inline: 0.5rem;
+  }
+
+  .markdown h1 {
+    font-size: 1.875rem;
+    margin-block-end: 1rem;
+  }
+
+  .markdown h2 {
+    font-size: 1.5rem;
+    margin-block-start: 2rem;
+  }
+
+  .markdown h3 {
+    font-size: 1.25rem;
+  }
+
+  .markdown pre {
+    margin-inline: -0.5rem;
+    padding: 1rem;
+    border-radius: 0;
+  }
+
+  .codeBlockContent pre {
+    font-size: 0.875rem;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  .navbar__link,
+  .menu__link,
+  .pagination-nav__link {
+    min-height: 44px;
+    padding-block: 0.75rem;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Mobile navigation */
+  .navbar__items--right {
+    gap: 0.5rem;
+  }
+
+  .menu__link-item {
+    padding-block: 0.625rem;
+  }
+}
+
+/* Small mobile (max-width: 479px) */
+@media (max-width: 479px) {
+  .markdown p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .markdown table {
+    font-size: 14px;
+  }
+
+  .markdown th,
+  .markdown td {
+    padding: 0.5rem;
+  }
+
+  /* Adjust code blocks for very small screens */
+  .codeBlockLines {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Code block improvements with logical margins */
+.codeBlockContent {
+  margin-block: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Table styling with logical padding */
+.markdown table {
+  margin-block: 1.5rem;
+  border-collapse: collapse;
+}
+
+.markdown th,
+.markdown td {
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+  text-align: start;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+}
+
+/* RTL-ready list styling */
+.markdown ul,
+.markdown ol {
+  padding-inline-start: 2rem;
+  margin-block: 1rem;
+}
+
+/* Interactive elements with minimum touch target size */
+button,
+a,
+input[type="button"],
+input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Focus indicators for accessibility */
+a:focus,
+button:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Print-friendly styles */
+@media print {
+  .navbar,
+  .footer,
+  .pagination-nav {
+    display: none;
+  }
+
+  .main-wrapper {
+    margin-inline: 0;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-emphasis-600);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-emphasis-700);
+}

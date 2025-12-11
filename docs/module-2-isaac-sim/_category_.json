@@ -1,0 +1,9 @@
+{
+  "label": "Module 2: NVIDIA Isaac Sim",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "NVIDIA Isaac Sim",
+    "description": "Learn physics-based simulation with NVIDIA Isaac Sim for robotic applications."
+  }
+}

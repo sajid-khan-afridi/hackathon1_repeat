@@ -1,0 +1,20 @@
+{
+  "id": "github-pages-deployment-research",
+  "title": "GitHub Pages Deployment with GitHub Actions for Docusaurus",
+  "description": "Executive Summary",
+  "source": "@site/docs/github-pages-deployment-research.md",
+  "sourceDirName": ".",
+  "slug": "/github-pages-deployment-research",
+  "permalink": "/hackathon1_repeat/docs/github-pages-deployment-research",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/github-pages-deployment-research.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Chapter 1: Introduction to Isaac Sim",
+    "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction"
+  }
+}

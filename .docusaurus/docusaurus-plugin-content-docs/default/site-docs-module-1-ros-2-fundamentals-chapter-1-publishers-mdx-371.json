@@ -1,0 +1,57 @@
+{
+  "id": "module-1-ros2-fundamentals/chapter-1-publishers",
+  "title": "Chapter 1: ROS 2 Publishers and Subscribers",
+  "description": "Learn the fundamental communication pattern in ROS 2 - publishers and subscribers",
+  "source": "@site/docs/module-1-ros2-fundamentals/chapter-1-publishers.mdx",
+  "sourceDirName": "module-1-ros2-fundamentals",
+  "slug": "/module-1-ros2-fundamentals/chapter-1-publishers",
+  "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-publishers",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/module-1-ros2-fundamentals/chapter-1-publishers.mdx",
+  "tags": [
+    {
+      "inline": true,
+      "label": "ros2",
+      "permalink": "/hackathon1_repeat/docs/tags/ros-2"
+    },
+    {
+      "inline": true,
+      "label": "fundamentals",
+      "permalink": "/hackathon1_repeat/docs/tags/fundamentals"
+    },
+    {
+      "inline": true,
+      "label": "communication",
+      "permalink": "/hackathon1_repeat/docs/tags/communication"
+    }
+  ],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "title": "Chapter 1: ROS 2 Publishers and Subscribers",
+    "sidebar_position": 1,
+    "description": "Learn the fundamental communication pattern in ROS 2 - publishers and subscribers",
+    "keywords": [
+      "ROS2",
+      "publishers",
+      "subscribers",
+      "nodes",
+      "topics"
+    ],
+    "tags": [
+      "ros2",
+      "fundamentals",
+      "communication"
+    ]
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Module 1: ROS 2 Fundamentals",
+    "permalink": "/hackathon1_repeat/docs/category/module-1-ros-2-fundamentals"
+  },
+  "next": {
+    "title": "Module 2: NVIDIA Isaac Sim",
+    "permalink": "/hackathon1_repeat/docs/category/module-2-nvidia-isaac-sim"
+  }
+}

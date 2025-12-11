@@ -1,0 +1,50 @@
+.themeToggle {
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.themeToggle:hover {
+  background: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-primary-light);
+  color: var(--ifm-color-primary);
+}
+
+.themeToggle:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.themeToggle:active {
+  transform: scale(0.95);
+}
+
+.icon {
+  transition: transform 0.2s ease;
+}
+
+.themeToggle:hover .icon {
+  transform: rotate(20deg);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .themeToggle {
+  background: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-emphasis-600);
+  color: var(--ifm-color-emphasis-900);
+}
+
+[data-theme='dark'] .themeToggle:hover {
+  background: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-lightest);
+}

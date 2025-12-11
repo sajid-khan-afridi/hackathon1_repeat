@@ -1,0 +1,419 @@
+{
+  "entrypoints": [
+    "main"
+  ],
+  "origins": {
+    "237": [
+      237
+    ],
+    "246": [
+      61,
+      401,
+      869,
+      246
+    ],
+    "17896441": [
+      246,
+      869,
+      401
+    ],
+    "84088384": [
+      180
+    ],
+    "main": [
+      354,
+      869,
+      792
+    ],
+    "runtime~main": [
+      792,
+      869,
+      354
+    ],
+    "0e384e19": [
+      976
+    ],
+    "14eb3368": [
+      869,
+      969
+    ],
+    "17681f1c": [
+      844
+    ],
+    "1df93b7f": [
+      869,
+      583
+    ],
+    "1f391b9e": [
+      246,
+      869,
+      61
+    ],
+    "3716e7cd": [
+      417
+    ],
+    "3720c009": [
+      869,
+      787
+    ],
+    "393be207": [
+      134
+    ],
+    "39684ca2": [
+      543
+    ],
+    "3cfc586a": [
+      612
+    ],
+    "5e95c892": [
+      647
+    ],
+    "5f5aac83": [
+      359
+    ],
+    "7dcab04a": [
+      477
+    ],
+    "a7456010": [
+      235
+    ],
+    "a7bd4aaa": [
+      98
+    ],
+    "a94703ab": [
+      869,
+      48
+    ],
+    "aba21aa0": [
+      742
+    ],
+    "b131bee9": [
+      369
+    ],
+    "bce94881": [
+      745
+    ],
+    "bcee36ee": [
+      853
+    ],
+    "d1d6badc": [
+      920
+    ],
+    "d9dde73b": [
+      353
+    ],
+    "da8d247a": [
+      704
+    ],
+    "df203c0f": [
+      869,
+      279
+    ],
+    "e0a83300": [
+      429
+    ],
+    "styles": [
+      48,
+      61,
+      246,
+      279,
+      354,
+      401,
+      583,
+      787,
+      792,
+      969,
+      869
+    ]
+  },
+  "assets": {
+    "48": {
+      "js": [
+        {
+          "file": "assets/js/a94703ab.8ac5e26e.js",
+          "hash": "705de5aaf5b36ee8",
+          "publicPath": "/hackathon1_repeat/assets/js/a94703ab.8ac5e26e.js"
+        }
+      ]
+    },
+    "61": {
+      "js": [
+        {
+          "file": "assets/js/1f391b9e.187a95f1.js",
+          "hash": "276222012c42f71f",
+          "publicPath": "/hackathon1_repeat/assets/js/1f391b9e.187a95f1.js"
+        }
+      ]
+    },
+    "98": {
+      "js": [
+        {
+          "file": "assets/js/a7bd4aaa.45b92ed8.js",
+          "hash": "3724ba619e24bf9b",
+          "publicPath": "/hackathon1_repeat/assets/js/a7bd4aaa.45b92ed8.js"
+        }
+      ]
+    },
+    "134": {
+      "js": [
+        {
+          "file": "assets/js/393be207.b778a10a.js",
+          "hash": "76841d646d7f0d0d",
+          "publicPath": "/hackathon1_repeat/assets/js/393be207.b778a10a.js"
+        }
+      ]
+    },
+    "180": {
+      "js": [
+        {
+          "file": "assets/js/84088384.4a14a95f.js",
+          "hash": "8cca063ab7f0a941",
+          "publicPath": "/hackathon1_repeat/assets/js/84088384.4a14a95f.js"
+        }
+      ]
+    },
+    "235": {
+      "js": [
+        {
+          "file": "assets/js/a7456010.cff6ca8f.js",
+          "hash": "33a2248d98e46e80",
+          "publicPath": "/hackathon1_repeat/assets/js/a7456010.cff6ca8f.js"
+        }
+      ]
+    },
+    "237": {
+      "js": [
+        {
+          "file": "assets/js/237.99561fc0.js",
+          "hash": "e74eef94d372a640",
+          "publicPath": "/hackathon1_repeat/assets/js/237.99561fc0.js"
+        }
+      ]
+    },
+    "246": {
+      "js": [
+        {
+          "file": "assets/js/246.59920144.js",
+          "hash": "0ded4f6f7e9db1a4",
+          "publicPath": "/hackathon1_repeat/assets/js/246.59920144.js"
+        }
+      ]
+    },
+    "279": {
+      "js": [
+        {
+          "file": "assets/js/df203c0f.e0ce2d16.js",
+          "hash": "fa3492b2cee4bb60",
+          "publicPath": "/hackathon1_repeat/assets/js/df203c0f.e0ce2d16.js"
+        }
+      ]
+    },
+    "353": {
+      "js": [
+        {
+          "file": "assets/js/d9dde73b.4e42cbf6.js",
+          "hash": "5ea695d2f4e2f267",
+          "publicPath": "/hackathon1_repeat/assets/js/d9dde73b.4e42cbf6.js"
+        }
+      ]
+    },
+    "354": {
+      "js": [
+        {
+          "file": "assets/js/runtime~main.7d943743.js",
+          "hash": "78d00a7748998794",
+          "publicPath": "/hackathon1_repeat/assets/js/runtime~main.7d943743.js"
+        }
+      ]
+    },
+    "359": {
+      "js": [
+        {
+          "file": "assets/js/5f5aac83.f8c731ce.js",
+          "hash": "b7c31bd0d1a9dda5",
+          "publicPath": "/hackathon1_repeat/assets/js/5f5aac83.f8c731ce.js"
+        }
+      ]
+    },
+    "369": {
+      "js": [
+        {
+          "file": "assets/js/b131bee9.22419d8b.js",
+          "hash": "e492e2d0f956bd40",
+          "publicPath": "/hackathon1_repeat/assets/js/b131bee9.22419d8b.js"
+        }
+      ]
+    },
+    "401": {
+      "js": [
+        {
+          "file": "assets/js/17896441.47669069.js",
+          "hash": "0f09377f5e897478",
+          "publicPath": "/hackathon1_repeat/assets/js/17896441.47669069.js"
+        }
+      ]
+    },
+    "417": {
+      "js": [
+        {
+          "file": "assets/js/3716e7cd.67b88230.js",
+          "hash": "3bbd6653b93bce75",
+          "publicPath": "/hackathon1_repeat/assets/js/3716e7cd.67b88230.js"
+        }
+      ]
+    },
+    "429": {
+      "js": [
+        {
+          "file": "assets/js/e0a83300.8430fd38.js",
+          "hash": "0cd4be99612ebc5a",
+          "publicPath": "/hackathon1_repeat/assets/js/e0a83300.8430fd38.js"
+        }
+      ]
+    },
+    "477": {
+      "js": [
+        {
+          "file": "assets/js/7dcab04a.6f88a065.js",
+          "hash": "48d3486d35993029",
+          "publicPath": "/hackathon1_repeat/assets/js/7dcab04a.6f88a065.js"
+        }
+      ]
+    },
+    "543": {
+      "js": [
+        {
+          "file": "assets/js/39684ca2.3354458a.js",
+          "hash": "260ea8c6b5558d90",
+          "publicPath": "/hackathon1_repeat/assets/js/39684ca2.3354458a.js"
+        }
+      ]
+    },
+    "583": {
+      "js": [
+        {
+          "file": "assets/js/1df93b7f.75837ae9.js",
+          "hash": "24ce53fdd0d91639",
+          "publicPath": "/hackathon1_repeat/assets/js/1df93b7f.75837ae9.js"
+        }
+      ]
+    },
+    "612": {
+      "js": [
+        {
+          "file": "assets/js/3cfc586a.1a40f92f.js",
+          "hash": "50e9dd7f04c71269",
+          "publicPath": "/hackathon1_repeat/assets/js/3cfc586a.1a40f92f.js"
+        }
+      ]
+    },
+    "647": {
+      "js": [
+        {
+          "file": "assets/js/5e95c892.72d25197.js",
+          "hash": "abc3fea94594f4f3",
+          "publicPath": "/hackathon1_repeat/assets/js/5e95c892.72d25197.js"
+        }
+      ]
+    },
+    "704": {
+      "js": [
+        {
+          "file": "assets/js/da8d247a.6db602ee.js",
+          "hash": "feff654b13966300",
+          "publicPath": "/hackathon1_repeat/assets/js/da8d247a.6db602ee.js"
+        }
+      ]
+    },
+    "742": {
+      "js": [
+        {
+          "file": "assets/js/aba21aa0.cfdfa571.js",
+          "hash": "612414984ef23bc4",
+          "publicPath": "/hackathon1_repeat/assets/js/aba21aa0.cfdfa571.js"
+        }
+      ]
+    },
+    "745": {
+      "js": [
+        {
+          "file": "assets/js/bce94881.2cd4cb9d.js",
+          "hash": "ef5733eb04335adf",
+          "publicPath": "/hackathon1_repeat/assets/js/bce94881.2cd4cb9d.js"
+        }
+      ]
+    },
+    "787": {
+      "js": [
+        {
+          "file": "assets/js/3720c009.0230d95a.js",
+          "hash": "1fded14079c08964",
+          "publicPath": "/hackathon1_repeat/assets/js/3720c009.0230d95a.js"
+        }
+      ]
+    },
+    "792": {
+      "js": [
+        {
+          "file": "assets/js/main.a59b969c.js",
+          "hash": "1f30e281cf52c83d",
+          "publicPath": "/hackathon1_repeat/assets/js/main.a59b969c.js"
+        }
+      ]
+    },
+    "844": {
+      "js": [
+        {
+          "file": "assets/js/17681f1c.be9813fd.js",
+          "hash": "bc1485b74dea2be5",
+          "publicPath": "/hackathon1_repeat/assets/js/17681f1c.be9813fd.js"
+        }
+      ]
+    },
+    "853": {
+      "js": [
+        {
+          "file": "assets/js/bcee36ee.66dfca09.js",
+          "hash": "d9e6fabce9fe64e1",
+          "publicPath": "/hackathon1_repeat/assets/js/bcee36ee.66dfca09.js"
+        }
+      ]
+    },
+    "869": {
+      "css": [
+        {
+          "file": "assets/css/styles.d4ef61a4.css",
+          "hash": "5b6c64b7ecd191c6",
+          "publicPath": "/hackathon1_repeat/assets/css/styles.d4ef61a4.css"
+        }
+      ]
+    },
+    "920": {
+      "js": [
+        {
+          "file": "assets/js/d1d6badc.cd61cb1f.js",
+          "hash": "addd68aa0fdd0c21",
+          "publicPath": "/hackathon1_repeat/assets/js/d1d6badc.cd61cb1f.js"
+        }
+      ]
+    },
+    "969": {
+      "js": [
+        {
+          "file": "assets/js/14eb3368.a1c5df46.js",
+          "hash": "bc1f033fea3360b7",
+          "publicPath": "/hackathon1_repeat/assets/js/14eb3368.a1c5df46.js"
+        }
+      ]
+    },
+    "976": {
+      "js": [
+        {
+          "file": "assets/js/0e384e19.53d307fc.js",
+          "hash": "d2d347e99fc06484",
+          "publicPath": "/hackathon1_repeat/assets/js/0e384e19.53d307fc.js"
+        }
+      ]
+    }
+  }
+}

@@ -82,7 +82,9 @@ Last Generated: 2025-12-10
 
 **Rationale:** Educational platforms require high reliability. Students depend on accurate information and stable systems. Technical debt in educational content compounds learning difficulties.
 
-**Quality Gates per Phase:**
+**Quality Gates per Phase (Summary - see QUALITY GATES section for complete criteria):**
+> **Note**: This is a high-level summary only (Tier 2). For authoritative detailed exit criteria, see the QUALITY GATES section below (lines 927-990) which serves as the single source of truth (Tier 1). Per ADR-003, plan phases must match the detailed criteria exactly.
+
 - Phase 1: Lighthouse scores > 85, build success, dark mode functional
 - Phase 2: Code examples execute 100%, readability Flesch-Kincaid 12-14
 - Phase 3: NDCG@10 > 0.8, p95 latency < 3s, zero hallucinations

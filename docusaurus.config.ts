@@ -70,6 +70,7 @@ markdown: {
         alt: 'Robotics Textbook Logo',
         src: 'img/logo.svg',
       },
+      hideOnScroll: false,
       items: [
         {
           type: 'docSidebar',
@@ -78,21 +79,35 @@ markdown: {
           label: 'Modules',
         },
         {
+          to: '/docs/intro',
+          label: 'Get Started',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/sajid-khan-afridi/hackathon1_repeat',
-          label: 'GitHub',
           position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [
         {
-          title: 'Learning Modules',
+          title: 'Learning',
           items: [
             {
               label: 'Introduction',
               to: '/docs/intro',
+            },
+            {
+              label: 'ROS 2 Fundamentals',
+              to: '/docs/module-1-ros2-fundamentals/chapter-1-publishers',
+            },
+            {
+              label: 'NVIDIA Isaac Sim',
+              to: '/docs/module-2-isaac-sim/chapter-1-introduction',
             },
           ],
         },
@@ -100,13 +115,30 @@ markdown: {
           title: 'Resources',
           items: [
             {
-              label: 'GitHub Repository',
+              label: 'ROS 2 Docs',
+              href: 'https://docs.ros.org/en/rolling/',
+            },
+            {
+              label: 'NVIDIA Isaac Sim',
+              href: 'https://developer.nvidia.com/isaac-sim',
+            },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'GitHub',
               href: 'https://github.com/sajid-khan-afridi/hackathon1_repeat',
+            },
+            {
+              label: 'Issues',
+              href: 'https://github.com/sajid-khan-afridi/hackathon1_repeat/issues',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Textbook. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

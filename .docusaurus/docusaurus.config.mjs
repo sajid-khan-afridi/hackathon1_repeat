@@ -13,6 +13,23 @@ export default {
   "projectName": "hackathon1_repeat",
   "onBrokenLinks": "throw",
   "onDuplicateRoutes": "warn",
+  "markdown": {
+    "anchors": {
+      "maintainCase": false
+    },
+    "hooks": {
+      "onBrokenMarkdownLinks": "throw",
+      "onBrokenMarkdownImages": "throw"
+    },
+    "format": "mdx",
+    "mermaid": false,
+    "emoji": true,
+    "mdx1Compat": {
+      "comments": true,
+      "admonitions": true,
+      "headingIds": true
+    }
+  },
   "i18n": {
     "defaultLocale": "en",
     "locales": [
@@ -49,6 +66,7 @@ export default {
         "alt": "Robotics Textbook Logo",
         "src": "img/logo.svg"
       },
+      "hideOnScroll": false,
       "items": [
         {
           "type": "docSidebar",
@@ -57,22 +75,35 @@ export default {
           "label": "Modules"
         },
         {
+          "to": "/docs/intro",
+          "label": "Get Started",
+          "position": "left"
+        },
+        {
           "href": "https://github.com/sajid-khan-afridi/hackathon1_repeat",
-          "label": "GitHub",
-          "position": "right"
+          "position": "right",
+          "className": "header-github-link",
+          "aria-label": "GitHub repository"
         }
-      ],
-      "hideOnScroll": false
+      ]
     },
     "footer": {
-      "style": "dark",
+      "style": "light",
       "links": [
         {
-          "title": "Learning Modules",
+          "title": "Learning",
           "items": [
             {
               "label": "Introduction",
               "to": "/docs/intro"
+            },
+            {
+              "label": "ROS 2 Fundamentals",
+              "to": "/docs/module-1-ros2-fundamentals/chapter-1-publishers"
+            },
+            {
+              "label": "NVIDIA Isaac Sim",
+              "to": "/docs/module-2-isaac-sim/chapter-1-introduction"
             }
           ]
         },
@@ -80,13 +111,30 @@ export default {
           "title": "Resources",
           "items": [
             {
-              "label": "GitHub Repository",
+              "label": "ROS 2 Docs",
+              "href": "https://docs.ros.org/en/rolling/"
+            },
+            {
+              "label": "NVIDIA Isaac Sim",
+              "href": "https://developer.nvidia.com/isaac-sim"
+            }
+          ]
+        },
+        {
+          "title": "Community",
+          "items": [
+            {
+              "label": "GitHub",
               "href": "https://github.com/sajid-khan-afridi/hackathon1_repeat"
+            },
+            {
+              "label": "Issues",
+              "href": "https://github.com/sajid-khan-afridi/hackathon1_repeat/issues"
             }
           ]
         }
       ],
-      "copyright": "Copyright © 2025 Physical AI & Humanoid Robotics. Built with Docusaurus."
+      "copyright": "Copyright © 2025 Physical AI & Humanoid Robotics Textbook. Built with Docusaurus."
     },
     "prism": {
       "theme": {
@@ -351,22 +399,5 @@ export default {
   "stylesheets": [],
   "clientModules": [],
   "titleDelimiter": "|",
-  "noIndex": false,
-  "markdown": {
-    "format": "mdx",
-    "mermaid": false,
-    "emoji": true,
-    "mdx1Compat": {
-      "comments": true,
-      "admonitions": true,
-      "headingIds": true
-    },
-    "anchors": {
-      "maintainCase": false
-    },
-    "hooks": {
-      "onBrokenMarkdownLinks": "throw",
-      "onBrokenMarkdownImages": "throw"
-    }
-  }
+  "noIndex": false
 };

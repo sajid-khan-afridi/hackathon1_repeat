@@ -1,56 +1,105 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  icon: string;
   description: ReactNode;
+  link?: string;
+  highlight?: boolean;
 };
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'ROS 2 Fundamentals',
+    icon: '🤖',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Master Robot Operating System 2 with comprehensive tutorials on publishers,
+        subscribers, services, and actions. Build real-world robotics applications
+        from scratch.
       </>
     ),
+    link: '/docs/module-1-ros2-fundamentals/chapter-1-publishers',
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'NVIDIA Isaac Sim',
+    icon: '🎮',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Learn simulation-driven development with NVIDIA Isaac Sim. Create realistic
+        robot simulations, test algorithms, and accelerate development workflows.
       </>
     ),
+    link: '/docs/module-2-isaac-sim/chapter-1-introduction',
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Humanoid Control',
+    icon: '🦾',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Explore advanced topics in humanoid robotics including inverse kinematics,
+        motion planning, balance control, and real-time decision making.
       </>
     ),
+    link: '/docs/intro',
+  },
+  {
+    title: 'Hands-On Projects',
+    icon: '⚡',
+    description: (
+      <>
+        Apply your knowledge through practical projects and exercises. Each chapter
+        includes working code examples you can run and modify.
+      </>
+    ),
+    highlight: true,
+  },
+  {
+    title: 'Industry Standards',
+    icon: '🏆',
+    description: (
+      <>
+        Learn industry-standard tools and best practices used by professional robotics
+        engineers at leading companies and research labs.
+      </>
+    ),
+    highlight: true,
+  },
+  {
+    title: 'Open Source',
+    icon: '💡',
+    description: (
+      <>
+        Completely free and open source. Contribute to the textbook, suggest improvements,
+        and help build the robotics education community.
+      </>
+    ),
+    highlight: true,
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, icon, description, link, highlight}: FeatureItem) {
+  const content = (
+    <>
+      <div className={styles.featureIcon}>{icon}</div>
+      <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
+      <p className={styles.featureDescription}>{description}</p>
+      {link && (
+        <Link className={styles.featureLink} to={link}>
+          Explore Module →
+        </Link>
+      )}
+    </>
+  );
+
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
+    <div className={clsx('col col--4', styles.featureCol)}>
+      <div className={clsx(styles.featureCard, {[styles.featureHighlight]: highlight})}>
+        {content}
       </div>
     </div>
   );
@@ -60,6 +109,14 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
+        <div className={styles.featuresHeader}>
+          <Heading as="h2" className={styles.featuresTitle}>
+            Everything You Need to Master Robotics
+          </Heading>
+          <p className={styles.featuresSubtitle}>
+            Comprehensive curriculum designed for students, researchers, and professionals
+          </p>
+        </div>
         <div className="row">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />

@@ -1,0 +1,186 @@
+# MDX Frontmatter Schema for Textbook Chapters
+# Feature: 002-mdx-textbook-chapters
+# Date: 2025-12-12
+# Used by: content-indexer skill, content-adapter skill
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: ChapterFrontmatter
+description: Required frontmatter fields for textbook MDX chapters
+type: object
+
+required:
+  - title
+  - sidebar_position
+  - description
+  - keywords
+  - tags
+  - learning_objectives
+  - difficulty_level
+  - ros_version
+  - estimated_time
+  - personalization_variants
+
+properties:
+  title:
+    type: string
+    description: Chapter title displayed in navigation and page header
+    minLength: 10
+    maxLength: 100
+    examples:
+      - "Chapter 1: ROS 2 Nodes & Lifecycle"
+      - "Chapter 4: Isaac Sim Environment Setup"
+
+  sidebar_position:
+    type: integer
+    description: Position in sidebar navigation (1-based)
+    minimum: 1
+    maximum: 20
+
+  description:
+    type: string
+    description: Brief description for SEO and previews
+    minLength: 50
+    maxLength: 200
+    examples:
+      - "Learn how to create ROS 2 nodes and understand node lifecycle management"
+
+  keywords:
+    type: array
+    description: SEO keywords for search engine optimization
+    minItems: 3
+    maxItems: 10
+    items:
+      type: string
+    examples:
+      - ["ROS2", "nodes", "lifecycle", "rclpy", "rclcpp"]
+
+  tags:
+    type: array
+    description: Content tags for indexing and filtering
+    minItems: 2
+    maxItems: 8
+    items:
+      type: string
+      pattern: "^[a-z0-9-]+$"
+    examples:
+      - ["ros2", "fundamentals", "nodes"]
+
+  learning_objectives:
+    type: array
+    description: Specific, measurable learning outcomes (minimum 3)
+    minItems: 3
+    maxItems: 7
+    items:
+      type: string
+      minLength: 20
+      maxLength: 150
+    examples:
+      - - "Create ROS 2 nodes using rclpy and rclcpp"
+        - "Understand and implement node lifecycle states"
+        - "Configure node parameters at runtime"
+
+  difficulty_level:
+    type: string
+    description: Overall difficulty level of the chapter
+    enum:
+      - beginner
+      - intermediate
+      - advanced
+
+  ros_version:
+    type: string
+    description: Target ROS 2 distribution for code examples
+    pattern: "^(humble|iron|jazzy)$"
+    default: humble
+    examples:
+      - "humble"
+
+  prerequisites:
+    type: array
+    description: Chapter IDs that should be completed before this chapter
+    default: []
+    items:
+      type: string
+      pattern: "^ch[0-9]{2}$"
+    examples:
+      - ["ch01", "ch02"]
+
+  estimated_time:
+    type: integer
+    description: Estimated completion time in minutes (reading + exercises)
+    minimum: 30
+    maximum: 90
+    default: 60
+    examples:
+      - 60
+
+  personalization_variants:
+    type: object
+    description: Flags indicating which personalization dimensions have content variants
+    required:
+      - experience_level
+      - ros_familiarity
+      - hardware_access
+    properties:
+      experience_level:
+        type: boolean
+        description: Whether chapter has beginner/intermediate/advanced content variants
+      ros_familiarity:
+        type: boolean
+        description: Whether chapter has novice/intermediate/expert ROS variants
+      hardware_access:
+        type: boolean
+        description: Whether chapter has simulation-only vs hardware content variants
+    additionalProperties: false
+
+  # Optional fields
+  author:
+    type: string
+    description: Chapter author for attribution
+    examples:
+      - "ContentWriter Agent"
+
+  last_updated:
+    type: string
+    format: date
+    description: Last modification date in ISO format
+    examples:
+      - "2025-12-12"
+
+  draft:
+    type: boolean
+    description: Whether chapter is in draft mode (hidden from production)
+    default: false
+
+additionalProperties: false
+
+# Example complete frontmatter
+examples:
+  - title: "Chapter 1: ROS 2 Nodes & Lifecycle"
+    sidebar_position: 1
+    description: "Learn how to create ROS 2 nodes and understand the complete node lifecycle including managed nodes with state transitions"
+    keywords:
+      - ROS2
+      - nodes
+      - lifecycle
+      - rclpy
+      - rclcpp
+      - managed nodes
+    tags:
+      - ros2
+      - fundamentals
+      - nodes
+      - lifecycle
+    learning_objectives:
+      - "Create ROS 2 nodes using rclpy (Python) and rclcpp (C++)"
+      - "Understand and implement the four primary node lifecycle states"
+      - "Configure lifecycle callbacks for state transitions"
+      - "Debug common node initialization issues"
+    difficulty_level: beginner
+    ros_version: humble
+    prerequisites: []
+    estimated_time: 60
+    personalization_variants:
+      experience_level: true
+      ros_familiarity: true
+      hardware_access: false

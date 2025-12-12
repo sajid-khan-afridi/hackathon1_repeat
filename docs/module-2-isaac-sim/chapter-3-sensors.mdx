@@ -1,0 +1,962 @@
+---
+title: "Chapter 3: Sensors & Physics Simulation"
+sidebar_position: 3
+description: "Learn how to configure and use various sensors in Isaac Sim, understand physics simulation parameters, and create realistic sensor data"
+keywords:
+  - sensors
+  - physics simulation
+  - Isaac Sim
+  - PhysX
+  - camera
+  - LiDAR
+  - IMU
+  - contact sensor
+  - simulation parameters
+tags:
+  - isaac-sim
+  - sensors
+  - physics
+  - simulation
+learning_objectives:
+  - "Configure camera and LiDAR sensors in Isaac Sim"
+  - "Understand PhysX simulation parameters and tuning"
+  - "Create contact and proximity sensors"
+  - "Generate realistic sensor data for ROS 2"
+difficulty_level: intermediate
+ros_version: humble
+isaac_sim_version: "2023.1.0+"
+prerequisites:
+  - "Chapter 1: Isaac Sim Environment Setup"
+  - "Chapter 2: Robot Models & URDF"
+  - "Basic physics concepts"
+estimated_time: 120
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 3: Sensors & Physics Simulation
+
+## Introduction
+
+Isaac Sim provides comprehensive sensor simulation capabilities that generate realistic data for robotics applications. Understanding how to properly configure sensors and physics simulation is crucial for developing robust robotic systems that can transition from simulation to real-world deployment.
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Think of sensors as the robot's eyes and ears. In simulation, we need to tell Isaac Sim what the robot can see and feel, and how the world behaves (like gravity, friction, and collisions).
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Isaac Sim's sensor simulation leverages PhysX for accurate physics rendering and RTX for photorealistic sensor output. The key is understanding the trade-offs between simulation fidelity and computational performance.
+</PersonalizedSection>
+
+## 3.1 Physics Simulation Configuration
+
+### Setting Up Physics Scene
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.core, omni.isaac.physics_engine
+
+from omni.isaac.core import World
+from omni.isaac.core.utils.physics import set_physics_engine_properties
+from omni.isaac.core.utils.stage import set_stage_units
+import carb
+
+def configure_physics_simulation():
+    """Configure PhysX parameters for realistic simulation"""
+
+    # Set stage units (meters, seconds)
+    set_stage_units(meters_per_unit=1.0, meters_per_unit_time=1.0)
+
+    # Configure physics engine
+    physics_properties = {
+        "gpu_enabled": True,  # Use GPU acceleration
+        "solver_type": 1,  # TGS solver
+        "bounce_threshold_velocity": 0.2,
+        "friction_offset_threshold": 0.04,
+        "friction_correlation_distance": 0.025,
+
+        # Solver iterations
+        "solver_position_iteration_count": 32,
+        "solver_velocity_iteration_count": 16,
+
+        # Contact properties
+        "default_contact_offset": 0.02,
+        "default_rest_offset": 0.0,
+
+        # CCD (Continuous Collision Detection)
+        "enable_ccd": False,
+        "max_ccd_penetration": 0.001,
+
+        # Stability
+        "enable_stabilization": True,
+        "min_stabilization_iterations": 4,
+    }
+
+    set_physics_engine_properties(**physics_properties)
+
+    carb.log_info("Physics simulation configured")
+```
+
+### Material Properties
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.core.utils.materials
+
+from omni.isaac.core.utils.materials import get_material_prim_path
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
+import omni.kit.commands
+
+def create_physics_material():
+    """Create a material with specific friction and restitution"""
+
+    # Create material
+    material_path = "/World/PhysicsMaterials/RubberMaterial"
+
+    omni.kit.commands.execute(
+        "CreateAndBindMdlMaterialFromLibrary",
+        mdl_name="OmniSurface.mdl",
+        mtl_name="OmniSurface_Default",
+        prim_path=material_path
+    )
+
+    # Get material and apply physics properties
+    material_prim = stage.GetPrimAtPath(material_path)
+    physics_api = UsdPhysics.MaterialAPI.Apply(material_prim)
+
+    # Set friction coefficients
+    physics_api.CreateStaticFrictionAttr(0.9)  # High friction
+    physics_api.CreateDynamicFrictionAttr(0.8)
+
+    # Set restitution (bounciness)
+    physics_api.CreateRestitutionAttr(0.2)  # Low bounciness
+
+    # Set friction combine mode
+    physics_api.CreateFrictionCombineModeAttr("multiply")
+
+    return material_path
+
+def apply_material_to_prim(prim_path, material_path):
+    """Apply material to a primitive"""
+
+    omni.kit.commands.execute(
+        "BindMaterialCommand",
+        prim_path=Sdf.Path(prim_path),
+        material_path=Sdf.Path(material_path),
+        stronger_than_descendants=True
+    )
+```
+
+## 3.2 Camera Sensors
+
+### RGB Camera Setup
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.sensor, omni.isaac.core
+
+import numpy as np
+from omni.isaac.core import World
+from omni.isaac.sensor import Camera
+
+def create_rgb_camera():
+    """Create and configure RGB camera sensor"""
+
+    # Initialize world
+    world = World()
+
+    # Create camera
+    camera = Camera(
+        prim_path="/World/camera_sensor",
+        position=np.array([2.0, 0.0, 1.0]),
+        frequency=30,  # 30 Hz
+        resolution=(640, 480),
+
+        # Intrinsics
+        focal_length=24.0,  # mm
+        horizontal_aperture=20.955,  # mm
+        vertical_aperture=15.716,  # mm
+
+        # Clipping
+        clipping_range=(0.1, 100.0)
+    )
+
+    # Add to scene
+    camera.initialize()
+
+    # Configure additional properties
+    camera.set_focal_length(24.0)
+    camera.set_focus_distance(10.0)
+    camera.set_f_stop(2.8)
+
+    # Enable post-processing
+    camera.enable_rgb_post_processing(True)
+
+    # Set exposure
+    camera.set_exposure_compensation(0.0)
+
+    return camera
+
+def capture_camera_data(camera):
+    """Capture and process camera data"""
+
+    # Get RGB data
+    rgba = camera.get_rgba()
+    rgb = rgba[..., :3]  # Remove alpha channel
+
+    # Get camera info
+    camera_pose = camera.get_world_pose()
+    intrinsics = camera.get_intrinsics_matrix()
+
+    return rgb, camera_pose, intrinsics
+```
+
+### Depth Camera
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def create_depth_camera():
+    """Create depth camera with different output types"""
+
+    depth_camera = Camera(
+        prim_path="/World/depth_camera",
+        position=np.array([2.0, 1.0, 1.0]),
+        frequency=30,
+        resolution=(640, 480),
+
+        # Depth-specific settings
+        depth_range=(0.1, 10.0),
+        focus_distance=2.0
+    )
+
+    depth_camera.initialize()
+
+    # Enable depth outputs
+    depth_camera.enable_depth_sensor(True)
+    depth_camera.enable_distance_to_image_plane_sensor(True)
+    depth_camera.enable_normals_sensor(True)
+
+    return depth_camera
+
+def get_depth_data(camera):
+    """Get various depth representations"""
+
+    # Linear depth (meters)
+    depth = camera.get_depth()
+
+    # Distance to image plane
+    distance = camera.get_distance_to_image_plane()
+
+    # Point cloud
+    pointcloud = camera.get_pointcloud()
+
+    return depth, distance, pointcloud
+```
+
+## 3.3 LiDAR Sensors
+
+### 3D LiDAR Configuration
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.range_sensor
+
+from omni.isaac.range_sensor import _range_sensor
+import omni.kit.commands
+
+def create_lidar_sensor():
+    """Create a 3D LiDAR sensor"""
+
+    # Create LiDAR prim
+    lidar_path = "/World/lidar_sensor"
+
+    omni.kit.commands.execute(
+        "RangeSensorCreateLidar",
+        path=lidar_path,
+        parent=None,
+        min_range=0.1,
+        max_range=100.0,
+        horizontal_fov=360.0,
+        vertical_fov=30.0,
+        horizontal_resolution=0.25,  # degrees
+        vertical_resolution=2.0,  # degrees
+        rotation_rate=10.0,  # Hz
+        draw_points=True,
+        draw_lines=False
+    )
+
+    # Get LiDAR interface
+    lidar_interface = _range_sensor.acquire_lidar_sensor_interface()
+    lidar_handle = lidar_interface.get_sensor_path(lidar_path)
+
+    return lidar_path, lidar_handle
+
+def configure_lidar_patterns(lidar_path):
+    """Configure custom LiDAR scan patterns"""
+
+    # Get LiDAR prim
+    stage = omni.usd.get_context().get_stage()
+    lidar_prim = stage.GetPrimAtPath(lidar_path)
+
+    # Add custom scan pattern (e.g., specific elevation angles)
+    scan_pattern = [
+        -15.0, -10.0, -5.0, 0.0, 5.0, 10.0, 15.0,  # degrees
+        -14.0, -7.0, 0.0, 7.0, 14.0,
+        -13.0, -6.5, 0.0, 6.5, 13.0
+    ]
+
+    # Set custom pattern
+    lidar_prim.GetAttribute("customScanPattern").Set(scan_pattern)
+    lidar_prim.GetAttribute("useCustomScanPattern").Set(True)
+```
+
+### Ray Caster for 2D LiDAR
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def create_2d_lidar():
+    """Create a 2D planar LiDAR using ray caster"""
+
+    # Create raycast sensor
+    num_rays = 360
+    max_range = 30.0
+    angles = np.linspace(0, 2*np.pi, num_rays, endpoint=False)
+
+    raycast_properties = {
+        "origin": np.array([0.0, 0.0, 0.5]),
+        "directions": np.array([
+            [np.cos(a), np.sin(a), 0.0] for a in angles
+        ]),
+        "max_range": max_range,
+        "draw_debug_lines": True
+    }
+
+    return raycast_properties
+
+def simulate_2d_lidar_scan(world, robot_pose, raycast_properties):
+    """Perform a 2D LiDAR scan"""
+
+    # Transform ray directions by robot pose
+    rotation = robot_pose[1]  # Quaternion or euler
+
+    # Perform raycasts
+    hits = []
+    for direction in raycast_properties["directions"]:
+        # Rotate direction
+        rotated_dir = rotate_vector(direction, rotation)
+
+        # Cast ray
+        hit_point = cast_ray(
+            origin=robot_pose[0] + raycast_properties["origin"],
+            direction=rotated_dir,
+            max_range=raycast_properties["max_range"],
+            world=world
+        )
+
+        if hit_point is not None:
+            distance = np.linalg.norm(hit_point - robot_pose[0])
+            hits.append((angles[i], distance))
+        else:
+            hits.append((angles[i], raycast_properties["max_range"]))
+
+    return hits
+```
+
+## 3.4 IMU and Contact Sensors
+
+### IMU Sensor Configuration
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.core_utils
+
+from omni.isaac.core.utils.nucleus import get_assets_root_path
+from omni.isaac.core_objects import DynamicCuboid
+
+def create_imu_sensor(robot_path="/World/Robot"):
+    """Create IMU sensor attached to robot"""
+
+    # IMU sensor path
+    imu_path = f"{robot_path}/IMU"
+
+    # Create IMU sensor
+    omni.kit.commands.execute(
+        "IsaacSensorCreateImuSensor",
+        path=imu_path,
+        parent=robot_path,
+        frequency=200,  # 200 Hz update rate
+        acceleration_noise_std=0.01,
+        angular_velocity_noise_std=0.01,
+        orientation_noise_std=0.001
+    )
+
+    # Configure frame
+    stage = omni.usd.get_context().get_stage()
+    imu_prim = stage.GetPrimAtPath(imu_path)
+
+    # Set transform relative to robot center
+    UsdGeom.Xformable(imu_prim).AddTranslateOp().Set(value=(0.0, 0.0, 0.1))
+
+    return imu_path
+
+def get_imu_data(imu_path):
+    """Read IMU sensor data"""
+
+    # Get IMU interface
+    imu_interface = omni.isaac.sensor._sensor.acquire_imu_sensor_interface()
+
+    # Get sensor handle
+    sensor_handle = imu_interface.get_sensor_path(imu_path)
+
+    # Read data
+    data = imu_interface.get_sensor_reading(sensor_handle)
+
+    if data is not None:
+        return {
+            "linear_acceleration": data.linear_acceleration,
+            "angular_velocity": data.angular_velocity,
+            "orientation": data.orientation,
+            "time": data.time
+        }
+
+    return None
+```
+
+### Contact and Force Sensors
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def create_contact_sensor(collision_prim_path):
+    """Create contact sensor on a collision primitive"""
+
+    # Get collision prim
+    stage = omni.usd.get_context().get_stage()
+    collision_prim = stage.GetPrimAtPath(collision_prim_path)
+
+    if not collision_prim.IsValid():
+        return False
+
+    # Add contact sensor API
+    contact_api = UsdPhysics.ContactReportAPI.Apply(collision_prim)
+    contact_api.CreateReportThresholdAttr(0.01)  # Minimum force threshold
+
+    # Enable contact reporting
+    physicsScene = UsdPhysics.Scene.Get(stage, "/physicsScene")
+    physicsScene.CreateContactReportEnabledAttr(True)
+
+    return True
+
+def monitor_contacts():
+    """Monitor and process contact events"""
+
+    from omni.isaac.core.utils.physics import get_physics_scene
+    from omni.isaac.core.utils.events import PhysicsEventType
+
+    # Subscribe to contact events
+    def on_contact_event(event):
+        if event.type == PhysicsEventType.CONTACT:
+            contact_info = {
+                "contact_time": event.time,
+                "objects": [event.body0, event.body1],
+                "position": event.position,
+                "force": event.impulse / event.dt,
+                "normal": event.normal
+            }
+            process_contact(contact_info)
+
+    # Register callback
+    get_physics_scene().subscribe_contact_event(on_contact_event)
+
+    return True
+```
+
+## 3.5 Sensor Data Integration with ROS 2
+
+### Publisher for Camera Data
+
+```python
+# test: true
+# ROS 2 Humble + Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: rclpy, sensor_msgs, cv_bridge
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image, CameraInfo, PointCloud2
+from cv_bridge import CvBridge
+import numpy as np
+
+class IsaacSimSensorPublisher(Node):
+    """Publish Isaac Sim sensor data to ROS 2"""
+
+    def __init__(self):
+        super().__init__('isaac_sensor_publisher')
+
+        # Publishers
+        self.image_pub = self.create_publisher(Image, '/camera/image_raw', 10)
+        self.depth_pub = self.create_publisher(Image, '/camera/depth', 10)
+        self.camera_info_pub = self.create_publisher(CameraInfo, '/camera/camera_info', 10)
+        self.pointcloud_pub = self.create_publisher(PointCloud2, '/lidar/points', 10)
+
+        # CV bridge for image conversion
+        self.bridge = CvBridge()
+
+        # Timer for publishing
+        self.timer = self.create_timer(1.0/30.0, self.publish_sensors)  # 30 Hz
+
+        # Camera intrinsics (example)
+        self.camera_info = CameraInfo()
+        self.camera_info.width = 640
+        self.camera_info.height = 480
+        self.camera_info.k = [300.0, 0.0, 320.0, 0.0, 300.0, 240.0, 0.0, 0.0, 1.0]
+        self.camera_info.distortion_model = 'plumb_bob'
+
+    def publish_sensors(self):
+        """Publish all sensor data"""
+
+        # Get camera data (from Isaac Sim)
+        rgb_data, camera_pose, intrinsics = get_isaac_camera_data()
+
+        if rgb_data is not None:
+            # Convert and publish RGB
+            rgb_msg = self.bridge.cv2_to_imgmsg(rgb_data, encoding='rgb8')
+            rgb_msg.header.stamp = self.get_clock().now().to_msg()
+            rgb_msg.header.frame_id = 'camera_link'
+            self.image_pub.publish(rgb_msg)
+
+            # Publish camera info
+            self.camera_info.header = rgb_msg.header
+            self.camera_info_pub.publish(self.camera_info)
+
+        # Get depth data
+        depth_data = get_isaac_depth_data()
+        if depth_data is not None:
+            # Convert depth to meters and publish
+            depth_msg = self.bridge.cv2_to_imgmsg(depth_data, encoding='32FC1')
+            depth_msg.header.stamp = self.get_clock().now().to_msg()
+            depth_msg.header.frame_id = 'camera_depth_optical_frame'
+            self.depth_pub.publish(depth_msg)
+
+        # Get LiDAR data
+        lidar_data = get_isaac_lidar_data()
+        if lidar_data is not None:
+            # Convert to ROS 2 PointCloud2
+            pc2_msg = create_pointcloud2_msg(lidar_data)
+            pc2_msg.header.stamp = self.get_clock().now().to_msg()
+            pc2_msg.header.frame_id = 'lidar_link'
+            self.pointcloud_pub.publish(pc2_msg)
+
+def create_pointcloud2_msg(points):
+    """Convert point cloud to ROS 2 PointCloud2 message"""
+
+    from sensor_msgs.msg import PointField
+    import struct
+
+    # Create message
+    msg = PointCloud2()
+    msg.height = 1
+    msg.width = len(points)
+
+    # Define fields
+    msg.fields = [
+        PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+        PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+        PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+        PointField(name='intensity', offset=12, datatype=PointField.FLOAT32, count=1)
+    ]
+
+    msg.is_bigendian = False
+    msg.point_step = 16  # 4 * 4 bytes
+    msg.row_step = msg.point_step * msg.width
+
+    # Pack data
+    data = []
+    for point in points:
+        data.append(struct.pack('ffff', point[0], point[1], point[2], point[3]))
+
+    msg.data = b''.join(data)
+    msg.is_dense = True
+
+    return msg
+```
+
+## 3.6 Performance Optimization
+
+### Level of Detail (LOD) for Sensors
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def optimize_sensor_performance():
+    """Configure sensors for optimal performance"""
+
+    # Camera optimizations
+    camera_settings = {
+        "resolution": (320, 240),  # Lower resolution for faster rendering
+        "frequency": 15,  # Reduce from 30 Hz to 15 Hz
+        "enable_post_processing": False,  # Disable expensive effects
+        "render_products": "RtxLidar",  # Use efficient renderer
+    }
+
+    # LiDAR optimizations
+    lidar_settings = {
+        "horizontal_resolution": 1.0,  # Reduce point density
+        "max_range": 50.0,  # Limit range
+        "rotation_rate": 5.0,  # Reduce scan rate
+        "draw_points": False,  # Disable visualization
+    }
+
+    # Physics optimizations
+    physics_settings = {
+        "solver_position_iteration_count": 16,  # Reduce from 32
+        "solver_velocity_iteration_count": 8,  # Reduce from 16
+        "enable_ccd": False,  # Disable continuous collision detection
+        "bounce_threshold_velocity": 2.0,  # Increase threshold
+    }
+
+    return camera_settings, lidar_settings, physics_settings
+```
+
+### Selective Rendering
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def setup_selective_rendering():
+    """Configure rendering only for necessary sensors"""
+
+    # Create render products for specific sensors
+    render_products = []
+
+    # RGB camera render product
+    rgb_render = omni.kit.commands.execute(
+        "CreateRenderProductCommand",
+        camera_path="/World/camera_sensor",
+        resolution=(640, 480),
+        render_product_name="/Render/RGBCamera"
+    )
+    render_products.append(rgb_render)
+
+    # Depth render product
+    depth_render = omni.kit.commands.execute(
+        "CreateRenderProductCommand",
+        camera_path="/World/camera_sensor",
+        resolution=(640, 480),
+        render_product_name="/Render/DepthCamera"
+    )
+    render_products.append(depth_render)
+
+    # Configure renderer settings
+    for render_product in render_products:
+        # Set specific renderer settings
+        settings = {
+            "shadingModel": "flat",
+            "enableShadows": False,
+            "enableAmbientOcclusion": False,
+            "enableMotionBlur": False
+        }
+
+        # Apply settings
+        omni.kit.commands.execute(
+            "UpdateRenderProductSettings",
+            render_product=render_product,
+            settings=settings
+        )
+
+    return render_products
+```
+
+## Exercises
+
+### Exercise 3.1: Multi-Camera Setup (Beginner)
+
+**Learning Objective**: Set up multiple cameras with different configurations
+
+#### Problem
+Create a robot with three cameras:
+- Front RGB camera (640x480, 30 Hz)
+- Front depth camera (320x240, 15 Hz)
+- Rear wide-angle camera (1280x720, 10 Hz)
+
+#### Solution
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+def setup_multi_camera_robot():
+    """Create robot with multiple cameras"""
+
+    # Front RGB camera
+    front_camera = Camera(
+        prim_path="/Robot/camera_front_rgb",
+        position=np.array([0.3, 0, 0.5]),
+        frequency=30,
+        resolution=(640, 480),
+        focal_length=24.0
+    )
+
+    # Front depth camera
+    depth_camera = Camera(
+        prim_path="/Robot/camera_front_depth",
+        position=np.array([0.3, 0, 0.3]),
+        frequency=15,
+        resolution=(320, 240),
+        depth_range=(0.5, 10.0)
+    )
+    depth_camera.enable_depth_sensor(True)
+
+    # Rear wide camera
+    rear_camera = Camera(
+        prim_path="/Robot/camera_rear",
+        position=np.array([-0.3, 0, 0.5]),
+        frequency=10,
+        resolution=(1280, 720),
+        horizontal_fov=120.0  # Wide angle
+    )
+    rear_camera.set_world_pose([0, 0, 0], [0, 0, 1, 0])  # Look backward
+
+    return [front_camera, depth_camera, rear_camera]
+```
+
+### Exercise 3.2: Simulate Sensor Noise (Intermediate)
+
+**Learning Objective**: Add realistic noise to sensor data
+
+#### Solution
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+import numpy as np
+
+class SensorNoiseSimulator:
+    """Add realistic noise to sensor data"""
+
+    def __init__(self):
+        # Camera noise parameters
+        self.camera_gaussian_noise = 0.01
+        self.camera_salt_pepper_prob = 0.001
+
+        # LiDAR noise parameters
+        self.lidar_range_noise = 0.02  # 2cm std dev
+        self.lidar_angle_noise = 0.1  # degrees
+
+        # IMU noise parameters
+        self.imu_acc_noise = 0.05  # m/s^2
+        self.imu_gyro_noise = 0.01  # rad/s
+
+    def add_camera_noise(self, image):
+        """Add noise to camera image"""
+        # Gaussian noise
+        noise = np.random.normal(0, self.camera_gaussian_noise, image.shape)
+        noisy = image + noise
+
+        # Salt and pepper noise
+        mask = np.random.random(image.shape[:2]) < self.camera_salt_pepper_prob
+        noisy[mask] = np.random.choice([0, 255], size=np.sum(mask))
+
+        return np.clip(noisy, 0, 255).astype(np.uint8)
+
+    def add_lidar_noise(self, ranges, angles):
+        """Add noise to LiDAR measurements"""
+        # Range noise
+        noisy_ranges = ranges + np.random.normal(0, self.lidar_range_noise, ranges.shape)
+
+        # Angle noise
+        noisy_angles = angles + np.random.normal(0, np.radians(self.lidar_angle_noise), angles.shape)
+
+        # Filter invalid readings
+        valid = noisy_ranges > 0
+        noisy_ranges[~valid] = 0
+
+        return noisy_ranges, noisy_angles
+
+    def add_imu_noise(self, acceleration, angular_velocity):
+        """Add noise to IMU measurements"""
+        noisy_acc = acceleration + np.random.normal(0, self.imu_acc_noise, 3)
+        noisy_gyro = angular_velocity + np.random.normal(0, self.imu_gyro_noise, 3)
+
+        return noisy_acc, noisy_gyro
+```
+
+### Exercise 3.3: Custom Sensor Fusion (Advanced)
+
+**Learning Objective**: Implement sensor fusion for robot localization
+
+#### Solution
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+class SensorFusionNode:
+    """Fuse sensor data for state estimation"""
+
+    def __init__(self):
+        # State vector [x, y, theta, vx, vy, vtheta]
+        self.state = np.zeros(6)
+        self.covariance = np.eye(6) * 0.1
+
+        # Sensor noise covariances
+        self.imu_noise = np.diag([0.01, 0.01, 0.01])  # acceleration noise
+        self.odom_noise = np.diag([0.1, 0.1, 0.1])   # odometry noise
+
+    def prediction_step(self, dt):
+        """Predict state based on dynamics"""
+        # Simple kinematic model
+        A = np.eye(6)
+        A[0:3, 3:6] = np.eye(3) * dt
+
+        # State prediction
+        self.state = A @ self.state
+
+        # Covariance prediction
+        self.covariance = A @ self.covariance @ A.T + self.process_noise
+
+    def update_with_imu(self, acc, gyro):
+        """Update with IMU measurement"""
+        # Expected measurement
+        expected_acc = self.state[3:6]  # acceleration
+
+        # Innovation
+        z = acc - expected_acc
+
+        # Kalman gain
+        H = np.zeros((3, 6))
+        H[:, 3:6] = np.eye(3)
+        S = H @ self.covariance @ H.T + self.imu_noise
+        K = self.covariance @ H.T @ np.linalg.inv(S)
+
+        # Update
+        self.state = self.state + K @ z
+        self.covariance = (np.eye(6) - K @ H) @ self.covariance
+
+    def update_with_odometry(self, pose):
+        """Update with wheel odometry"""
+        # Similar Kalman update for odometry
+        # Implementation details...
+        pass
+```
+
+### Exercise 3.4: Sensor Calibration (Advanced)
+
+**Learning Objective**: Calibrate extrinsic parameters of sensors
+
+#### Solution
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+class SensorCalibration:
+    """Calibrate sensor extrinsic parameters"""
+
+    def __init__(self):
+        self.calibration_points = []
+        self.observations = []
+
+    def add_calibration_point(self, world_point, sensor_reading):
+        """Add a calibration observation"""
+        self.calibration_points.append(world_point)
+        self.observations.append(sensor_reading)
+
+    def calibrate_camera_extrinsics(self, initial_guess):
+        """Calibrate camera extrinsic parameters using PnP"""
+        import cv2
+
+        # Known 3D points in world frame
+        object_points = np.array(self.calibration_points, dtype=np.float32)
+
+        # Corresponding 2D image points
+        image_points = np.array(self.observations, dtype=np.float32)
+
+        # Camera matrix (intrinsics)
+        camera_matrix = np.array([
+            [300, 0, 320],
+            [0, 300, 240],
+            [0, 0, 1]
+        ], dtype=np.float32)
+
+        # Distortion coefficients
+        dist_coeffs = np.zeros(4)
+
+        # Solve PnP
+        success, rvec, tvec = cv2.solvePnP(
+            object_points,
+            image_points,
+            camera_matrix,
+            dist_coeffs,
+            flags=cv2.SOLVEPNP_ITERATIVE
+        )
+
+        if success:
+            # Convert rotation vector to rotation matrix
+            R, _ = cv2.Rodrigues(rvec)
+
+            # Create 4x4 transformation matrix
+            T = np.eye(4)
+            T[:3, :3] = R
+            T[:3, 3] = tvec.flatten()
+
+            return T
+
+        return None
+
+    def calibrate_lidar_to_camera(self, lidar_points, image_points):
+        """Calibrate LiDAR to camera transformation"""
+        # Use corresponding points to estimate transformation
+        from scipy.spatial.transform import Rotation
+
+        # Extract point correspondences
+        lidar_pts = np.array(lidar_points)
+        image_pts = np.array(image_points)
+
+        # Solve using Procrustes analysis
+        # Implementation details...
+        pass
+```
+
+## Best Practices
+
+1. **Match sensor rates**: Set appropriate frequencies based on application needs
+2. **Limit sensor range**: Use realistic maximum ranges to improve performance
+3. **Add realistic noise**: Simulate actual sensor characteristics
+4. **Coordinate frames**: Maintain consistent coordinate frame conventions
+5. **Time synchronization**: Ensure all sensors use synchronized timestamps
+6. **GPU utilization**: Leverage GPU acceleration for sensor simulation
+7. **Selective rendering**: Only render what's needed for active sensors
+8. **Calibration**: Regularly validate sensor extrinsics and intrinsics
+
+## Summary
+
+In this chapter, we covered:
+- Physics simulation configuration with PhysX
+- Creating and configuring various sensor types
+- RGB and depth cameras with realistic properties
+- 2D and 3D LiDAR sensors
+- IMU and contact sensors for robotics
+- ROS 2 integration for sensor data publishing
+- Performance optimization techniques
+- Sensor noise simulation and calibration
+
+Key takeaways:
+- Isaac Sim provides comprehensive sensor simulation capabilities
+- Physics parameters must be tuned for realistic behavior
+- Sensor data needs proper noise models for training robust algorithms
+- Performance optimization is crucial for real-time applications
+- Proper coordinate frame management is essential for multi-sensor systems
+- Calibration ensures accurate sensor measurements
+
+In the next chapter, we'll explore kinematics and path planning for robotic applications.

@@ -1,0 +1,1547 @@
+---
+title: "Chapter 3: ROS 2 Parameters & Launch"
+sidebar_position: 3
+description: "Learn to configure ROS 2 nodes using parameters, manage parameter lifecycles, and orchestrate multi-node systems with launch files"
+keywords:
+  - ROS2
+  - parameters
+  - launch files
+  - node orchestration
+  - configuration
+  - remapping
+  - lifecycle
+tags:
+  - ros2
+  - fundamentals
+  - parameters
+  - launch
+learning_objectives:
+  - "Declare and use parameters in ROS 2 nodes"
+  - "Create and use launch files for multi-node systems"
+  - "Understand parameter lifecycles and dynamic updates"
+  - "Implement node composition and remapping in launch"
+difficulty_level: beginner
+ros_version: humble
+prerequisites: ["ch01", "ch02"]
+estimated_time: 70
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: false
+---
+
+# Chapter 3: ROS 2 Parameters & Launch
+
+## Introduction
+
+ROS 2 provides powerful mechanisms for configuring nodes and orchestrating complex systems. **Parameters** allow you to configure node behavior without changing code, while **launch files** enable you to start and manage multiple nodes as a coordinated system.
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Think of parameters like settings on your phone - you can change brightness, volume, or other options without reinstalling apps. Launch files are like a startup script that opens all the apps you need at once in the right order.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Parameters in ROS 2 provide a type-safe, distributed configuration system with automatic persistence and lifecycle management. Launch files leverage Python's flexibility to create complex node graphs with conditional execution, component composition, and sophisticated argument passing mechanisms.
+</PersonalizedSection>
+
+## 3.1 Working with Parameters
+
+Parameters are key-value pairs that configure node behavior at runtime. They can be set when launching a node or changed dynamically during execution.
+
+### Declaring Parameters
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, geometry_msgs
+import rclpy
+from rclpy.node import Node
+from rclpy.parameter import Parameter
+from geometry_msgs.msg import Twist
+import math
+import time
+
+class MobileRobotController(Node):
+    """A robot controller with configurable parameters."""
+
+    def __init__(self):
+        super().__init__('mobile_robot_controller')
+
+        # Declare parameters with default values and descriptions
+        self.declare_parameter(
+            'max_linear_speed',
+            1.0,
+            ParameterDescriptor(
+                description='Maximum linear speed in m/s',
+                read_only=True
+            )
+        )
+
+        self.declare_parameter(
+            'max_angular_speed',
+            2.0,
+            ParameterDescriptor(
+                description='Maximum angular speed in rad/s'
+            )
+        )
+
+        self.declare_parameter(
+            'wheel_base',
+            0.3,
+            ParameterDescriptor(
+                description='Distance between robot wheels in meters'
+            )
+        )
+
+        self.declare_parameter(
+            'safety_mode',
+            True,
+            ParameterDescriptor(
+                description='Enable safety checks for movement'
+            )
+        )
+
+        self.declare_parameter(
+            'control_frequency',
+            50.0,
+            ParameterDescriptor(
+                description='Control loop frequency in Hz'
+            )
+        )
+
+        # Array parameter example
+        self.declare_parameter(
+            'joints',
+            ['wheel_left_joint', 'wheel_right_joint'],
+            ParameterDescriptor(
+                description='List of controllable joint names'
+            )
+        )
+
+        # Get initial parameter values
+        self.update_parameters()
+
+        # Create publisher for velocity commands
+        self.cmd_vel_pub = self.create_publisher(
+            Twist,
+            'cmd_vel',
+            10
+        )
+
+        # Add parameter callback for dynamic updates
+        self.add_on_set_parameters_callback(self.parameters_callback)
+
+        # Create control timer
+        control_period = 1.0 / self.control_frequency
+        self.timer = self.create_timer(control_period, self.control_loop)
+
+        self.get_logger().info('Mobile Robot Controller initialized')
+        self.log_parameters()
+
+    def update_parameters(self):
+        """Update local variables from ROS parameters."""
+        self.max_linear_speed = self.get_parameter('max_linear_speed').value
+        self.max_angular_speed = self.get_parameter('max_angular_speed').value
+        self.wheel_base = self.get_parameter('wheel_base').value
+        self.safety_mode = self.get_parameter('safety_mode').value
+        self.control_frequency = self.get_parameter('control_frequency').value
+        self.joints = self.get_parameter('joints').value
+
+    def parameters_callback(self, parameters):
+        """Handle dynamic parameter updates."""
+        result = SetParametersResult(successful=True)
+
+        for param in parameters:
+            if param.name == 'control_frequency':
+                if param.type_ == Parameter.Type.DOUBLE and param.value > 0:
+                    # Recreate timer with new frequency
+                    self.timer.destroy()
+                    control_period = 1.0 / param.value
+                    self.timer = self.create_timer(control_period, self.control_loop)
+                    self.get_logger().info(f'Updated control frequency to {param.value} Hz')
+                else:
+                    result.successful = False
+                    result.reason = 'Control frequency must be positive'
+
+            elif param.name == 'safety_mode':
+                if param.type_ == Parameter.Type.BOOL:
+                    self.get_logger().info(f'Safety mode: {"ON" if param.value else "OFF"}')
+                    if not param.value:
+                        self.get_logger().warn('Safety mode DISABLED - robot may move unpredictably!')
+
+            elif param.name == 'max_linear_speed':
+                if param.type_ == Parameter.Type.DOUBLE and 0 <= param.value <= 5.0:
+                    self.get_logger().info(f'Max linear speed updated to {param.value} m/s')
+                else:
+                    result.successful = False
+                    result.reason = 'Linear speed must be between 0 and 5 m/s'
+
+        return result
+
+    def log_parameters(self):
+        """Log current parameter values."""
+        self.get_logger().info('Current Parameters:')
+        self.get_logger().info(f'  Max Linear Speed: {self.max_linear_speed} m/s')
+        self.get_logger().info(f'  Max Angular Speed: {self.max_angular_speed} rad/s')
+        self.get_logger().info(f'  Wheel Base: {self.wheel_base} m')
+        self.get_logger().info(f'  Safety Mode: {"ON" if self.safety_mode else "OFF"}')
+        self.get_logger().info(f'  Control Frequency: {self.control_frequency} Hz')
+        self.get_logger().info(f'  Joints: {", ".join(self.joints)}')
+
+    def control_loop(self):
+        """Main control loop."""
+        # Example: Generate motion pattern
+        current_time = time.time()
+
+        # Create velocity command
+        cmd = Twist()
+
+        # Sinusoidal linear velocity
+        cmd.linear.x = self.max_linear_speed * 0.5 * (1 + math.sin(current_time))
+
+        # Cosine angular velocity
+        cmd.angular.z = self.max_angular_speed * 0.5 * math.cos(current_time * 0.5)
+
+        # Apply safety checks if enabled
+        if self.safety_mode:
+            # Limit accelerations
+            if hasattr(self, 'last_linear_cmd'):
+                max_accel = 2.0  # m/s^2
+                dt = 1.0 / self.control_frequency
+                accel = (cmd.linear.x - self.last_linear_cmd) / dt
+
+                if abs(accel) > max_accel:
+                    cmd.linear.x = self.last_linear_cmd + max_accel * dt * (1 if accel > 0 else -1)
+                    self.get_logger().debug(f'Limited acceleration to {max_accel} m/s^2')
+
+        # Store command for next iteration
+        self.last_linear_cmd = cmd.linear.x
+
+        # Publish command
+        self.cmd_vel_pub.publish(cmd)
+
+def main(args=None):
+    rclpy.init(args=args)
+    controller = MobileRobotController()
+    try:
+        rclpy.spin(controller)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        controller.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Parameter Namespace and Organization
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy
+import rclpy
+from rclpy.node import Node
+import yaml
+
+class OrganizedParameterNode(Node):
+    """Demonstrates parameter organization with namespaces."""
+
+    def __init__(self):
+        super().__init__('parameter_namespace_demo')
+
+        # Declare parameters in different namespaces
+        self.declare_parameter('sensor.camera.framerate', 30.0)
+        self.declare_parameter('sensor.camera.resolution', [1920, 1080])
+        self.declare_parameter('sensor.lidar.range_max', 10.0)
+        self.declare_parameter('sensor.lidar.range_min', 0.1)
+
+        self.declare_parameter('control.pid.kp', 1.0)
+        self.declare_parameter('control.pid.ki', 0.1)
+        self.declare_parameter('control.pid.kd', 0.05)
+
+        self.declare_parameter('safety.max_velocity', 2.0)
+        self.declare_parameter('safety.emergency_stop_timeout', 5.0)
+
+        # Get all parameters as dictionary
+        all_params = self.get_parameters_by_prefix('')
+
+        # Organize parameters by namespace
+        self.sensor_params = self.get_parameters_by_prefix('sensor.')
+        self.control_params = self.get_parameters_by_prefix('control.')
+        self.safety_params = self.get_parameters_by_prefix('safety.')
+
+        # Log organized parameters
+        self.log_parameter_groups()
+
+    def log_parameter_groups(self):
+        """Log parameters grouped by namespace."""
+        self.get_logger().info('=== Parameter Groups ===')
+
+        self.get_logger().info('Sensor Parameters:')
+        for name, param in self.sensor_params.items():
+            self.get_logger().info(f'  {name}: {param.value}')
+
+        self.get_logger().info('Control Parameters:')
+        for name, param in self.control_params.items():
+            self.get_logger().info(f'  {name}: {param.value}')
+
+        self.get_logger().info('Safety Parameters:')
+        for name, param in self.safety_params.items():
+            self.get_logger().info(f'  {name}: {param.value}')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = OrganizedParameterNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 3.2 Launch Files
+
+Launch files are essential for starting and configuring multiple nodes. In ROS 2, launch files are written in Python, providing powerful programmatic capabilities.
+
+### Basic Launch File Example
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# File: launch/mobile_robot_launch.py
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.conditions import IfCondition
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    # Declare launch arguments
+    use_sim_time_arg = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation clock if true'
+    )
+
+    robot_name_arg = DeclareLaunchArgument(
+        'robot_name',
+        default_value='robot_1',
+        description='Name of the robot'
+    )
+
+    enable_safety_arg = DeclareLaunchArgument(
+        'enable_safety',
+        default_value='true',
+        description='Enable safety features'
+    )
+
+    camera_enabled_arg = DeclareLaunchArgument(
+        'camera_enabled',
+        default_value='false',
+        description='Enable camera node'
+    )
+
+    # Get package directory
+    pkg_share = FindPackageShare('your_package_name').find('your_package_name')
+
+    # Include another launch file
+    base_launch = IncludeLaunchDescription(
+        PathJoinSubstitution([pkg_share, 'launch', 'base_robot_launch.py']),
+        launch_arguments={
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            'robot_name': LaunchConfiguration('robot_name')
+        }.items()
+    )
+
+    # Robot controller node
+    controller_node = Node(
+        package='your_package_name',
+        executable='mobile_robot_controller',
+        name='robot_controller',
+        namespace=LaunchConfiguration('robot_name'),
+        output='screen',
+        parameters=[{
+            'max_linear_speed': 1.5,
+            'max_angular_speed': 1.0,
+            'wheel_base': 0.285,
+            'safety_mode': LaunchConfiguration('enable_safety'),
+            'control_frequency': 50.0,
+            'use_sim_time': LaunchConfiguration('use_sim_time')
+        }],
+        remappings=[
+            ('cmd_vel', 'diff_drive_controller/cmd_vel'),
+            ('odom', 'diff_drive_controller/odom')
+        ]
+    )
+
+    # Camera node (conditional)
+    camera_node = Node(
+        package='usb_cam',
+        executable='usb_cam_node_exe',
+        name='camera',
+        namespace=LaunchConfiguration('robot_name'),
+        output='screen',
+        parameters=[{
+            'video_device': '/dev/video0',
+            'image_width': 640,
+            'image_height': 480,
+            'pixel_format': 'yuyv',
+            'camera_frame_id': 'camera_link',
+            'io_method': 'mmap',
+            'framerate': 30.0,
+            'brightness': 100,
+            'contrast': 50,
+            'saturation': 50,
+            'sharpness': 50,
+            'autofocus': True,
+            'use_sim_time': LaunchConfiguration('use_sim_time')
+        }],
+        condition=IfCondition(LaunchConfiguration('camera_enabled'))
+    )
+
+    # RViz2 node
+    rviz_config_file = PathJoinSubstitution([
+        pkg_share, 'config', 'robot_view.rviz'
+    ])
+
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file],
+        parameters=[{
+            'use_sim_time': LaunchConfiguration('use_sim_time')
+        }]
+    )
+
+    # Static transform publisher
+    static_transform_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_camera',
+        arguments=[
+            '--x', '0.1',
+            '--y', '0.0',
+            '--z', '0.2',
+            '--yaw', '0.0',
+            '--pitch', '0.0',
+            '--roll', '0.0',
+            '--frame-id', 'base_link',
+            '--child-frame-id', 'camera_link'
+        ]
+    )
+
+    # Create return LaunchDescription
+    return LaunchDescription([
+        use_sim_time_arg,
+        robot_name_arg,
+        enable_safety_arg,
+        camera_enabled_arg,
+        base_launch,
+        controller_node,
+        camera_node,
+        rviz_node,
+        static_transform_publisher
+    ])
+```
+
+### Advanced Launch File with Component Nodes
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# File: launch/composed_robot_system.py
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument, ExecuteProcess, GroupAction,
+    IncludeLaunchDescription, TimerAction, RegisterEventHandler
+)
+from launch.conditions import IfCondition
+from launch.event_handlers import OnProcessExit
+from launch.substitutions import (
+    Command, FindExecutable, LaunchConfiguration,
+    PathJoinSubstitution, PythonExpression
+)
+from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    # Get package directories
+    nav2_dir = FindPackageShare('nav2_bringup').find('nav2_bringup')
+    pkg_share = FindPackageShare('your_package_name').find('your_package_name')
+
+    # Launch arguments
+    namespace_arg = DeclareLaunchArgument(
+        'namespace',
+        default_value='',
+        description='Top-level namespace'
+    )
+
+    use_namespace_arg = DeclareLaunchArgument(
+        'use_namespace',
+        default_value='false',
+        description='Whether to apply a namespace to the navigation stack'
+    )
+
+    map_yaml_arg = DeclareLaunchArgument(
+        'map',
+        default_value=PathJoinSubstitution([pkg_share, 'maps', 'warehouse.yaml']),
+        description='Full path to map yaml file'
+    )
+
+    use_sim_time_arg = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true'
+    )
+
+    autostart_arg = DeclareLaunchArgument(
+        'autostart',
+        default_value='true',
+        description='Automatically startup the nav2 stack'
+    )
+
+    # Composable node container
+    container = ComposableNodeContainer(
+        name='navigation_container',
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container_mt',
+        output='screen',
+        parameters=[
+            {'use_sim_time': LaunchConfiguration('use_sim_time')}
+        ]
+    )
+
+    # Load components into container
+    load_components = LoadComposableNodes(
+        target_container=container,
+        composable_node_descriptions=[
+            # Lifecycle manager
+            ComposableNode(
+                package='nav2_lifecycle_manager',
+                plugin='nav2_lifecycle_manager::LifecycleManager',
+                name='lifecycle_manager',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'autostart': LaunchConfiguration('autostart')},
+                    {'bond_timeout': 4.0}
+                ]
+            ),
+
+            # Map server
+            ComposableNode(
+                package='nav2_map_server',
+                plugin='nav2_map_server::MapServer',
+                name='map_server',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'yaml_filename': LaunchConfiguration('map')},
+                    {'topic_name': 'map'},
+                    {'frame_id': 'map'}
+                ]
+            ),
+
+            # AMCL (Localization)
+            ComposableNode(
+                package='nav2_amcl',
+                plugin='nav2_amcl::AmclNode',
+                name='amcl',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'min_particles': 500},
+                    {'max_particles': 2000},
+                    {'update_min_a': 0.2},
+                    {'update_min_d': 0.25},
+                    {'save_pose_rate': 0.5},
+                    {'transform_tolerance': 1.0},
+                    {'initial_pose.x': -2.0},
+                    {'initial_pose.y': -0.5},
+                    {'initial_pose.yaw': 0.0}
+                ]
+            ),
+
+            # Controller Server
+            ComposableNode(
+                plugin='nav2_controller::ControllerServer',
+                package='nav2_controller',
+                name='controller_server',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'controller_frequency': 20.0},
+                    {'min_x_velocity_threshold': 0.001},
+                    {'min_y_velocity_threshold': 0.5},
+                    {'min_theta_velocity_threshold': 0.001}
+                ],
+                remappings=[
+                    ('cmd_vel', 'cmd_vel_nav')
+                ]
+            ),
+
+            # Behavior Server
+            ComposableNode(
+                plugin='nav2_behavior_tree::BehaviorTree',
+                package='nav2_behaviors',
+                name='behavior_tree',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'default_bt_xml_filename': PathJoinSubstitution([
+                        pkg_share, 'behavior_trees', 'navigate_w_replanning_and_recovery.xml'
+                    ])},
+                    {'plugin_lib_names': 'nav2_compute_path_to_pose_action_bt_node;nav2_follow_path_action_bt_node;nav2_back_up_action_bt_node;nav2_spin_action_bt_node;nav2_wait_action_bt_node;nav2_clear_costmap_service_bt_node;nav2_is_stuck_condition_bt_node;nav2_goal_reached_condition_bt_node;nav2_goal_updated_condition_bt_node;nav2_initial_pose_received_condition_bt_node;nav2_reinitialize_global_localization_service_bt_node;nav2_rate_controller_bt_node;nav2_distance_controller_bt_node;nav2_speed_controller_bt_node;nav2_truncate_path_action_bt_node;nav2_goal_updated_controller_bt_node;nav2_recovery_node_bt_node'}
+                ]
+            ),
+
+            # Planner Server
+            ComposableNode(
+                plugin='nav2_planner::PlannerServer',
+                package='nav2_planner',
+                name='planner_server',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'expected_planner_frequency': 20.0},
+                    {'planner_plugins': ['GridBased']},
+                    {'GridBased.plugin': 'nav2_navfn_planner/NavfnPlanner'},
+                    {'GridDownSampler.downsample_costmap': False},
+                    {'use_astar': False},
+                    {'allow_unknown': True}
+                ]
+            ),
+
+            # Recovery Server
+            ComposableNode(
+                plugin='nav2_recoveries::RecoveryServer',
+                package='nav2_recoveries',
+                name='recovery_server',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'costmap_topic': 'local_costmap/costmap_raw'},
+                    {'footprint_topic': 'local_costmap/published_footprint'}
+                ]
+            ),
+
+            # Costmap (Global)
+            ComposableNode(
+                plugin='nav2_costmap_2d::Costmap2D',
+                package='nav2_costmap_2d',
+                name='global_costmap',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'global_costmap.global_frame': 'map'},
+                    {'global_costmap.robot_base_frame': 'base_link'},
+                    {'global_costmap.resolution': 0.05},
+                    {'global_costmap.width': 400},
+                    {'global_costmap.height': 400},
+                    {'global_costmap.map_subscribe_transient_local': True}
+                ]
+            ),
+
+            # Costmap (Local)
+            ComposableNode(
+                plugin='nav2_costmap_2d::Costmap2D',
+                package='nav2_costmap_2d',
+                name='local_costmap',
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                    {'local_costmap.global_frame': 'odom'},
+                    {'local_costmap.robot_base_frame': 'base_link'},
+                    {'local_costmap.resolution': 0.05},
+                    {'local_costmap.width': 10.0},
+                    {'local_costmap.height': 10.0}
+                ]
+            )
+        ]
+    )
+
+    return LaunchDescription([
+        # Declare launch arguments
+        namespace_arg,
+        use_namespace_arg,
+        map_yaml_arg,
+        use_sim_time_arg,
+        autostart_arg,
+
+        # Add composable nodes
+        container,
+        load_components
+    ])
+```
+
+## 3.3 Launch File Best Practices
+
+### Parameter Files and Configuration
+
+Create a YAML configuration file for parameters:
+
+```yaml
+# config/robot_parameters.yaml
+robot_controller:
+  ros__parameters:
+    max_linear_speed: 2.0
+    max_angular_speed: 1.5
+    wheel_base: 0.3
+    safety_mode: true
+    control_frequency: 100.0
+    joints: [wheel_left_joint, wheel_right_joint]
+
+camera:
+  ros__parameters:
+    framerate: 30.0
+    resolution: [1920, 1080]
+    auto_exposure: true
+    white_balance: auto
+
+safety_monitor:
+  ros__parameters:
+    collision_threshold: 0.5
+    emergency_stop_timeout: 5.0
+    max_tilt_angle: 0.3
+```
+
+### Launch File Using Parameter Files
+
+```python
+# test: true
+# File: launch/robot_with_params.py
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    # Get package directory
+    pkg_share = FindPackageShare('your_package_name').find('your_package_name')
+
+    # Declare parameter file argument
+    param_file_arg = DeclareLaunchArgument(
+        'params_file',
+        default_value=PathJoinSubstitution([
+            pkg_share, 'config', 'robot_parameters.yaml'
+        ]),
+        description='Path to parameter file'
+    )
+
+    # Robot controller node with parameter file
+    controller_node = Node(
+        package='your_package_name',
+        executable='mobile_robot_controller',
+        name='robot_controller',
+        output='screen',
+        parameters=[
+            LaunchConfiguration('params_file')
+        ]
+    )
+
+    # Camera node with specific parameters from file
+    camera_node = Node(
+        package='your_package_name',
+        executable='camera_driver',
+        name='camera',
+        output='screen',
+        parameters=[
+            LaunchConfiguration('params_file'),
+            {'camera.frame_id': 'camera_link'}  # Override specific parameter
+        ],
+        remappings=[
+            ('image_raw', 'camera/image_raw'),
+            ('camera_info', 'camera/camera_info')
+        ]
+    )
+
+    return LaunchDescription([
+        param_file_arg,
+        controller_node,
+        camera_node
+    ])
+```
+
+## Exercises
+
+### Exercise 3.1: Parameter Validator Node (Beginner)
+
+**Learning Objective**: Implement parameter validation and constraints
+
+#### Problem
+Create a node that:
+- Validates parameters against constraints
+- Provides warnings for invalid configurations
+- Auto-corrects certain parameters
+
+#### Solution
+```python
+# test: true
+import rclpy
+from rclpy.node import Node
+from rclpy.parameter import Parameter, ParameterDescriptor, ParameterType
+from rclpy.qos import QoSProfile
+import time
+
+class ParameterValidator(Node):
+    """Node that validates and auto-corrects parameters."""
+
+    def __init__(self):
+        super().__init__('parameter_validator')
+
+        # Define parameter constraints
+        self.constraints = {
+            'max_speed': {'min': 0.0, 'max': 10.0, 'default': 1.0},
+            'update_rate': {'min': 1.0, 'max': 100.0, 'default': 10.0},
+            'tolerance': {'min': 0.001, 'max': 1.0, 'default': 0.1},
+            'timeout': {'min': 0.1, 'max': 60.0, 'default': 5.0}
+        }
+
+        # Declare parameters with constraints
+        for param_name, constraint in self.constraints.items():
+            self.declare_parameter(
+                param_name,
+                constraint['default'],
+                ParameterDescriptor(
+                    description=f'{param_name} (min: {constraint["min"]}, max: {constraint["max"]})'
+                )
+            )
+
+        # Add callback for parameter validation
+        self.add_on_set_parameters_callback(self.validate_parameters)
+
+        # Timer for periodic validation
+        self.timer = self.create_timer(5.0, self.periodic_validation)
+
+        self.get_logger().info('Parameter Validator initialized')
+
+    def validate_parameters(self, parameters):
+        """Validate and potentially correct parameters."""
+        result = rclpy.parameter.SetParametersResult(successful=True)
+        corrections = []
+
+        for param in parameters:
+            if param.name in self.constraints:
+                constraint = self.constraints[param.name]
+                value = param.value
+                corrected = False
+
+                # Type checking
+                if not isinstance(value, (int, float)):
+                    result.successful = False
+                    result.reason = f'{param.name} must be a number'
+                    continue
+
+                # Range checking
+                if value < constraint['min']:
+                    corrected_value = constraint['min']
+                    corrections.append(f'{param.name}: {value} -> {corrected_value} (below min)')
+                    # Note: In real implementation, you'd use Parameter.set_value()
+                    # but that's not directly available in callback
+                    corrected = True
+
+                elif value > constraint['max']:
+                    corrected_value = constraint['max']
+                    corrections.append(f'{param.name}: {value} -> {corrected_value} (above max)')
+                    corrected = True
+
+                if corrected:
+                    self.get_logger().warn(f'Auto-corrected {corrections[-1]}')
+
+        return result
+
+    def periodic_validation(self):
+        """Periodically check all parameters."""
+        all_valid = True
+        for param_name, constraint in self.constraints.items():
+            value = self.get_parameter(param_name).value
+
+            if not isinstance(value, (int, float)):
+                self.get_logger().error(f'{param_name} has invalid type')
+                all_valid = False
+                continue
+
+            if value < constraint['min'] or value > constraint['max']:
+                self.get_logger().warn(
+                    f'{param_name} ({value}) is outside valid range '
+                    f'[{constraint["min"]}, {constraint["max"]}]'
+                )
+                all_valid = False
+
+        if all_valid:
+            self.get_logger().info('All parameters are valid', throttle_duration_sec=30.0)
+
+def main(args=None):
+    rclpy.init(args=args)
+    validator = ParameterValidator()
+    try:
+        rclpy.spin(validator)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        validator.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Exercise 3.2: Multi-Robot Launch File (Intermediate)
+
+**Learning Objective**: Create a launch file that launches multiple robot instances
+
+#### Problem
+Create a launch file that:
+- Launches N robot instances
+- Each robot has a unique namespace
+- Parameters are configurable per robot
+- Includes monitoring nodes
+
+#### Solution
+```python
+# test: true
+# File: launch/multi_robot_launch.py
+import os
+from launch import LaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument, GroupAction, OpaqueFunction,
+    EmitEvent, RegisterEventHandler
+)
+from launch.conditions import IfCondition
+from launch.events import matches_action
+from launch.substitutions import (
+    Command, FindExecutable, LaunchConfiguration,
+    PathJoinSubstitution, PythonExpression
+)
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    # Declare launch arguments
+    num_robots_arg = DeclareLaunchArgument(
+        'num_robots',
+        default_value='3',
+        description='Number of robots to launch'
+    )
+
+    use_sim_arg = DeclareLaunchArgument(
+        'use_sim',
+        default_value='true',
+        description='Use simulation'
+    )
+
+    config_file_arg = DeclareLaunchArgument(
+        'config_file',
+        default_value='',
+        description='Optional YAML config file for robot parameters'
+    )
+
+    # Main nodes for each robot
+    robot_nodes = []
+
+    def launch_robot_nodes(context):
+        """Launch nodes for each robot."""
+        num_robots = int(LaunchConfiguration('num_robots').perform(context))
+        nodes = []
+
+        for i in range(num_robots):
+            robot_id = f'robot_{i:02d}'
+
+            # Robot controller
+            controller_node = Node(
+                package='your_package_name',
+                executable='robot_controller',
+                namespace=robot_id,
+                name='controller',
+                output='screen',
+                parameters=[
+                    {'robot_id': i},
+                    {'use_sim_time': LaunchConfiguration('use_sim')},
+                    {'initial_pose.x': i * 2.0},
+                    {'initial_pose.y': 0.0},
+                    {'max_speed': 1.0}
+                ]
+            )
+            nodes.append(controller_node)
+
+            # Localization
+            localization_node = Node(
+                package='your_package_name',
+                executable='localization',
+                namespace=robot_id,
+                name='localization',
+                output='screen',
+                parameters=[
+                    {'robot_id': i},
+                    {'use_sim_time': LaunchConfiguration('use_sim')},
+                    {'initial_pose_covariance': [0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06864]}
+                ]
+            )
+            nodes.append(localization_node)
+
+            # Sensor nodes
+            sensor_node = Node(
+                package='your_package_name',
+                executable='sensor_driver',
+                namespace=robot_id,
+                name='sensors',
+                output='screen',
+                parameters=[
+                    {'robot_id': i},
+                    {'use_sim_time': LaunchConfiguration('use_sim')},
+                    {'sensor_frequency': 30.0}
+                ],
+                condition=IfCondition(LaunchConfiguration('use_sim'))
+            )
+            nodes.append(sensor_node)
+
+            # Robot state publisher
+            state_publisher = Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                namespace=robot_id,
+                name='robot_state_publisher',
+                output='screen',
+                parameters=[
+                    {'robot_description': Command([
+                        FindExecutable(name='xacro'),
+                        PathJoinSubstitution([
+                            FindPackageShare('your_robot_description'),
+                            'urdf', 'robot.urdf.xacro'
+                        ]),
+                        f'robot_id:={i}'
+                    ])},
+                    {'use_sim_time': LaunchConfiguration('use_sim')}
+                ]
+            )
+            nodes.append(state_publisher)
+
+            # Static transform publisher for robot base
+            base_tf = Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                namespace=robot_id,
+                name='base_to_robot',
+                arguments=[
+                    '--x', '0.0',
+                    '--y', '0.0',
+                    '--z', '0.1',
+                    '--yaw', '0.0',
+                    '--pitch', '0.0',
+                    '--roll', '0.0',
+                    '--frame-id', 'world',
+                    '--child-frame-id', f'{robot_id}/base_link'
+                ]
+            )
+            nodes.append(base_tf)
+
+        return nodes
+
+    # Monitoring node
+    monitor_node = Node(
+        package='your_package_name',
+        executable='multi_robot_monitor',
+        name='monitor',
+        output='screen',
+        parameters=[
+            {'num_robots': LaunchConfiguration('num_robots')},
+            {'update_frequency': 1.0}
+        ]
+    )
+
+    # RViz with multi-robot configuration
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=[
+            '-d', PathJoinSubstitution([
+                FindPackageShare('your_package_name'),
+                'config',
+                'multi_robot.rviz'
+            ])
+        ]
+    )
+
+    return LaunchDescription([
+        num_robots_arg,
+        use_sim_arg,
+        config_file_arg,
+        monitor_node,
+        rviz_node,
+        OpaqueFunction(function=launch_robot_nodes)
+    ])
+```
+
+### Exercise 3.3: Dynamic Parameter Reconfiguration Service (Intermediate)
+
+**Learning Objective**: Create a service for batch parameter updates
+
+#### Problem
+Create a service that:
+- Accepts multiple parameter updates
+- Validates all updates before applying
+- Returns success/failure for each parameter
+
+#### Solution
+```python
+# test: true
+from rcl_interfaces.srv import SetParametersResult, GetParameters
+from rclpy.node import Node
+from rclpy.parameter import Parameter
+import json
+import time
+
+class DynamicReconfigService(Node):
+    """Service for dynamic parameter reconfiguration."""
+
+    def __init__(self):
+        super().__init__('dynamic_reconfig_service')
+
+        # Create service
+        self.reconfig_service = self.create_service(
+            SetParametersResult,
+            'reconfigure_parameters',
+            self.reconfigure_callback
+        )
+
+        # Create service for getting parameters
+        self.get_params_service = self.create_service(
+            GetParameters,
+            'get_all_parameters',
+            self.get_params_callback
+        )
+
+        # Declare some example parameters
+        self.declare_parameter('motor_speed', 0.0)
+        self.declare_parameter('sensor_gain', 1.0)
+        self.declare_parameter('filter_cutoff', 10.0)
+        self.declare_parameter('control_mode', 'auto')
+
+        self.get_logger().info('Dynamic Reconfiguration Service ready')
+
+    def reconfigure_callback(self, request, response):
+        """Handle parameter reconfiguration requests."""
+        self.get_logger().info(f'Received reconfiguration request with {len(request.parameters)} parameters')
+
+        results = []
+        all_successful = True
+
+        for param in request.parameters:
+            try:
+                # Validate parameter
+                validation_result = self.validate_parameter(param)
+
+                if validation_result['valid']:
+                    # Apply the parameter
+                    self.set_parameters([param])
+                    results.append({
+                        'name': param.name,
+                        'successful': True,
+                        'reason': 'Successfully updated'
+                    })
+                    self.get_logger().info(f'Updated {param.name} to {param.value}')
+                else:
+                    results.append({
+                        'name': param.name,
+                        'successful': False,
+                        'reason': validation_result['reason']
+                    })
+                    all_successful = False
+                    self.get_logger().warn(f'Failed to update {param.name}: {validation_result["reason"]}')
+
+            except Exception as e:
+                results.append({
+                    'name': param.name,
+                    'successful': False,
+                    'reason': f'Exception: {str(e)}'
+                })
+                all_successful = False
+
+        # Set response
+        response.successful = all_successful
+        response.reason = json.dumps(results)
+
+        return response
+
+    def validate_parameter(self, param):
+        """Validate a single parameter."""
+        if param.name == 'motor_speed':
+            if param.type_ != Parameter.Type.DOUBLE:
+                return {'valid': False, 'reason': 'Must be a double'}
+            if not -10.0 <= param.value <= 10.0:
+                return {'valid': False, 'reason': 'Must be between -10 and 10'}
+            return {'valid': True}
+
+        elif param.name == 'sensor_gain':
+            if param.type_ != Parameter.Type.DOUBLE:
+                return {'valid': False, 'reason': 'Must be a double'}
+            if not 0.1 <= param.value <= 100.0:
+                return {'valid': False, 'reason': 'Must be between 0.1 and 100'}
+            return {'valid': True}
+
+        elif param.name == 'filter_cutoff':
+            if param.type_ != Parameter.Type.DOUBLE:
+                return {'valid': False, 'reason': 'Must be a double'}
+            if not 0.1 <= param.value <= 1000.0:
+                return {'valid': False, 'reason': 'Must be between 0.1 and 1000 Hz'}
+            return {'valid': True}
+
+        elif param.name == 'control_mode':
+            if param.type_ != Parameter.Type.STRING:
+                return {'valid': False, 'reason': 'Must be a string'}
+            if param.value not in ['auto', 'manual', 'emergency']:
+                return {'valid': False, 'reason': 'Must be one of: auto, manual, emergency'}
+            return {'valid': True}
+
+        return {'valid': False, 'reason': 'Unknown parameter'}
+
+    def get_params_callback(self, request, response):
+        """Get all current parameters."""
+        parameters = self.list_parameters({})
+
+        for param_name in parameters.names:
+            param_value = self.get_parameter(param_name).value
+            response.values.append(param_value)
+
+        return response
+
+def main(args=None):
+    rclpy.init(args=args)
+    service = DynamicReconfigService()
+    try:
+        rclpy.spin(service)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        service.destroy_node()
+        rcl2.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Exercise 3.4: Launch File with Conditional Components (Advanced)
+
+**Learning Objective**: Create a launch file with conditional node loading based on parameters
+
+#### Problem
+Create a launch file that:
+- Loads different node configurations based on deployment type
+- Supports simulation, hardware, and hybrid modes
+- Handles node dependencies and startup order
+
+#### Solution
+```python
+# test: true
+# File: launch/conditional_robot_launch.py
+import os
+from launch import LaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument, GroupAction, OpaqueFunction,
+    TimerAction, LogInfo
+)
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import (
+    AndSubstitution, NotSubstitution, OrSubstitution,
+    LaunchConfiguration, PythonExpression
+)
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    # Declare launch arguments
+    deployment_type_arg = DeclareLaunchArgument(
+        'deployment_type',
+        default_value='simulation',
+        description='Deployment type: simulation, hardware, or hybrid'
+    )
+
+    enable_perception_arg = DeclareLaunchArgument(
+        'enable_perception',
+        default_value='true',
+        description='Enable perception stack'
+    )
+
+    enable_navigation_arg = DeclareLaunchArgument(
+        'enable_navigation',
+        default_value='true',
+        description='Enable navigation stack'
+    )
+
+    robot_model_arg = DeclareLaunchArgument(
+        'robot_model',
+        default_value='turtlebot3_waffle',
+        description='Robot model name'
+    )
+
+    # Create node groups based on deployment type
+    def create_simulation_nodes(context):
+        """Create nodes for simulation deployment."""
+        return [
+            Node(
+                package='gazebo_ros',
+                executable='gazebo',
+                name='gazebo',
+                output='screen',
+                arguments=[
+                    '-s', 'libgazebo_ros_init.so',
+                    '-s', 'libgazebo_ros_factory.so',
+                    '-s', 'libgazebo_ros_force_system.so'
+                ]
+            ),
+            Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                name='robot_state_publisher',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': True,
+                    'robot_description': Command([
+                        'xacro',
+                        FindPackageShare(['turtlebot3_description', 'urdf', LaunchConfiguration('robot_model') + '.urdf.xacro'])
+                    ])
+                }]
+            ),
+            Node(
+                package='gazebo_ros',
+                executable='spawn_entity.py',
+                name='spawn_robot',
+                output='screen',
+                arguments=[
+                    '-entity', LaunchConfiguration('robot_model'),
+                    '-topic', 'robot_description',
+                    '-x', '0.0',
+                    '-y', '0.0',
+                    '-z', '0.2'
+                ]
+            )
+        ]
+
+    def create_hardware_nodes(context):
+        """Create nodes for hardware deployment."""
+        return [
+            Node(
+                package='robot_driver',
+                executable='hardware_interface',
+                name='hardware_interface',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': False,
+                    'robot_description': Command([
+                        'xacro',
+                        FindPackageShare(['turtlebot3_description', 'urdf', LaunchConfiguration('robot_model') + '.urdf.xacro'])
+                    ]),
+                    'serial_port': '/dev/ttyUSB0',
+                    'baud_rate': 115200
+                }]
+            ),
+            Node(
+                package='imu_driver',
+                executable='imu_node',
+                name='imu',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': False,
+                    'device': '/dev/imu',
+                    'frame_id': 'imu_link'
+                }]
+            ),
+            Node(
+                package='laser_driver',
+                executable='laser_node',
+                name='laser',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': False,
+                    'port': '/dev/laser',
+                    'frame_id': 'laser'
+                }]
+            )
+        ]
+
+    def create_perception_nodes(context):
+        """Create perception nodes."""
+        return [
+            Node(
+                package='depth_image_proc',
+                executable='register_node',
+                name='depth_image_register',
+                output='screen',
+                parameters=[{'use_sim_time': LaunchConfiguration('deployment_type') == 'simulation'}]
+            ),
+            Node(
+                package='rtabmap_slam',
+                executable='rtabmap',
+                name='rtabmap',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': LaunchConfiguration('deployment_type') == 'simulation',
+                    'database_path': '~/.ros/rtabmap.db'
+                }]
+            ),
+            Node(
+                package='rtabmap_viz',
+                executable='rtabmap_viz',
+                name='rtabmap_viz',
+                output='screen'
+            )
+        ]
+
+    def create_navigation_nodes(context):
+        """Create navigation nodes."""
+        return [
+            Node(
+                package='nav2_controller',
+                executable='controller_server',
+                name='controller_server',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': LaunchConfiguration('deployment_type') == 'simulation',
+                    'controller_frequency': 20.0
+                }]
+            ),
+            Node(
+                package='nav2_planner',
+                executable='planner_server',
+                name='planner_server',
+                output='screen',
+                parameters=[{
+                    'use_sim_time': LaunchConfiguration('deployment_type') == 'simulation',
+                    'planner_plugins': ['GridBased']
+                }]
+            ),
+            Node(
+                package='nav2_recoveries',
+                executable='recovery_server',
+                name='recovery_server',
+                output='screen'
+            ),
+            Node(
+                package='nav2_bt_navigator',
+                executable='bt_navigator',
+                name='bt_navigator',
+                output='screen'
+            )
+        ]
+
+    # Conditional groups
+    simulation_group = GroupAction(
+        condition=IfCondition(
+            PythonExpression([
+                "'", LaunchConfiguration('deployment_type'), "' == 'simulation'"
+            ])
+        ),
+        actions=[OpaqueFunction(function=create_simulation_nodes)]
+    )
+
+    hardware_group = GroupAction(
+        condition=IfCondition(
+            PythonExpression([
+                "'", LaunchConfiguration('deployment_type'), "' == 'hardware'"
+            ])
+        ),
+        actions=[OpaqueFunction(function=create_hardware_nodes)]
+    )
+
+    hybrid_group = GroupAction(
+        condition=IfCondition(
+            PythonExpression([
+                "'", LaunchConfiguration('deployment_type'), "' == 'hybrid'"
+            ])
+        ),
+        actions=[
+            OpaqueFunction(function=create_simulation_nodes),
+            OpaqueFunction(function=create_hardware_nodes)
+        ]
+    )
+
+    perception_group = GroupAction(
+        condition=IfCondition(LaunchConfiguration('enable_perception')),
+        actions=[OpaqueFunction(function=create_perception_nodes)]
+    )
+
+    navigation_group = GroupAction(
+        condition=IfCondition(LaunchConfiguration('enable_navigation')),
+        actions=[OpaqueFunction(function=create_navigation_nodes)]
+    )
+
+    return LaunchDescription([
+        deployment_type_arg,
+        enable_perception_arg,
+        enable_navigation_arg,
+        robot_model_arg,
+        LogInfo(msg=[
+            'Starting robot with deployment type: ',
+            LaunchConfiguration('deployment_type')
+        ]),
+        simulation_group,
+        hardware_group,
+        hybrid_group,
+        perception_group,
+        navigation_group
+    ])
+```
+
+#### Expected Output
+
+For Exercise 3.1:
+- Parameter validation with warnings for out-of-range values
+- Auto-correction of invalid parameters
+- Periodic validation reports
+
+For Exercise 3.2:
+- Multiple robot instances with unique namespaces
+- Each robot has its own controller, localization, and sensor nodes
+- Monitor node tracks all robot instances
+
+For Exercise 3.3:
+- Batch parameter updates via service call
+- Detailed validation results for each parameter
+- All-or-nothing parameter updates
+
+For Exercise 3.4:
+- Different node sets based on deployment type
+- Conditional loading of perception and navigation
+- Proper use_sim_time handling
+
+#### Troubleshooting Steps
+
+- **Parameters not loading**: Check parameter file path and YAML syntax
+- **Launch file not found**: Verify package is in ROS 2 path and launch file is in correct directory
+- **Namespace conflicts**: Ensure unique namespaces for each node instance
+- **Dependency issues**: Check that required packages are installed and built
+
+## Summary
+
+In this chapter, we learned:
+- How to declare and use parameters in ROS 2 nodes
+- Parameter validation and dynamic updates
+- Creating Python launch files for multi-node systems
+- Component containers and composed nodes
+- Conditional launch configurations
+- Best practices for parameter and launch file organization
+
+Key takeaways:
+- Parameters provide runtime configurability without code changes
+- Launch files orchestrate complex systems with dependencies
+- Use namespaces to run multiple robot instances
+- Component containers reduce resource usage
+- Conditional launching enables flexible deployments
+
+With the completion of User Story 1, we now have a solid foundation in ROS 2 fundamentals including nodes, communication patterns, and system orchestration. The next chapters will explore simulation with Isaac Sim and advanced robotics applications.

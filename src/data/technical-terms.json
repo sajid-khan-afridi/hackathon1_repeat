@@ -1,0 +1,274 @@
+{
+  "terms": [
+    {
+      "term": "ROS 2",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "روبوٹ آپریٹنگ سسٹم 2 - روبوٹس کے لیے ایک میٹا آپریٹنگ سسٹم"
+    },
+    {
+      "term": "node",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "نوڈ - ROS 2 میں ایک پروسیس جو پیغامات بھیجتا اور وصول کرتا ہے"
+    },
+    {
+      "term": "publisher",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "پبلشر - ڈیٹا ٹاپک پر بھیجنے والا نوڈ"
+    },
+    {
+      "term": "subscriber",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "سبسکرائبر - ڈیٹا ٹاپک س وصول کرنے والا نوڈ"
+    },
+    {
+      "term": "topic",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ٹاپک - نوڈز کے درمیان ڈیٹا کا تبادلہ کرنے کا چینل"
+    },
+    {
+      "term": "service",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "سروس - ریکوئسٹ اور رسپانس کی بنیاد پر کام کرنے والا میکانزم"
+    },
+    {
+      "term": "lifecycle",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "لائف سائیکل - نوڈ کی مختلف حالتوں (inactive, active, finalized) کا سلسلہ"
+    },
+    {
+      "term": "QoS",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "کیوئ او ایس - کوالیٹی آف سروس، ڈیٹا کی فراہمی کے معیارات"
+    },
+    {
+      "term": "launch file",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "لانچ فائل - متعدد نوڈز کو ایک ساتھ چلانے کے لیے YAML فائل"
+    },
+    {
+      "term": "parameter",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "پیرامیٹر - نوڈ کی کنفیگریشن کو کنٹرول کرنے والی قدر"
+    },
+    {
+      "term": "rclpy",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "آر سی ایل پیائی - ROS 2 کا پائتھون کلائنٹ لائبریری"
+    },
+    {
+      "term": "rclcpp",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "آر سی ایل سی پی پی - ROS 2 کا سی پلس پلس کلائنٹ لائبریری"
+    },
+    {
+      "term": "Isaac Sim",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "آئساک سم - این ویڈیا کا روبوٹ سیمولیشن پلیٹ فارم"
+    },
+    {
+      "term": "URDF",
+      "category": "format",
+      "translationStatus": "preserve",
+      "contextualExplanation": "یو آر ڈی ایف - یونائیٹڈ روبوٹ ڈسکریپشن فارمیٹ"
+    },
+    {
+      "term": "Gazebo",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "گیزیبو - روبوٹ سیمولیٹر"
+    },
+    {
+      "term": "kinematics",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "حرکیات - رو بوٹ کی حرکت کا مطالعہ"
+    },
+    {
+      "term": "forward kinematics",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "فارورڈ حرکیات - جوائنٹ انگلز سے اینڈ آفی کی پوزیشن کا حساب"
+    },
+    {
+      "term": "inverse kinematics",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "الٹی حرکیات - اینڈ آفی کی پوزیشن سے جوائنٹ انگلز کا حساب"
+    },
+    {
+      "term": "Nav2",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "نیویگیٹ 2 - ROS 2 کا نیویگیشن اسٹیک"
+    },
+    {
+      "term": "sensor fusion",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "سینسر فیوزن - متعدد سینسرز کے ڈیٹا کو ملانا"
+    },
+    {
+      "term": "lidar",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "لائیڈار - لیزر کی مدد سے فاصلے ناپنے کا سینسر"
+    },
+    {
+      "term": "IMU",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "آئی ایم یو - انرشیل میژرمینٹ یونٹ"
+    },
+    {
+      "term": "humanoid",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ہیومنائیڈ - انسانی شکل کا روبوٹ"
+    },
+    {
+      "term": "bipedal",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "بائی پیڈل - دو پاؤں والا"
+    },
+    {
+      "term": "DH parameters",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ڈیویٹ ہارٹنبرگ پیرامیٹرز - رو بوٹ کینمیکس کے لیے پیرامیٹرز"
+    },
+    {
+      "term": "transform",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ٹرانسفارم - کوآرڈینیٹ سسٹم کے درمیان تبدیلی"
+    },
+    {
+      "term": "TF",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ٹی ایف - ٹرانسفارم لائبریری"
+    },
+    {
+      "term": "odometry",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "اوڈومیٹری - رو بوٹ کی حرکت کا پتہ لگانا"
+    },
+    {
+      "term": "SLAM",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "سلیم - simultaneous localization and mapping"
+    },
+    {
+      "term": "joint",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "جوائنٹ - رو بوٹ کا موڑ"
+    },
+    {
+      "term": "link",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "لنک - رو بوٹ کا عضو"
+    },
+    {
+      "term": "workspace",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ورک سپیس - روبوٹ کے ہاتھ پہنچ سکتے ہیں"
+    },
+    {
+      "term": "control law",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "کنٹرول لا - کنٹرول ان پٹ کا حساب کرنے کا فارمولا"
+    },
+    {
+      "term": "PID",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "پی آئی ڈی - proportional integral derivative"
+    },
+    {
+      "term": "path planning",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "پاتھ پلاننگ - راستے کا منصوبہ بنانا"
+    },
+    {
+      "term": "collision detection",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "کولیژن ڈیٹیکشن - ٹکرانے کا پتہ لگانا"
+    },
+    {
+      "term": "point cloud",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "پوائنٹ کلاؤڈ - 3D پوائنٹس کا مجموعہ"
+    },
+    {
+      "term": "occupancy grid",
+      "category": "robotics",
+      "translationStatus": "preserve",
+      "contextualExplanation": "آکیوپنسی گرڈ - نقشہ جو دکھاتا ہے کہ کہاں رکاوٹ ہیں"
+    },
+    {
+      "term": "humble",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ہمبل - ROS 2 کا LTS ورژن"
+    },
+    {
+      "term": "colcon",
+      "category": "platform",
+      "translationStatus": "preserve",
+      "contextualExplanation": "کولکون - ROS 2 کا Build tool"
+    },
+    {
+      "term": "message",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "میسیج - ڈیٹا کا ڈھانچہ"
+    },
+    {
+      "term": "action",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "ایکشن - لمبی مدتی ٹاسکز کے لیے"
+    },
+    {
+      "term": "bag file",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "بیگ فائل - ROS ڈیٹا کو ریکارڈ کرنے کی فائل"
+    },
+    {
+      "term": "namespace",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "نیم اسپیس - ناموں کو گروپ کرنے کا طریقہ"
+    },
+    {
+      "term": "frame",
+      "category": "ros-concept",
+      "translationStatus": "preserve",
+      "contextualExplanation": "فریم - کوآرڈینیٹ سسٹم"
+    }
+  ]
+}

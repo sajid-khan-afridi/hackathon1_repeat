@@ -1,0 +1,1055 @@
+---
+title: "Chapter 4: Humanoid Robot Control"
+sidebar_position: 4
+description: "Learn humanoid robot control including bipedal locomotion, balance control, and whole-body motion planning"
+keywords:
+  - humanoid robots
+  - bipedal locomotion
+  - balance control
+  - inverse kinematics
+  - gait planning
+  - zero moment point
+  - whole-body control
+  - motion planning
+tags:
+  - humanoid
+  - bipedal
+  - control
+  - locomotion
+learning_objectives:
+  - "Understand bipedal locomotion principles"
+  - "Implement Zero Moment Point (ZMP) based balance control"
+  - "Design gait patterns for walking"
+  - "Apply whole-body control for complex motions"
+difficulty_level: advanced
+ros_version: humble
+prerequisites:
+  - "Chapter 1: Robot Kinematics"
+  - "Chapter 3: Perception & Sensor Fusion"
+  - "Dynamics and control theory"
+estimated_time: 150
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 4: Humanoid Robot Control
+
+## Introduction
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Humanoid robots are robots designed to look and move like humans. Think of them as complex machines that can walk, balance, and interact with the world much like we do, with two legs, arms, and a torso.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Humanoid robot control involves managing high-dimensional systems with complex dynamics. This chapter covers ZMP-based balance control, bipedal gait generation, whole-body coordination through hierarchical control, and motion planning for maintaining stability while performing complex tasks.
+</PersonalizedSection>
+
+## 4.1 Bipedal Locomotion Fundamentals
+
+### Zero Moment Point (ZMP)
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, scipy
+
+import numpy as np
+from scipy.integrate import odeint
+
+class ZMPController:
+    """Zero Moment Point based controller for bipedal balance"""
+
+    def __init__(self, robot_height=1.0, gravity=9.81):
+        self.h = robot_height  # Center of mass height
+        self.g = gravity
+        self.omega = np.sqrt(gravity / robot_height)  # Natural frequency
+
+    def compute_zmp(self, com_pos, com_acc):
+        """Compute ZMP from center of mass position and acceleration"""
+        # ZMP = COM - (h/g) * COM_ddot
+        zmp_x = com_pos[0] - (self.h / self.g) * com_acc[0]
+        zmp_y = com_pos[1] - (self.h / self.g) * com_acc[1]
+
+        return np.array([zmp_x, zmp_y])
+
+    def preview_control(self, ref_zmp, horizon=1.6, dt=0.01):
+        """Preview control for ZMP tracking"""
+        N = int(horizon / dt)
+
+        # State space model for COM dynamics
+        A = np.array([
+            [1, dt, dt**2/2],
+            [0, 1, dt],
+            [0, 0, 1]
+        ])
+
+        B = np.array([dt**3/6, dt**2/2, dt]).reshape(3, 1)
+
+        C = np.array([1, 0, -self.h/self.g])
+
+        # Solve LQR
+        Q = np.diag([1, 0, 0])  # Position weight
+        R = np.array([[1e-6]])  # Input weight
+
+        # Simplified LQR solution (use control library in practice)
+        K = np.array([1000, 1000, 1000])  # Gains
+
+        # Preview gains (simplified)
+        f = np.zeros(N)
+
+        # Generate optimal input sequence
+        inputs = []
+        for i in range(N):
+            # Feedback term
+            state = np.array([0, 0, 0])  # Current state
+            u = -K @ state + f[i] * ref_zmp[min(i, len(ref_zmp)-1)]
+            inputs.append(u[0])
+
+        return np.array(inputs)
+
+    def generate_com_trajectory(self, zmp_trajectory, initial_com, dt=0.01):
+        """Generate COM trajectory from ZMP using preview control"""
+        # Preview control to compute COM jerk
+        jerk = self.preview_control(zmp_trajectory, dt=dt)
+
+        # Integrate to get COM trajectory
+        com_pos = []
+        com_vel = []
+        com_acc = []
+
+        pos = initial_com[:2]
+        vel = initial_com[2:4]
+        acc = np.zeros(2)
+
+        for j in jerk:
+            # Update acceleration
+            acc += j * dt
+
+            # Update velocity and position
+            vel += acc * dt
+            pos += vel * dt
+
+            com_pos.append(pos.copy())
+            com_vel.append(vel.copy())
+            com_acc.append(acc.copy())
+
+        return np.array(com_pos), np.array(com_vel), np.array(com_acc)
+```
+
+### Footstep Planning
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class FootstepPlanner:
+    """Plan footsteps for bipedal walking"""
+
+    def __init__(self, step_length=0.2, step_width=0.1, max_step_height=0.05):
+        self.step_length = step_length
+        self.step_width = step_width
+        self.max_step_height = max_step_height
+
+    def plan_linear_path(self, start_pose, goal_pose, num_steps=None):
+        """Plan footsteps along linear path"""
+        # Calculate required steps
+        dx = goal_pose[0] - start_pose[0]
+        dy = goal_pose[1] - start_pose[1]
+        distance = np.sqrt(dx**2 + dy**2)
+
+        if num_steps is None:
+            num_steps = int(distance / self.step_length)
+
+        # Generate footsteps
+        footsteps = []
+        current_pose = start_pose.copy()
+
+        # Add initial foot positions
+        footsteps.append({
+            'position': current_pose[:2],
+            'orientation': current_pose[2],
+            'side': 'left',
+            'time': 0.0
+        })
+
+        current_pose[0] += self.step_width/2 * np.sin(current_pose[2])
+        current_pose[1] -= self.step_width/2 * np.cos(current_pose[2])
+
+        footsteps.append({
+            'position': current_pose[:2],
+            'orientation': current_pose[2],
+            'side': 'right',
+            'time': 0.5
+        })
+
+        # Generate intermediate steps
+        for i in range(1, num_steps):
+            # Calculate next position
+            progress = i / num_steps
+            next_x = start_pose[0] + progress * dx
+            next_y = start_pose[1] + progress * dy
+
+            # Alternating feet
+            side = 'left' if i % 2 == 0 else 'right'
+            offset = self.step_width/2 if side == 'left' else -self.step_width/2
+
+            # Apply lateral offset
+            next_x += offset * np.sin(goal_pose[2])
+            next_y -= offset * np.cos(goal_pose[2])
+
+            footsteps.append({
+                'position': np.array([next_x, next_y]),
+                'orientation': goal_pose[2],
+                'side': side,
+                'time': 0.5 + i * 0.5
+            })
+
+        # Final step to goal orientation
+        footsteps.append({
+            'position': goal_pose[:2],
+            'orientation': goal_pose[2],
+            'side': 'right' if num_steps % 2 == 0 else 'left',
+            'time': 0.5 + num_steps * 0.5
+        })
+
+        return footsteps
+
+    def generate_foot_trajectory(self, footstep, swing_time=0.5, height=0.05):
+        """Generate swing foot trajectory"""
+        t = np.linspace(0, swing_time, 50)
+        trajectory = []
+
+        for ti in t:
+            # Use cubic polynomial for smooth motion
+            s = ti / swing_time
+
+            # Position
+            if s < 0.5:
+                # Lift phase
+                x = footstep['position'][0] * (2 * s**2)
+                y = footstep['position'][1] * (2 * s**2)
+                z = 4 * height * s * (1 - s)
+            else:
+                # Place phase
+                x = footstep['position'][0] * (1 - 2 * (1-s)**2)
+                y = footstep['position'][1] * (1 - 2 * (1-s)**2)
+                z = 4 * height * s * (1 - s)
+
+            trajectory.append([x, y, z])
+
+        return np.array(trajectory)
+```
+
+## 4.2 Whole Body Control
+
+### Hierarchical Control Architecture
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, pinocchio
+
+class WholeBodyController:
+    """Hierarchical whole body controller for humanoid robots"""
+
+    def __init__(self, robot_model):
+        self.robot = robot_model
+        self.num_joints = robot_model.nq
+
+        # Control hierarchy
+        self.tasks = []
+        self.joint_limits = robot_model.joint_limits
+
+        # Nullspace projector
+        self.N = np.eye(self.num_joints)
+
+    def add_task(self, task, priority):
+        """Add control task to hierarchy"""
+        self.tasks.append({
+            'task': task,
+            'priority': priority,
+            'active': True
+        })
+
+        # Sort by priority
+        self.tasks.sort(key=lambda x: x['priority'])
+
+    def compute_joint_velocities(self, q, dq, dt=0.01):
+        """Compute joint velocities using hierarchical control"""
+        q_dot = np.zeros(self.num_joints)
+
+        # Initialize nullspace projector
+        N = np.eye(self.num_joints)
+
+        for task_dict in self.tasks:
+            if not task_dict['active']:
+                continue
+
+            task = task_dict['task']
+
+            # Get task jacobian and desired velocity
+            J = task.compute_jacobian(q)
+            x_dot_des = task.compute_desired_velocity(q, dq)
+
+            # Project task into nullspace of higher priority tasks
+            J_proj = J @ N
+
+            # Compute joint velocities for this task
+            if J_proj.shape[0] > 0:  # Task is active
+                # Weighted pseudoinverse
+                W = task.get_weight_matrix()
+                J_pinv = W @ J_proj.T @ np.linalg.inv(
+                    J_proj @ W @ J_proj.T + task.regularization * np.eye(J_proj.shape[0])
+                )
+
+                # Compute joint contribution
+                dq_task = J_pinv @ (x_dot_des - J @ q_dot)
+
+                # Update joint velocities
+                q_dot += dq_task
+
+                # Update nullspace projector
+                N = N - J_pinv @ J_proj
+
+        # Apply joint limits
+        q_dot = self.enforce_joint_limits(q, q_dot, dt)
+
+        return q_dot
+
+    def enforce_joint_limits(self, q, q_dot, dt):
+        """Enforce joint velocity limits"""
+        # Position limits
+        q_min = self.joint_limits[:, 0]
+        q_max = self.joint_limits[:, 1]
+
+        # Velocity limits
+        dq_max = self.joint_limits[:, 2]
+        dq_min = -dq_max
+
+        # Check position limits
+        for i in range(len(q)):
+            if q[i] + q_dot[i] * dt > q_max[i]:
+                q_dot[i] = (q_max[i] - q[i]) / dt
+            elif q[i] + q_dot[i] * dt < q_min[i]:
+                q_dot[i] = (q_min[i] - q[i]) / dt
+
+        # Clamp velocities
+        q_dot = np.clip(q_dot, dq_min, dq_max)
+
+        return q_dot
+
+class ControlTask:
+    """Base class for control tasks"""
+
+    def __init__(self, name, weight=1.0, regularization=1e-6):
+        self.name = name
+        self.weight = weight
+        self.regularization = regularization
+        self.active = True
+
+    def compute_jacobian(self, q):
+        """Compute task Jacobian"""
+        raise NotImplementedError
+
+    def compute_desired_velocity(self, q, dq):
+        """Compute desired task space velocity"""
+        raise NotImplementedError
+
+    def get_weight_matrix(self):
+        """Get task weight matrix"""
+        return self.weight * np.eye(self.dof)
+
+class COMTask(ControlTask):
+    """Center of Mass tracking task"""
+
+    def __init__(self, com_desired, weight=10.0):
+        super().__init__("COM", weight)
+        self.com_desired = com_desired
+        self.dof = 3  # x, y, z
+
+    def compute_jacobian(self, q):
+        """Compute COM Jacobian"""
+        # Use robot model to compute COM Jacobian
+        J_com = self.robot.compute_com_jacobian(q)
+        return J_com
+
+    def compute_desired_velocity(self, q, dq):
+        """Compute COM velocity to reach desired position"""
+        com_current = self.robot.compute_com(q)
+        error = self.com_desired - com_current
+
+        # Proportional control
+        kp = 5.0
+        x_dot_des = kp * error
+
+        return x_dot_des
+
+class FootTask(ControlTask):
+    """Foot placement task"""
+
+    def __init__(self, foot_name, position_desired, orientation_desired=None, weight=20.0):
+        super().__init__(f"Foot_{foot_name}", weight)
+        self.foot_name = foot_name
+        self.position_desired = position_desired
+        self.orientation_desired = orientation_desired or [0, 0, 0, 1]
+        self.dof = 6  # position + orientation
+
+    def compute_jacobian(self, q):
+        """Compute foot Jacobian"""
+        J_foot = self.robot.compute_foot_jacobian(q, self.foot_name)
+        return J_foot
+
+    def compute_desired_velocity(self, q, dq):
+        """Compute foot velocity to reach desired pose"""
+        foot_current = self.robot.compute_foot_pose(q, self.foot_name)
+        pos_error = self.position_desired - foot_current['position']
+
+        # Proportional control
+        kp = 10.0
+        x_dot_des = np.zeros(6)
+        x_dot_des[:3] = kp * pos_error
+
+        # Add orientation control if needed
+        if self.orientation_desired is not None:
+            ori_error = self.orientation_error(
+                foot_current['orientation'], self.orientation_desired
+            )
+            x_dot_des[3:] = kp * ori_error
+
+        return x_dot_des
+
+    def orientation_error(self, q_current, q_desired):
+        """Compute orientation error using quaternion"""
+        # Simplified orientation error
+        return np.zeros(3)
+```
+
+### Dynamic Balance Controller
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, pinocchio
+
+class DynamicBalanceController:
+    """Controller for maintaining dynamic balance"""
+
+    def __init__(self, robot_model):
+        self.robot = robot_model
+        self.zmp_controller = ZMPController(robot_height=0.8)
+        self.wbc = WholeBodyController(robot_model)
+
+        # Add balance tasks
+        self.setup_balance_tasks()
+
+    def setup_balance_tasks(self):
+        """Setup tasks for balance control"""
+        # COM tracking task
+        self.com_task = COMTask(np.array([0, 0, 0.8]), weight=50.0)
+        self.wbc.add_task(self.com_task, priority=1)
+
+        # Foot contact tasks (added dynamically)
+        self.foot_tasks = {}
+
+    def update_balance(self, q, dq, support_feet, desired_com=None):
+        """Update balance control based on support configuration"""
+        # Deactivate all foot tasks
+        for foot_task in self.foot_tasks.values():
+            foot_task['active'] = False
+
+        # Activate tasks for support feet
+        for foot_name in support_feet:
+            if foot_name not in self.foot_tasks:
+                # Create new foot task
+                foot_task = FootTask(
+                    foot_name,
+                    self.robot.get_foot_position(q, foot_name),
+                    weight=100.0
+                )
+                self.foot_tasks[foot_name] = {
+                    'task': foot_task,
+                    'active': True
+                }
+                self.wbc.add_task(foot_task, priority=0)  # Highest priority
+            else:
+                self.foot_tasks[foot_name]['active'] = True
+
+        # Update COM reference if provided
+        if desired_com is not None:
+            self.com_task.com_desired = desired_com
+
+        # Compute joint velocities
+        q_dot = self.wbc.compute_joint_velocities(q, dq)
+
+        return q_dot
+
+    def compute_capture_point(self, com_pos, com_vel):
+        """Compute capture point for balance recovery"""
+        # Capture point = COM + sqrt(h/g) * COM_velocity
+        omega = np.sqrt(self.zmp_controller.g / self.zmp_controller.h)
+        capture_point = com_pos + com_vel / omega
+
+        return capture_point
+
+    def balance_recovery_step(self, q, dq, com_desired):
+        """Generate balance recovery step"""
+        # Current state
+        com_pos = self.robot.compute_com(q)
+        com_vel = self.robot.compute_com_velocity(q, dq)
+
+        # Compute capture point
+        capture_point = self.compute_capture_point(com_pos, com_vel)
+
+        # Check if step is needed
+        support_polygon = self.robot.get_support_polygon(q)
+
+        if not self.point_in_polygon(capture_point[:2], support_polygon):
+            # Need to take step
+            step_location = self.plan_recovery_step(capture_point, support_polygon)
+
+            # Generate footstep
+            footstep = {
+                'position': step_location,
+                'orientation': 0,  # Keep current orientation
+                'side': 'right' if dq[2] > 0 else 'left',  # Choose based on angular momentum
+                'time': 0.5  # Immediate step
+            }
+
+            return footstep
+
+        return None
+
+    def plan_recovery_step(self, capture_point, support_polygon):
+        """Plan recovery step location"""
+        # Project capture point to support polygon edge
+        min_dist = float('inf')
+        step_location = None
+
+        for i in range(len(support_polygon)):
+            p1 = support_polygon[i]
+            p2 = support_polygon[(i + 1) % len(support_polygon)]
+
+            # Find closest point on edge
+            edge = p2 - p1
+            t = np.clip(np.dot(capture_point[:2] - p1, edge) / np.dot(edge, edge), 0, 1)
+            closest = p1 + t * edge
+
+            dist = np.linalg.norm(capture_point[:2] - closest)
+            if dist < min_dist:
+                min_dist = dist
+                step_location = closest
+
+        # Offset slightly outside support polygon
+        if step_location is not None:
+            center = np.mean(support_polygon, axis=0)
+            direction = step_location - center
+            direction = direction / np.linalg.norm(direction)
+            step_location = step_location + 0.05 * direction
+
+        return step_location if step_location is not None else capture_point[:2]
+
+    def point_in_polygon(self, point, polygon):
+        """Check if point is inside polygon"""
+        n = len(polygon)
+        inside = False
+
+        p1x, p1y = polygon[0]
+        for i in range(1, n + 1):
+            p2x, p2y = polygon[i % n]
+            if point[1] > min(p1y, p2y):
+                if point[1] <= max(p1y, p2y):
+                    if point[0] <= max(p1x, p2x):
+                        if p1y != p2y:
+                            xinters = (point[1] - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                        if p1x == p2x or point[0] <= xinters:
+                            inside = not inside
+            p1x, p1y = p2x, p2y
+
+        return inside
+```
+
+## 4.3 Motion Planning for Humanoids
+
+### Sampling-Based Planning with Constraints
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, pinocchio
+
+class HumanoidMotionPlanner:
+    """Motion planner for humanoid robots with balance constraints"""
+
+    def __init__(self, robot_model):
+        self.robot = robot_model
+        self.balance_controller = DynamicBalanceController(robot_model)
+
+    def plan_balanced_motion(self, q_start, q_goal, constraints=None):
+        """Plan motion while maintaining balance"""
+        # Simplified planning using RRT with balance checking
+        from rrt_planner import RRTPlanner
+
+        # Define state space (joint positions)
+        dim = self.robot.nq
+
+        # Create planner
+        planner = RRTPlanner(
+            state_dim=dim,
+            bounds=self.robot.joint_limits,
+            max_iterations=5000,
+            step_size=0.1
+        )
+
+        # Define goal bias and sampling
+        def sample_free():
+            if np.random.random() < 0.1:
+                # Sample near goal
+                return q_goal + np.random.randn(dim) * 0.1
+            else:
+                # Random sample
+                return np.random.uniform(
+                    self.robot.joint_limits[:, 0],
+                    self.robot.joint_limits[:, 1]
+                )
+
+        def is_collision_free(q):
+            # Check self-collisions
+            if self.robot.check_self_collision(q):
+                return False
+
+            # Check balance
+            com_pos = self.robot.compute_com(q)
+            support_polygon = self.robot.get_support_polygon(q)
+
+            # Simple balance check
+            if not self.point_in_polygon(com_pos[:2], support_polygon):
+                return False
+
+            return True
+
+        def distance(q1, q2):
+            # Weighted joint space distance
+            weights = np.ones(dim)
+            weights[:6] = 0.1  # Lower weight for base joints
+            return np.sqrt(np.sum(weights * (q1 - q2)**2))
+
+        # Plan path
+        path = planner.plan(
+            start=q_start,
+            goal=q_goal,
+            sample_free=sample_free,
+            is_collision_free=is_collision_free,
+            distance=distance
+        )
+
+        if path is not None:
+            # Smooth path
+            smoothed_path = self.smooth_trajectory(path)
+
+            # Add timing and balance control
+            timed_trajectory = self.add_timing_and_balance(smoothed_path)
+
+            return timed_trajectory
+
+        return None
+
+    def smooth_trajectory(self, path, iterations=50):
+        """Smooth joint trajectory while maintaining constraints"""
+        smoothed = path.copy()
+
+        for _ in range(iterations):
+            # Pick random segment
+            if len(smoothed) < 3:
+                break
+
+            i = np.random.randint(0, len(smoothed) - 2)
+            j = np.random.randint(i + 2, len(smoothed))
+
+            # Check if direct connection is valid
+            if self.is_path_valid(smoothed[i], smoothed[j]):
+                # Shortcut
+                smoothed = smoothed[:i+1] + smoothed[j:]
+
+        return smoothed
+
+    def add_timing_and_balance(self, joint_trajectory, dt=0.01):
+        """Add timing and ensure balance throughout trajectory"""
+        timed_trajectory = []
+
+        for i, q in enumerate(joint_trajectory):
+            # Compute joint velocities (finite difference)
+            if i > 0:
+                dq = (q - joint_trajectory[i-1]) / dt
+            else:
+                dq = np.zeros_like(q)
+
+            # Check and adjust balance
+            if not self.is_balanced(q, dq):
+                # Apply balance correction
+                q_corrected = self.correct_balance(q, dq)
+                joint_trajectory[i] = q_corrected
+                q = q_corrected
+
+            # Add to timed trajectory
+            timed_trajectory.append({
+                'position': q,
+                'velocity': dq,
+                'time': i * dt
+            })
+
+        return timed_trajectory
+
+    def is_balanced(self, q, dq, margin=0.02):
+        """Check if configuration is balanced"""
+        # Compute ZMP
+        com_pos = self.robot.compute_com(q)
+        com_acc = self.robot.compute_com_acceleration(q, dq)
+        zmp = self.balance_controller.zmp_controller.compute_zmp(com_pos, com_acc)
+
+        # Get support polygon
+        support_polygon = self.robot.get_support_polygon(q)
+
+        # Check if ZMP is within support polygon with margin
+        return self.point_in_polygon_with_margin(zmp[:2], support_polygon, margin)
+```
+
+## 4.4 ROS 2 Integration
+
+### Humanoid Control Node
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy, sensor_msgs, geometry_msgs, trajectory_msgs
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import JointState, Imu
+from geometry_msgs.msg import PoseStamped, Twist
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+import numpy as np
+
+class HumanoidControlNode(Node):
+    """Main control node for humanoid robot"""
+
+    def __init__(self):
+        super().__init__('humanoid_control_node')
+
+        # Initialize controllers
+        self.balance_controller = DynamicBalanceController(self.robot_model)
+        self.motion_planner = HumanoidMotionPlanner(self.robot_model)
+
+        # State variables
+        self.q = np.zeros(self.robot_model.nq)  # Joint positions
+        self.dq = np.zeros(self.robot_model.nq)  # Joint velocities
+        self.current_state = 'idle'
+
+        # Subscribers
+        self.joint_state_sub = self.create_subscription(
+            JointState, '/joint_states', self.joint_state_callback, 10)
+        self.imu_sub = self.create_subscription(
+            Imu, '/imu/data', self.imu_callback, 10)
+        self.cmd_vel_sub = self.create_subscription(
+            Twist, '/cmd_vel', self.cmd_vel_callback, 10)
+
+        # Publishers
+        self.joint_cmd_pub = self.create_publisher(
+            JointTrajectory, '/joint_trajectory_controller/command', 10)
+        self.com_pub = self.create_publisher(
+            PoseStamped, '/com_position', 10)
+        self.zmp_pub = self.create_publisher(
+            PoseStamped, '/zmp_position', 10)
+
+        # Control timer
+        self.control_timer = self.create_timer(0.01, self.control_loop)
+
+        # Walking parameters
+        self.walking_phase = 0
+        self.support_foot = 'left'
+        self.step_queue = []
+
+    def joint_state_callback(self, msg):
+        """Handle joint state updates"""
+        # Update joint positions and velocities
+        for i, name in enumerate(msg.name):
+            if name in self.robot_model.joint_names:
+                idx = self.robot_model.joint_names.index(name)
+                self.q[idx] = msg.position[i]
+                if len(msg.velocity) > i:
+                    self.dq[idx] = msg.velocity[i]
+
+    def imu_callback(self, msg):
+        """Handle IMU measurements"""
+        # Extract orientation for base
+        self.q[3:7] = [msg.orientation.x, msg.orientation.y,
+                       msg.orientation.z, msg.orientation.w]
+
+    def cmd_vel_callback(self, msg):
+        """Handle velocity commands for walking"""
+        # Convert velocity command to footsteps
+        if msg.linear.x != 0 or msg.angular.z != 0:
+            self.generate_footsteps_from_velocity(msg)
+
+    def control_loop(self):
+        """Main control loop"""
+        # Update current state
+        self.update_state()
+
+        # State machine
+        if self.current_state == 'idle':
+            self.idle_control()
+        elif self.current_state == 'walking':
+            self.walking_control()
+        elif self.current_state == 'balance':
+            self.balance_control()
+
+        # Publish joint commands
+        self.publish_joint_commands()
+
+    def update_state(self):
+        """Update robot state estimation"""
+        # Compute COM and ZMP
+        self.com_pos = self.robot_model.compute_com(self.q)
+        self.com_vel = self.robot_model.compute_com_velocity(self.q, self.dq)
+
+        # Compute ZMP
+        com_acc = self.robot_model.compute_com_acceleration(self.q, self.dq)
+        self.zmp = self.balance_controller.zmp_controller.compute_zmp(
+            self.com_pos, com_acc)
+
+        # Publish for visualization
+        self.publish_com_zmp()
+
+    def walking_control(self):
+        """Control for walking state"""
+        if not self.step_queue:
+            # No more steps, transition to idle
+            self.current_state = 'idle'
+            return
+
+        # Get current footstep
+        current_step = self.step_queue[0]
+
+        # Check if step time reached
+        if self.get_clock().now().nanoseconds * 1e-9 >= current_step['time']:
+            # Execute step
+            self.execute_footstep(current_step)
+            self.step_queue.pop(0)
+
+            # Switch support foot
+            self.support_foot = 'right' if self.support_foot == 'left' else 'left'
+
+        # Update balance control
+        support_feet = [self.support_foot]
+        q_dot = self.balance_controller.update_balance(
+            self.q, self.dq, support_feet)
+
+        # Send velocity commands
+        self.send_joint_velocities(q_dot)
+
+    def execute_footstep(self, footstep):
+        """Execute footstep using whole-body control"""
+        # Compute desired foot placement
+        foot_task = FootTask(
+            footstep['side'],
+            footstep['position'],
+            footstep.get('orientation'),
+            weight=100.0
+        )
+
+        # Add to WBC temporarily
+        self.balance_controller.wbc.tasks.append({
+            'task': foot_task,
+            'priority': 0,
+            'active': True
+        })
+
+        # Execute for a short duration
+        duration = 0.3
+        start_time = self.get_clock().now().nanoseconds * 1e-9
+
+        while (self.get_clock().now().nanoseconds * 1e-9 - start_time) < duration:
+            # Control loop
+            q_dot = self.balance_controller.compute_joint_velocities(
+                self.q, self.dq)
+            self.send_joint_velocities(q_dot)
+            self.rate.sleep()
+
+    def send_joint_velocities(self, q_dot):
+        """Send joint velocity commands"""
+        # Create trajectory message
+        traj = JointTrajectory()
+        traj.header.stamp = self.get_clock().now().to_msg()
+        traj.joint_names = self.robot_model.joint_names
+
+        # Add trajectory point
+        point = JointTrajectoryPoint()
+        point.positions = (self.q + q_dot * 0.01).tolist()
+        point.velocities = q_dot.tolist()
+        point.time_from_start = rclpy.duration.Duration(seconds=0.01).to_msg()
+        traj.points.append(point)
+
+        # Publish
+        self.joint_cmd_pub.publish(traj)
+
+    def generate_footsteps_from_velocity(self, cmd_vel):
+        """Generate footsteps from velocity command"""
+        # Simple footstep generation
+        if abs(cmd_vel.linear.x) < 0.01 and abs(cmd_vel.angular.z) < 0.01:
+            return
+
+        # Calculate step parameters
+        step_length = min(cmd_vel.linear.x * 0.5, 0.3)
+        step_angle = cmd_vel.angular.z * 0.5
+
+        # Generate footsteps
+        current_time = self.get_clock().now().nanoseconds * 1e-9
+
+        # Current foot position
+        if self.support_foot == 'left':
+            current_foot_pos = self.robot_model.get_foot_position(self.q, 'right')
+        else:
+            current_foot_pos = self.robot_model.get_foot_position(self.q, 'left')
+
+        # Plan next step
+        next_foot_pos = current_foot_pos.copy()
+        next_foot_pos[0] += step_length * np.cos(next_foot_pos[2] + step_angle/2)
+        next_foot_pos[1] += step_length * np.sin(next_foot_pos[2] + step_angle/2)
+        next_foot_pos[2] += step_angle
+
+        # Add to queue
+        self.step_queue.append({
+            'position': next_foot_pos[:2],
+            'orientation': next_foot_pos[2],
+            'side': 'right' if self.support_foot == 'left' else 'left',
+            'time': current_time + 0.5
+        })
+
+        # Update state
+        if self.current_state == 'idle':
+            self.current_state = 'walking'
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = HumanoidControlNode()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## Exercises
+
+### Exercise 4.1: Simple Balance Controller (Intermediate)
+
+**Learning Objective**: Implement a simple PID balance controller
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class SimpleBalanceController:
+    def __init__(self):
+        # PID gains
+        self.kp = 100.0
+        self.ki = 10.0
+        self.kd = 50.0
+
+        # State
+        self.error_integral = 0
+        self.prev_error = 0
+
+    def control(self, com_pos, com_desired, dt=0.01):
+        """Compute control output for balance"""
+        # Error
+        error = com_desired - com_pos
+
+        # PID control
+        self.error_integral += error * dt
+        error_derivative = (error - self.prev_error) / dt
+
+        control = (self.kp * error +
+                  self.ki * self.error_integral +
+                  self.kd * error_derivative)
+
+        self.prev_error = error
+
+        return control
+```
+
+### Exercise 4.2: Inverse Kinematics for Leg (Advanced)
+
+**Learning Objective**: Implement IK for humanoid leg
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class LegIK:
+    def __init__(self, hip_to_knee, knee_to_ankle, ankle_to_ground):
+        self.L1 = hip_to_knee
+        self.L2 = knee_to_ankle
+        self.L3 = ankle_to_ground
+
+    def solve(self, foot_pos, hip_pos=np.array([0, 0, 0])):
+        """Solve IK for leg given foot position"""
+        # Relative position
+        delta = foot_pos - hip_pos
+
+        # Hip yaw
+        yaw = np.arctan2(delta[1], delta[0])
+
+        # Distance in hip-forward plane
+        d = np.sqrt(delta[0]**2 + delta[1]**2)
+        height = hip_pos[2] - foot_pos[2]
+
+        # Knee angle using law of cosines
+        l = np.sqrt(d**2 + height**2)
+        cos_knee = (l**2 - self.L1**2 - self.L2**2) / (2 * self.L1 * self.L2)
+        knee = np.arccos(np.clip(cos_knee, -1, 1))
+
+        # Hip pitch
+        alpha = np.arctan2(height, d)
+        beta = np.arctan2(self.L2 * np.sin(knee),
+                         self.L1 + self.L2 * np.cos(knee))
+        hip_pitch = alpha + beta
+
+        # Ankle pitch to keep foot level
+        ankle_pitch = -(hip_pitch + knee)
+
+        return [yaw, hip_pitch, knee, ankle_pitch]
+```
+
+## Summary
+
+In this chapter, we covered:
+- Zero Moment Point (ZMP) based balance control
+- Bipedal gait generation and footstep planning
+- Hierarchical whole-body control
+- Dynamic balance with capture points
+- Motion planning with balance constraints
+- ROS 2 integration for humanoid control
+
+Key takeaways:
+- ZMP is crucial for dynamic balance in bipedal walking
+- Hierarchical control manages task priorities
+- Whole-body control coordinates multiple objectives
+- Balance recovery requires strategic foot placement
+- Motion planning must consider stability constraints
+- Humanoid control combines planning, control, and estimation
+
+This completes the comprehensive robotics textbook covering ROS 2 fundamentals, Isaac Sim simulation, kinematics, navigation, perception, and humanoid control. These chapters provide a solid foundation for developing sophisticated robotic systems.

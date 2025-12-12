@@ -1,0 +1,958 @@
+---
+title: "Chapter 1: Robot Kinematics"
+sidebar_position: 1
+description: "Learn forward and inverse kinematics for robotic manipulators, including mathematical foundations and practical implementations"
+keywords:
+  - kinematics
+  - forward kinematics
+  - inverse kinematics
+  - Jacobian
+  - DH parameters
+  - manipulators
+  - robotics
+  - transformation matrices
+tags:
+  - kinematics
+  - manipulators
+  - mathematics
+  - robotics
+learning_objectives:
+  - "Understand forward kinematics using DH parameters"
+  - "Implement inverse kinematics algorithms"
+  - "Calculate Jacobian matrices for velocity analysis"
+  - "Apply kinematics to real robotic arms"
+difficulty_level: intermediate
+ros_version: humble
+prerequisites:
+  - "Chapter 1: ROS 2 Nodes & Lifecycle"
+  - "Linear algebra basics"
+  - "Python programming"
+estimated_time: 90
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: false
+---
+
+# Chapter 1: Robot Kinematics
+
+## Introduction
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Kinematics is the study of motion without considering forces. For robots, it helps us understand how the robot's joints relate to the position of its end-effector (the robot's "hand"). Think of it like understanding how your shoulder, elbow, and wrist movements determine where your hand ends up.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Robot kinematics provides the mathematical framework for mapping joint configurations to end-effector poses (forward kinematics) and vice versa (inverse kinematics). This chapter covers the Denavit-Hartenberg convention, analytical and numerical IK solutions, and Jacobian-based velocity control.
+</PersonalizedSection>
+
+## 1.1 Coordinate Transformations
+
+### Homogeneous Transformations
+
+A 3D transformation combines rotation and translation:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+import numpy as np
+
+class Transform3D:
+    """3D homogeneous transformation matrix"""
+
+    def __init__(self, rotation=None, translation=None):
+        """Create transformation from rotation matrix and translation vector"""
+        if rotation is None:
+            rotation = np.eye(3)
+        if translation is None:
+            translation = np.zeros(3)
+
+        self.matrix = np.eye(4)
+        self.matrix[:3, :3] = rotation
+        self.matrix[:3, 3] = translation
+
+    @classmethod
+    def from_rpy(cls, roll, pitch, yaw, x=0, y=0, z=0):
+        """Create transformation from RPY angles and translation"""
+        # Roll rotation
+        Rx = np.array([
+            [1, 0, 0],
+            [0, np.cos(roll), -np.sin(roll)],
+            [0, np.sin(roll), np.cos(roll)]
+        ])
+
+        # Pitch rotation
+        Ry = np.array([
+            [np.cos(pitch), 0, np.sin(pitch)],
+            [0, 1, 0],
+            [-np.sin(pitch), 0, np.cos(pitch)]
+        ])
+
+        # Yaw rotation
+        Rz = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw), np.cos(yaw), 0],
+            [0, 0, 1]
+        ])
+
+        # Combined rotation
+        rotation = Rz @ Ry @ Rx
+        translation = np.array([x, y, z])
+
+        return cls(rotation, translation)
+
+    def inverse(self):
+        """Compute inverse transformation"""
+        R = self.matrix[:3, :3]
+        t = self.matrix[:3, 3]
+
+        inv_R = R.T
+        inv_t = -inv_R @ t
+
+        result = Transform3D()
+        result.matrix[:3, :3] = inv_R
+        result.matrix[:3, 3] = inv_t
+
+        return result
+
+    def __matmul__(self, other):
+        """Compose transformations"""
+        result = Transform3D()
+        result.matrix = self.matrix @ other.matrix
+        return result
+```
+
+## 1.2 Forward Kinematics
+
+### Denavit-Hartenberg Parameters
+
+The DH convention provides a systematic way to assign coordinate frames to robot links:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class DHRobot:
+    """Robot kinematics using Denavit-Hartenberg parameters"""
+
+    def __init__(self, dh_params):
+        """
+        dh_params: List of (a, alpha, d, theta_offset) for each joint
+        a: link length (distance along x_i-1)
+        alpha: link twist (rotation about x_i-1)
+        d: link offset (distance along z_i)
+        theta_offset: joint angle offset (rotation about z_i)
+        """
+        self.dh_params = dh_params
+        self.num_joints = len(dh_params)
+
+    def dh_transform(self, a, alpha, d, theta):
+        """Create transformation matrix from DH parameters"""
+        ct = np.cos(theta)
+        st = np.sin(theta)
+        ca = np.cos(alpha)
+        sa = np.sin(alpha)
+
+        T = np.array([
+            [ct, -st*ca, st*sa, a*ct],
+            [st, ct*ca, -ct*sa, a*st],
+            [0, sa, ca, d],
+            [0, 0, 0, 1]
+        ])
+
+        return T
+
+    def forward_kinematics(self, joint_angles):
+        """Compute forward kinematics for all links"""
+        T = np.eye(4)
+        transforms = [T.copy()]
+
+        for i, (a, alpha, d, theta_offset) in enumerate(self.dh_params):
+            theta = joint_angles[i] + theta_offset
+            T_i = self.dh_transform(a, alpha, d, theta)
+            T = T @ T_i
+            transforms.append(T.copy())
+
+        return transforms
+
+    def get_end_effector_pose(self, joint_angles):
+        """Get end-effector position and orientation"""
+        transforms = self.forward_kinematics(joint_angles)
+        T_ee = transforms[-1]
+
+        position = T_ee[:3, 3]
+        rotation = T_ee[:3, :3]
+
+        # Convert rotation matrix to RPY
+        rpy = self.rotation_to_rpy(rotation)
+
+        return position, rpy
+
+    def rotation_to_rpy(self, R):
+        """Convert rotation matrix to roll-pitch-yaw angles"""
+        sy = np.sqrt(R[0, 0]**2 + R[1, 0]**2)
+
+        singular = sy < 1e-6
+
+        if not singular:
+            x = np.arctan2(R[2, 1], R[2, 2])
+            y = np.arctan2(-R[2, 0], sy)
+            z = np.arctan2(R[1, 0], R[0, 0])
+        else:
+            x = np.arctan2(-R[1, 2], R[1, 1])
+            y = np.arctan2(-R[2, 0], sy)
+            z = 0
+
+        return np.array([x, y, z])
+```
+
+### Example: 2-DOF Planar Arm
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class PlanarArm2D(DHRobot):
+    """2-DOF planar manipulator"""
+
+    def __init__(self, L1=1.0, L2=1.0):
+        # DH parameters for 2-DOF planar arm
+        dh_params = [
+            (L1, 0, 0, 0),    # Link 1
+            (L2, 0, 0, 0)     # Link 2
+        ]
+        super().__init__(dh_params)
+        self.L1 = L1
+        self.L2 = L2
+
+    def forward_kinematics_analytical(self, theta1, theta2):
+        """Analytical forward kinematics for 2-DOF planar arm"""
+        # End-effector position
+        x = self.L1 * np.cos(theta1) + self.L2 * np.cos(theta1 + theta2)
+        y = self.L1 * np.sin(theta1) + self.L2 * np.sin(theta1 + theta2)
+
+        # End-effector orientation (angle of last link)
+        theta = theta1 + theta2
+
+        return np.array([x, y]), theta
+
+    def plot_workspace(self, num_points=100):
+        """Plot the reachable workspace"""
+        import matplotlib.pyplot as plt
+
+        angles1 = np.linspace(-np.pi, np.pi, num_points)
+        angles2 = np.linspace(-np.pi, np.pi, num_points)
+
+        workspace_points = []
+
+        for th1 in angles1[::5]:  # Sample for visualization
+            for th2 in angles2[::5]:
+                pos, _ = self.forward_kinematics_analytical(th1, th2)
+                workspace_points.append(pos)
+
+        workspace_points = np.array(workspace_points)
+
+        plt.figure(figsize=(8, 8))
+        plt.scatter(workspace_points[:, 0], workspace_points[:, 1], s=1, alpha=0.5)
+        plt.xlabel('X (m)')
+        plt.ylabel('Y (m)')
+        plt.title('2-DOF Planar Arm Workspace')
+        plt.grid(True)
+        plt.axis('equal)
+        plt.show()
+```
+
+## 1.3 Inverse Kinematics
+
+### Numerical IK using Jacobian
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class IKSolver:
+    """Numerical inverse kinematics solver using Jacobian"""
+
+    def __init__(self, robot, max_iterations=100, tolerance=1e-6):
+        self.robot = robot
+        self.max_iterations = max_iterations
+        self.tolerance = tolerance
+
+    def compute_jacobian(self, joint_angles):
+        """Compute the geometric Jacobian matrix"""
+        epsilon = 1e-6
+        n = len(joint_angles)
+
+        # Get current end-effector pose
+        pos, _ = self.robot.get_end_effector_pose(joint_angles)
+
+        J = np.zeros((6, n))
+
+        # Numerical differentiation
+        for i in range(n):
+            angles_plus = joint_angles.copy()
+            angles_plus[i] += epsilon
+
+            pos_plus, _ = self.robot.get_end_effector_pose(angles_plus)
+
+            # Linear velocity part
+            J[:3, i] = (pos_plus - pos) / epsilon
+
+            # Angular velocity part (simplified)
+            # For full implementation, use analytical methods
+            angles_minus = joint_angles.copy()
+            angles_minus[i] -= epsilon
+
+            _, rpy_minus = self.robot.get_end_effector_pose(joint_angles)
+            _, rpy_plus = self.robot.get_end_effector_pose(angles_plus)
+
+            J[3:, i] = (rpy_plus - rpy_minus) / (2 * epsilon)
+
+        return J
+
+    def solve(self, target_pose, initial_guess=None):
+        """Solve inverse kinematics using Newton-Raphson"""
+        if initial_guess is None:
+            joint_angles = np.zeros(self.robot.num_joints)
+        else:
+            joint_angles = initial_guess.copy()
+
+        target_pos, target_rpy = target_pose
+
+        for iteration in range(self.max_iterations):
+            # Current pose
+            current_pos, current_rpy = self.robot.get_end_effector_pose(joint_angles)
+
+            # Error
+            error = np.concatenate([
+                target_pos - current_pos,
+                target_rpy - current_rpy
+            ])
+
+            # Check convergence
+            if np.linalg.norm(error) < self.tolerance:
+                return True, joint_angles
+
+            # Compute Jacobian
+            J = self.compute_jacobian(joint_angles)
+
+            # Damped least squares (Levenberg-Marquardt)
+            lambda_ = 0.1
+            J_T = J.T
+            delta_q = J_T @ np.linalg.inv(J @ J_T + lambda_**2 * np.eye(6)) @ error
+
+            # Update joint angles
+            joint_angles += delta_q
+
+        return False, joint_angles  # Failed to converge
+```
+
+### Analytical IK for 2-DOF Planar Arm
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class PlanarArmIK:
+    """Analytical inverse kinematics for 2-DOF planar arm"""
+
+    def __init__(self, L1=1.0, L2=1.0):
+        self.L1 = L1
+        self.L2 = L2
+
+    def solve(self, x, y, elbow_up=True):
+        """Solve IK for target position (x, y)"""
+        # Distance to target
+        d = np.sqrt(x**2 + y**2)
+
+        # Check if target is reachable
+        if d > self.L1 + self.L2:
+            print("Target too far!")
+            return None
+        if d < abs(self.L1 - self.L2):
+            print("Target too close!")
+            return None
+
+        # Law of cosines for angle 2
+        cos_theta2 = (d**2 - self.L1**2 - self.L2**2) / (2 * self.L1 * self.L2)
+
+        # Clamp to valid range
+        cos_theta2 = np.clip(cos_theta2, -1, 1)
+
+        # Two solutions for theta2
+        theta2_1 = np.arccos(cos_theta2)
+        theta2_2 = -np.arccos(cos_theta2)
+
+        # Choose solution
+        theta2 = theta2_1 if elbow_up else theta2_2
+
+        # Calculate theta1
+        beta = np.arctan2(y, x)
+        alpha = np.arctan2(self.L2 * np.sin(theta2),
+                          self.L1 + self.L2 * np.cos(theta2))
+        theta1 = beta - alpha
+
+        return np.array([theta1, theta2])
+
+    def solve_all(self, x, y):
+        """Return all valid solutions"""
+        solutions = []
+
+        # Elbow up
+        sol1 = self.solve(x, y, elbow_up=True)
+        if sol1 is not None:
+            solutions.append(sol1)
+
+        # Elbow down
+        sol2 = self.solve(x, y, elbow_up=False)
+        if sol2 is not None:
+            solutions.append(sol2)
+
+        return solutions
+```
+
+## 1.4 Velocity Kinematics and Jacobians
+
+### Geometric Jacobian
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class VelocityKinematics:
+    """Velocity kinematics using geometric Jacobian"""
+
+    def __init__(self, robot):
+        self.robot = robot
+
+    def compute_geometric_jacobian(self, joint_angles):
+        """Compute geometric Jacobian matrix"""
+        T = self.robot.forward_kinematics(joint_angles)
+
+        n = self.robot.num_joints
+        J = np.zeros((6, n))
+
+        for i in range(n):
+            # Z-axis of frame i in base frame
+            z_i = T[i][:3, 2]
+
+            # Position of end-effector in base frame
+            p_ee = T[-1][:3, 3]
+
+            # Position of frame i in base frame
+            p_i = T[i][:3, 3]
+
+            # Linear velocity contribution
+            J[:3, i] = np.cross(z_i, p_ee - p_i)
+
+            # Angular velocity contribution
+            J[3:, i] = z_i
+
+        return J
+
+    def jacobian_transpose_method(self, joint_angles, target_velocity):
+        """Move end-effector using Jacobian transpose method"""
+        J = self.compute_geometric_jacobian(joint_angles)
+
+        # Joint velocities using transpose
+        alpha = 0.1  # Step size
+        q_dot = alpha * J.T @ target_velocity
+
+        return q_dot
+
+    def resolved_rate_motion(self, joint_angles, target_velocity, dt=0.01):
+        """Resolved rate motion control"""
+        J = self.compute_geometric_jacobian(joint_angles)
+
+        # Check if Jacobian is full rank
+        if np.linalg.matrix_rank(J) < min(J.shape):
+            print("Near singularity!")
+            # Use damped least squares
+            lambda_ = 0.1
+            J_pinv = J.T @ np.linalg.inv(J @ J.T + lambda_**2 * np.eye(6))
+        else:
+            J_pinv = np.linalg.pinv(J)
+
+        # Compute joint velocities
+        q_dot = J_pinv @ target_velocity
+
+        # Update joint angles
+        new_angles = joint_angles + q_dot * dt
+
+        return new_angles, q_dot
+```
+
+## 1.5 Singularity Analysis
+
+### Detecting and Handling Singularities
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class SingularityAnalysis:
+    """Analyze and handle singularities in robot kinematics"""
+
+    def __init__(self, robot):
+        self.robot = robot
+
+    def check_singularity(self, joint_angles, threshold=0.01):
+        """Check if robot is near singularity using manipulability"""
+        J = self.compute_geometric_jacobian(joint_angles)
+
+        # Manipulability measure (Yoshikawa)
+        manipulability = np.sqrt(np.linalg.det(J @ J.T))
+
+        if manipulability < threshold:
+            return True, manipulability
+
+        return False, manipulability
+
+    def null_space_projection(self, joint_angles, primary_task, secondary_task=None):
+        """Null space control for redundancy resolution"""
+        J = self.compute_geometric_jacobian(joint_angles)
+
+        # Primary task solution
+        J_pinv = np.linalg.pinv(J)
+        q_dot_primary = J_pinv @ primary_task
+
+        if secondary_task is None:
+            return q_dot_primary
+
+        # Null space projector
+        I = np.eye(len(joint_angles))
+        N = I - J_pinv @ J
+
+        # Secondary task in null space
+        q_dot_secondary = N @ secondary_task
+
+        # Combine tasks
+        q_dot = q_dot_primary + q_dot_secondary
+
+        return q_dot
+
+    singularity_types = {
+        "wrist_singularities": "Last three joints aligned",
+        "shoulder_singularities": "Wrist center at shoulder axis",
+        "elbow_singularities": "Elbow fully extended or retracted"
+    }
+```
+
+## 1.6 ROS 2 Integration
+
+### Kinematics Service Node
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy, geometry_msgs, numpy
+
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Pose, Point, Quaternion
+from std_msgs.msg import Float64MultiArray
+from rclpy.qos import QoSProfile
+import numpy as np
+
+class KinematicsNode(Node):
+    """ROS 2 node for robot kinematics services"""
+
+    def __init__(self):
+        super().__init__('kinematics_node')
+
+        # Initialize robot
+        self.robot = PlanarArm2D(L1=1.0, L2=1.0)
+        self.ik_solver = IKSolver(self.robot)
+        self.vel_kin = VelocityKinematics(self.robot)
+
+        # Publishers
+        self.joint_state_pub = self.create_publisher(
+            Float64MultiArray, '/joint_states', 10)
+
+        # Subscribers
+        self.pose_sub = self.create_subscription(
+            Pose, '/target_pose', self.pose_callback, 10)
+
+        # Current joint angles
+        self.joint_angles = np.zeros(2)
+
+        # Timer for publishing
+        self.timer = self.create_timer(0.1, self.publish_joint_states)
+
+    def pose_callback(self, msg):
+        """Handle target pose messages"""
+        # Extract position and orientation
+        target_pos = np.array([msg.position.x, msg.position.y])
+        target_theta = self.quaternion_to_yaw(msg.orientation)
+
+        # Solve IK
+        target_pose = (target_pos, target_theta)
+        success, angles = self.ik_solver.solve(target_pose, self.joint_angles)
+
+        if success:
+            self.joint_angles = angles
+            self.get_logger().info(f'IK solution: {angles}')
+        else:
+            self.get_logger().warn('IK failed to converge')
+
+    def quaternion_to_yaw(self, q):
+        """Convert quaternion to yaw angle"""
+        return np.arctan2(2 * (q.w * q.z + q.x * q.y),
+                          1 - 2 * (q.y * q.y + q.z * q.z))
+
+    def yaw_to_quaternion(self, yaw):
+        """Convert yaw angle to quaternion"""
+        q = Quaternion()
+        q.w = np.cos(yaw / 2)
+        q.z = np.sin(yaw / 2)
+        return q
+
+    def publish_joint_states(self):
+        """Publish current joint angles"""
+        msg = Float64MultiArray()
+        msg.data = self.joint_angles.tolist()
+        self.joint_state_pub.publish(msg)
+
+    def forward_kinematics_service(self, request, response):
+        """Service for forward kinematics"""
+        joint_angles = np.array(request.joint_angles)
+        position, rpy = self.robot.get_end_effector_pose(joint_angles)
+
+        response.position = Point(x=position[0], y=position[1], z=position[2])
+        response.orientation = self.yaw_to_quaternion(rpy[2])
+
+        return response
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = KinematicsNode()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## Exercises
+
+### Exercise 1.1: Forward Kinematics for 3-DOF Arm (Beginner)
+
+**Learning Objective**: Implement forward kinematics for a 3-DOF robot arm
+
+#### Problem
+Create a 3-DOF planar arm with link lengths L1=0.5m, L2=0.4m, L3=0.3m.
+Implement forward kinematics to calculate end-effector position and orientation.
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class PlanarArm3D:
+    def __init__(self, L1=0.5, L2=0.4, L3=0.3):
+        self.L1 = L1
+        self.L2 = L2
+        self.L3 = L3
+
+    def forward_kinematics(self, theta1, theta2, theta3):
+        """Calculate end-effector position and orientation"""
+        # Position of joint 2
+        x2 = self.L1 * np.cos(theta1)
+        y2 = self.L1 * np.sin(theta1)
+
+        # Position of joint 3
+        x3 = x2 + self.L2 * np.cos(theta1 + theta2)
+        y3 = y2 + self.L2 * np.sin(theta1 + theta2)
+
+        # End-effector position
+        x_ee = x3 + self.L3 * np.cos(theta1 + theta2 + theta3)
+        y_ee = y3 + self.L3 * np.sin(theta1 + theta2 + theta3)
+
+        # End-effector orientation
+        theta_ee = theta1 + theta2 + theta3
+
+        return np.array([x_ee, y_ee]), theta_ee
+
+    def get_all_joint_positions(self, theta1, theta2, theta3):
+        """Get positions of all joints for visualization"""
+        positions = []
+
+        # Base
+        positions.append([0, 0])
+
+        # Joint 2
+        positions.append([self.L1 * np.cos(theta1),
+                        self.L1 * np.sin(theta1)])
+
+        # Joint 3
+        positions.append([
+            positions[1][0] + self.L2 * np.cos(theta1 + theta2),
+            positions[1][1] + self.L2 * np.sin(theta1 + theta2)
+        ])
+
+        # End-effector
+        positions.append([
+            positions[2][0] + self.L3 * np.cos(theta1 + theta2 + theta3),
+            positions[2][1] + self.L3 * np.sin(theta1 + theta2 + theta3)
+        ])
+
+        return positions
+```
+
+### Exercise 1.2: Workspace Visualization (Beginner)
+
+**Learning Objective**: Visualize the reachable workspace of a robot
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: matplotlib, numpy
+
+def plot_arm_workspace(arm, num_points=50):
+    """Plot the reachable workspace of a planar arm"""
+    import matplotlib.pyplot as plt
+
+    # Generate joint angles
+    theta1_range = np.linspace(-np.pi, np.pi, num_points)
+    theta2_range = np.linspace(-np.pi, np.pi, num_points)
+
+    # Compute workspace points
+    workspace = []
+
+    for t1 in theta1_range[::5]:  # Subsample for efficiency
+        for t2 in theta2_range[::5]:
+            pos, _ = arm.forward_kinematics(t1, t2)
+            if np.linalg.norm(pos) <= arm.L1 + arm.L2:  # Valid configurations
+                workspace.append(pos)
+
+    workspace = np.array(workspace)
+
+    # Plot
+    plt.figure(figsize=(8, 8))
+    plt.scatter(workspace[:, 0], workspace[:, 1], s=1, alpha=0.5)
+    plt.xlabel('X (m)')
+    plt.ylabel('Y (m)')
+    plt.title('Robot Workspace')
+    plt.grid(True)
+    plt.axis('equal')
+
+    # Draw arm base
+    plt.plot(0, 0, 'ko', markersize=10)
+
+    # Draw reach boundaries
+    circle_outer = plt.Circle((0, 0), arm.L1 + arm.L2, fill=False,
+                             color='red', linestyle='--', label='Maximum reach')
+    circle_inner = plt.Circle((0, 0), abs(arm.L1 - arm.L2), fill=False,
+                             color='blue', linestyle='--', label='Minimum reach')
+    plt.gca().add_patch(circle_outer)
+    plt.gca().add_patch(circle_inner)
+    plt.legend()
+    plt.show()
+```
+
+### Exercise 1.3: Jacobian Computation (Intermediate)
+
+**Learning Objective**: Analytically compute Jacobian for 2-DOF arm
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+def analytical_jacobian_2dof(theta1, theta2, L1, L2):
+    """Analytical Jacobian for 2-DOF planar arm"""
+
+    # Partial derivatives of x
+    J11 = -L1 * np.sin(theta1) - L2 * np.sin(theta1 + theta2)
+    J12 = -L2 * np.sin(theta1 + theta2)
+
+    # Partial derivatives of y
+    J21 = L1 * np.cos(theta1) + L2 * np.cos(theta1 + theta2)
+    J22 = L2 * np.cos(theta1 + theta2)
+
+    # For planar arm, we also want orientation
+    J31 = 1  # d(theta_ee)/d(theta1)
+    J32 = 1  # d(theta_ee)/d(theta2)
+
+    J = np.array([
+        [J11, J12],
+        [J21, J22],
+        [J31, J32]
+    ])
+
+    return J
+```
+
+### Exercise 1.4: IK with Joint Limits (Intermediate)
+
+**Learning Objective**: Implement IK with joint limits and constraints
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+class ConstrainedIK:
+    def __init__(self, arm, joint_limits):
+        self.arm = arm
+        self.joint_limits = joint_limits  # [(min1, max1), (min2, max2), ...]
+
+    def solve_with_limits(self, target_pos, initial_guess=None):
+        """IK with joint limits using constrained optimization"""
+        from scipy.optimize import minimize
+
+        if initial_guess is None:
+            initial_guess = np.zeros(len(self.joint_limits))
+
+        # Objective function: minimize distance to target
+        def objective(q):
+            pos, _ = self.arm.forward_kinematics(q[0], q[1])
+            return np.sum((pos - target_pos)**2)
+
+        # Joint limits constraint
+        bounds = self.joint_limits
+
+        # Solve
+        result = minimize(objective, initial_guess, bounds=bounds,
+                         method='SLSQP')
+
+        if result.success:
+            return True, result.x
+        else:
+            return False, result.x
+
+    def solve_with_weights(self, target_pos, joint_weights=None):
+        """Weighted IK to prefer certain joint configurations"""
+        if joint_weights is None:
+            joint_weights = np.ones(2)
+
+        def objective(q):
+            # Position error
+            pos, _ = self.arm.forward_kinematics(q[0], q[1])
+            pos_error = np.sum((pos - target_pos)**2)
+
+            # Joint configuration penalty
+            config_penalty = np.sum(joint_weights * q**2)
+
+            return pos_error + 0.01 * config_penalty
+
+        # Use initial guess from geometric IK if possible
+        initial = self.arm.solve(target_pos[0], target_pos[1])
+        if initial is None:
+            initial = np.zeros(2)
+
+        bounds = self.joint_limits
+        result = minimize(objective, initial, bounds=bounds)
+
+        return result.success, result.x
+```
+
+### Exercise 1.5: Singularity Avoidance (Advanced)
+
+**Learning Objective**: Implement singularity avoidance using damped least squares
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+class SingularityAvoidanceIK:
+    def __init__(self, robot, damping=0.1):
+        self.robot = robot
+        self.damping = damping
+
+    def compute_damped_pseudoinverse(self, J):
+        """Compute damped pseudoinverse for singularity robustness"""
+        # SVD of Jacobian
+        U, S, Vt = np.linalg.svd(J)
+
+        # Damp singular values
+        S_damped = S**2 + self.damping**2
+        S_inv = S / S_damped
+
+        # Reconstruct pseudoinverse
+        J_pinv = Vt.T @ np.diag(S_inv) @ U.T
+
+        return J_pinv
+
+    def adaptive_damping(self, J):
+        """Adaptive damping based on manipulability"""
+        # Manipulability
+        w = np.sqrt(np.linalg.det(J @ J.T))
+
+        # Adaptive damping factor
+        if w < 0.1:
+            damping = 1.0 - w/0.1
+        else:
+            damping = 0.0
+
+        # Clamp
+        damping = np.clip(damping, 0.0, 1.0)
+
+        return damping
+
+    def solve_with_singularity_avoidance(self, target_pose, initial_guess):
+        """IK with automatic singularity avoidance"""
+        q = initial_guess.copy()
+
+        for iteration in range(100):
+            # Current pose
+            current_pose = self.robot.get_end_effector_pose(q)
+
+            # Error
+            error = target_pose - current_pose
+
+            # Check convergence
+            if np.linalg.norm(error) < 1e-6:
+                return True, q
+
+            # Compute Jacobian
+            J = self.robot.compute_jacobian(q)
+
+            # Adaptive damping
+            damping = self.adaptive_damping(J)
+
+            # Damped least squares solution
+            J_pinv = self.compute_damped_pseudoinverse(J, damping)
+            delta_q = J_pinv @ error
+
+            # Update
+            q += delta_q
+
+        return False, q
+```
+
+## Summary
+
+In this chapter, we covered:
+- Coordinate transformations and homogeneous coordinates
+- Forward kinematics using Denavit-Hartenberg parameters
+- Analytical and numerical inverse kinematics
+- Jacobian matrices for velocity kinematics
+- Singularity detection and avoidance
+- ROS 2 integration for kinematics services
+
+Key takeaways:
+- Forward kinematics maps joint angles to end-effector pose
+- Inverse kinematics is more complex and may have multiple solutions
+- Jacobian relates joint velocities to end-effector velocities
+- Singularities occur when the robot loses degrees of freedom
+- Numerical methods like Jacobian transpose or damped least squares handle complex cases
+- ROS 2 provides services for real-time kinematics computation
+
+In the next chapter, we'll explore navigation and path planning algorithms for mobile robots.

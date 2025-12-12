@@ -47,8 +47,8 @@
   },
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Module 1: ROS 2 Fundamentals",
-    "permalink": "/hackathon1_repeat/docs/category/module-1-ros-2-fundamentals"
+    "title": "Chapter 1: ROS 2 Nodes & Lifecycle",
+    "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-nodes-lifecycle"
   },
   "next": {
     "title": "Module 2: NVIDIA Isaac Sim",

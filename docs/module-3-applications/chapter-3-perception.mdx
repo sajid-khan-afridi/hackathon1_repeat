@@ -1,0 +1,1249 @@
+---
+title: "Chapter 3: Perception & Sensor Fusion"
+sidebar_position: 3
+description: "Learn perception algorithms and sensor fusion techniques for autonomous robots, including object detection, tracking, and state estimation"
+keywords:
+  - perception
+  - sensor fusion
+  - Kalman filter
+  - object detection
+  - computer vision
+  - point cloud
+  - state estimation
+  - Bayesian filtering
+tags:
+  - perception
+  - sensor-fusion
+  - computer-vision
+  - autonomous-systems
+learning_objectives:
+  - "Implement Kalman filter for sensor fusion"
+  - "Apply computer vision for object detection"
+  - "Process and filter point cloud data"
+  - "Design robust perception pipelines"
+difficulty_level: advanced
+ros_version: humble
+prerequisites:
+  - "Chapter 2: Navigation & Path Planning"
+  - "Linear algebra and probability"
+  - "OpenCV basics"
+estimated_time: 120
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 3: Perception & Sensor Fusion
+
+## Introduction
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Perception is how robots understand their environment through sensors. Think of it like combining information from your eyes, ears, and touch to build a complete picture of what's around you.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Robot perception involves processing multi-modal sensor data to estimate the state of the environment. This chapter covers Bayesian filtering for state estimation, sensor fusion architectures, computer vision techniques, and robust perception pipelines suitable for autonomous navigation.
+</PersonalizedSection>
+
+## 3.1 Bayesian State Estimation
+
+### Kalman Filter Implementation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, scipy
+
+import numpy as np
+from scipy.linalg import expm
+
+class KalmanFilter:
+    """Extended Kalman Filter for nonlinear state estimation"""
+
+    def __init__(self, state_dim, measurement_dim):
+        self.state_dim = state_dim
+        self.measurement_dim = measurement_dim
+
+        # State vector and covariance
+        self.x = np.zeros(state_dim)  # State estimate
+        self.P = np.eye(state_dim)    # State covariance
+
+        # Process model
+        self.F = np.eye(state_dim)    # State transition matrix
+        self.Q = np.eye(state_dim)    # Process noise covariance
+
+        # Measurement model
+        self.H = np.zeros((measurement_dim, state_dim))  # Measurement matrix
+        self.R = np.eye(measurement_dim)                # Measurement noise covariance
+
+    def predict(self, u=None, dt=1.0):
+        """Predict state forward in time"""
+        if u is not None:
+            self.x = self.F @ self.x + u
+        else:
+            self.x = self.F @ self.x
+
+        # Predict covariance
+        self.P = self.F @ self.P @ self.F.T + self.Q
+
+        return self.x, self.P
+
+    def update(self, z):
+        """Update state with measurement"""
+        # Innovation
+        y = z - self.H @ self.x
+
+        # Innovation covariance
+        S = self.H @ self.P @ self.H.T + self.R
+
+        # Kalman gain
+        K = self.P @ self.H.T @ np.linalg.inv(S)
+
+        # State update
+        self.x = self.x + K @ y
+
+        # Covariance update (Joseph form for numerical stability)
+        I_KH = np.eye(self.state_dim) - K @ self.H
+        self.P = I_KH @ self.P @ I_KH.T + K @ self.R @ K.T
+
+        return self.x, self.P, K, y
+
+class ExtendedKalmanFilter(KalmanFilter):
+    """Extended Kalman Filter for nonlinear systems"""
+
+    def __init__(self, state_dim, measurement_dim):
+        super().__init__(state_dim, measurement_dim)
+        self.f = None  # State transition function
+        self.h = None  # Measurement function
+
+    def predict(self, u=None, dt=1.0):
+        """Predict with nonlinear dynamics"""
+        # Use nonlinear state transition
+        if self.f is not None:
+            if u is not None:
+                self.x = self.f(self.x, u, dt)
+            else:
+                self.x = self.f(self.x, None, dt)
+
+            # Compute Jacobian numerically
+            self.F = self.compute_jacobian(self.x, u, dt)
+        else:
+            # Fall back to linear prediction
+            super().predict(u, dt)
+
+        # Predict covariance
+        self.P = self.F @ self.P @ self.F.T + self.Q
+
+        return self.x, self.P
+
+    def update(self, z):
+        """Update with nonlinear measurement"""
+        # Use nonlinear measurement
+        if self.h is not None:
+            # Predicted measurement
+            z_pred = self.h(self.x)
+
+            # Innovation
+            y = z - z_pred
+
+            # Compute measurement Jacobian
+            self.H = self.compute_measurement_jacobian(self.x)
+        else:
+            # Linear measurement
+            y = z - self.H @ self.x
+
+        # Rest is same as linear Kalman
+        S = self.H @ self.P @ self.H.T + self.R
+        K = self.P @ self.H.T @ np.linalg.inv(S)
+        self.x = self.x + K @ y
+
+        I_KH = np.eye(self.state_dim) - K @ self.H
+        self.P = I_KH @ self.P @ I_KH.T + K @ self.R @ K.T
+
+        return self.x, self.P, K, y
+
+    def compute_jacobian(self, x, u, dt, epsilon=1e-6):
+        """Numerically compute state Jacobian"""
+        F = np.zeros((self.state_dim, self.state_dim))
+
+        for i in range(self.state_dim):
+            x_plus = x.copy()
+            x_plus[i] += epsilon
+            x_minus = x.copy()
+            x_minus[i] -= epsilon
+
+            if u is not None:
+                f_plus = self.f(x_plus, u, dt)
+                f_minus = self.f(x_minus, u, dt)
+            else:
+                f_plus = self.f(x_plus, None, dt)
+                f_minus = self.f(x_minus, None, dt)
+
+            F[:, i] = (f_plus - f_minus) / (2 * epsilon)
+
+        return F
+```
+
+### Multi-Sensor Fusion
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class MultiSensorFusion:
+    """Fuse multiple sensors using Kalman filtering"""
+
+    def __init__(self):
+        # State: [x, y, vx, vy]
+        self.ekf = ExtendedKalmanFilter(state_dim=4, measurement_dim=2)
+
+        # Process model
+        dt = 0.1
+        self.ekf.F = np.array([
+            [1, 0, dt, 0],
+            [0, 1, 0, dt],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ])
+
+        # Process noise (model uncertainty)
+        self.ekf.Q = np.array([
+            [0.01, 0, 0, 0],
+            [0, 0.01, 0, 0],
+            [0, 0, 0.1, 0],
+            [0, 0, 0, 0.1]
+        ])
+
+        # Measurement functions
+        self.ekf.h = lambda x: x[:2]  # Position measurement
+
+    def fuse_gps_imu(self, gps_data, imu_data, dt):
+        """Fuse GPS position and IMU velocity"""
+        # Predict with IMU acceleration
+        acc = np.array([imu_data['ax'], imu_data['ay'], 0, 0])
+        self.ekf.predict(u=acc, dt=dt)
+
+        # Update with GPS position
+        if gps_data is not None:
+            z = np.array([gps_data['x'], gps_data['y']])
+            self.ekf.H = np.array([
+                [1, 0, 0, 0],
+                [0, 1, 0, 0]
+            ])
+
+            # GPS noise characteristics
+            self.ekf.R = np.array([
+                [gps_data['var_x'], 0],
+                [0, gps_data['var_y']]
+            ])
+
+            self.ekf.update(z)
+
+        return self.ekf.x
+
+    def fuse_camera_lidar(self, camera_detections, lidar_detections):
+        """Fuse camera and LiDAR object detections"""
+        # Association logic
+        associations = self.associate_detections(camera_detections, lidar_detections)
+
+        fused_objects = []
+        for cam_idx, lid_idx in associations:
+            cam_obj = camera_detections[cam_idx]
+            lid_obj = lidar_detections[lid_idx]
+
+            # Fuse position (weighted average)
+            weight_cam = 1.0 / (cam_obj['var_pos'] + 1e-6)
+            weight_lid = 1.0 / (lid_obj['var_pos'] + 1e-6)
+
+            fused_pos = (weight_cam * cam_obj['position'] +
+                        weight_lid * lid_obj['position']) / (weight_cam + weight_lid)
+
+            # Fuse velocity (primarily from camera)
+            fused_vel = cam_obj.get('velocity', np.zeros(3))
+
+            fused_obj = {
+                'position': fused_pos,
+                'velocity': fused_vel,
+                'class': cam_obj['class'],
+                'confidence': (cam_obj['confidence'] + lid_obj['confidence']) / 2
+            }
+            fused_objects.append(fused_obj)
+
+        return fused_objects
+
+    def associate_detections(self, cam_dets, lid_dets, max_dist=2.0):
+        """Associate camera and LiDAR detections using Hungarian algorithm"""
+        from scipy.optimize import linear_sum_assignment
+
+        # Compute cost matrix
+        cost_matrix = np.zeros((len(cam_dets), len(lid_dets)))
+
+        for i, cam_det in enumerate(cam_dets):
+            for j, lid_det in enumerate(lid_dets):
+                # Distance as cost
+                dist = np.linalg.norm(cam_det['position'] - lid_det['position'])
+                cost_matrix[i, j] = dist if dist < max_dist else 1e6
+
+        # Solve assignment
+        row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+        # Filter valid associations
+        associations = []
+        for i, j in zip(row_indices, col_indices):
+            if cost_matrix[i, j] < max_dist:
+                associations.append((i, j))
+
+        return associations
+```
+
+## 3.2 Computer Vision for Robotics
+
+### Object Detection with YOLO
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: cv2, numpy, ultralytics
+
+import cv2
+import numpy as np
+from ultralytics import YOLO
+
+class RobotObjectDetector:
+    """Object detection for robotics applications"""
+
+    def __init__(self, model_path="yolov8n.pt", confidence=0.5):
+        self.model = YOLO(model_path)
+        self.confidence = confidence
+
+        # Classes relevant for robotics
+        self.robot_classes = ['person', 'car', 'truck', 'bus', 'motorcycle',
+                            'bicycle', 'traffic light', 'stop sign', 'chair',
+                            'backpack', 'handbag', 'suitcase']
+
+    def detect_objects(self, image, camera_matrix=None, dist_coeffs=None):
+        """Detect objects in image"""
+        # Run inference
+        results = self.model(image, conf=self.confidence)
+
+        detections = []
+        for result in results:
+            boxes = result.boxes
+            if boxes is not None:
+                for box in boxes:
+                    # Extract box and confidence
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    conf = box.conf[0].cpu().numpy()
+                    cls = int(box.cls[0].cpu().numpy())
+
+                    # Get class name
+                    class_name = self.model.names[cls]
+
+                    # Filter for relevant classes
+                    if class_name in self.robot_classes:
+                        detection = {
+                            'class': class_name,
+                            'confidence': float(conf),
+                            'bbox': [int(x1), int(y1), int(x2), int(y2)],
+                            'center': [(x1 + x2) / 2, (y1 + y2) / 2]
+                        }
+
+                        # Estimate 3D position if camera parameters available
+                        if camera_matrix is not None and class_name in ['person', 'car']:
+                            detection['position_3d'] = self.estimate_3d_position(
+                                detection['bbox'], camera_matrix, dist_coeffs
+                            )
+
+                        detections.append(detection)
+
+        return detections
+
+    def estimate_3d_position(self, bbox, camera_matrix, dist_coeffs, object_heights=None):
+        """Estimate 3D position of object using bounding box"""
+        if object_heights is None:
+            object_heights = {
+                'person': 1.7,  # meters
+                'car': 1.5,
+                'truck': 2.5
+            }
+
+        # Get bounding box center
+        x_center = int((bbox[0] + bbox[2]) / 2)
+        y_bottom = int(bbox[3])  # Use bottom of box for ground contact
+
+        # Undistort point
+        if dist_coeffs is not None:
+            points = np.array([[x_center, y_bottom]], dtype=np.float32)
+            undistorted = cv2.undistortPoints(points, camera_matrix, dist_coeffs)
+            x_center, y_bottom = undistorted[0][0]
+
+        # Assume object rests on ground (z=0)
+        # Use camera height and angle to estimate distance
+        camera_height = 0.5  # meters above ground
+        pitch_angle = np.radians(30)  # camera pitch
+
+        # Simple triangulation
+        f = camera_matrix[0, 0]  # focal length
+        distance = camera_height / np.tan(pitch_angle + np.arctan((y_bottom - camera_matrix[1, 2]) / f))
+
+        # Get 3D position in camera frame
+        x_cam = (x_center - camera_matrix[0, 2]) * distance / f
+        z_cam = distance
+        y_cam = camera_height
+
+        return np.array([x_cam, y_cam, z_cam])
+
+    def track_objects(self, detections, previous_tracks):
+        """Track objects across frames using simple centroid tracking"""
+        if not previous_tracks:
+            # Initialize tracks
+            tracks = []
+            for i, det in enumerate(detections):
+                track = {
+                    'id': i,
+                    'positions': [det['center']],
+                    'classes': [det['class']],
+                    'confidence': det['confidence'],
+                    'last_seen': 0
+                }
+                tracks.append(track)
+            return tracks
+
+        # Match detections to existing tracks
+        tracks = previous_tracks.copy()
+        unmatched_dets = list(range(len(detections)))
+
+        for track in tracks:
+            track['last_seen'] += 1
+
+        # Simple nearest neighbor matching
+        for det_idx, det in enumerate(detections):
+            if det_idx not in unmatched_dets:
+                continue
+
+            best_track = None
+            best_dist = float('inf')
+
+            for track_idx, track in enumerate(tracks):
+                if track['last_seen'] > 5:  # Track lost
+                    continue
+
+                # Compare positions
+                prev_pos = track['positions'][-1]
+                dist = np.linalg.norm(np.array(det['center']) - np.array(prev_pos))
+
+                if dist < best_dist and dist < 50:  # Threshold
+                    best_dist = dist
+                    best_track = track_idx
+
+            if best_track is not None:
+                # Update track
+                tracks[best_track]['positions'].append(det['center'])
+                tracks[best_track]['classes'].append(det['class'])
+                tracks[best_track]['confidence'] = det['confidence']
+                tracks[best_track]['last_seen'] = 0
+                unmatched_dets.remove(det_idx)
+
+        # Create new tracks for unmatched detections
+        new_id = max([t['id'] for t in tracks]) + 1 if tracks else 0
+        for det_idx in unmatched_dets:
+            det = detections[det_idx]
+            track = {
+                'id': new_id,
+                'positions': [det['center']],
+                'classes': [det['class']],
+                'confidence': det['confidence'],
+                'last_seen': 0
+            }
+            tracks.append(track)
+            new_id += 1
+
+        # Remove old tracks
+        tracks = [t for t in tracks if t['last_seen'] <= 10]
+
+        return tracks
+```
+
+### Semantic Segmentation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: torch, torchvision, numpy
+
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+
+class SemanticSegmentationNetwork(nn.Module):
+    """Simple U-Net for semantic segmentation"""
+
+    def __init__(self, num_classes=19):
+        super().__init__()
+        # Encoder
+        self.enc1 = self.conv_block(3, 64)
+        self.enc2 = self.conv_block(64, 128)
+        self.enc3 = self.conv_block(128, 256)
+        self.enc4 = self.conv_block(256, 512)
+
+        # Decoder
+        self.dec4 = self.upconv_block(512, 256)
+        self.dec3 = self.upconv_block(256, 128)
+        self.dec2 = self.upconv_block(128, 64)
+        self.dec1 = nn.Conv2d(64, num_classes, kernel_size=1)
+
+        # Pooling
+        self.pool = nn.MaxPool2d(2)
+
+    def conv_block(self, in_ch, out_ch):
+        return nn.Sequential(
+            nn.Conv2d(in_ch, out_ch, 3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_ch, out_ch, 3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True)
+        )
+
+    def upconv_block(self, in_ch, out_ch):
+        return nn.Sequential(
+            nn.ConvTranspose2d(in_ch, out_ch, 2, stride=2),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True)
+        )
+
+    def forward(self, x):
+        # Encoder path
+        e1 = self.enc1(x)
+        e2 = self.enc2(self.pool(e1))
+        e3 = self.enc3(self.pool(e2))
+        e4 = self.enc4(self.pool(e3))
+
+        # Decoder path with skip connections
+        d4 = self.dec4(e4) + e3
+        d3 = self.dec3(d4) + e2
+        d2 = self.dec2(d3) + e1
+        d1 = self.dec1(d2)
+
+        return d1
+
+class SemanticSegmentator:
+    """Semantic segmentation for scene understanding"""
+
+    def __init__(self, model_path, num_classes=19):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = SemanticSegmentationNetwork(num_classes)
+        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+        self.model.to(self.device)
+        self.model.eval()
+
+        # Cityscapes classes
+        self.classes = [
+            'road', 'sidewalk', 'building', 'wall', 'fence', 'pole',
+            'traffic light', 'traffic sign', 'vegetation', 'terrain',
+            'sky', 'person', 'rider', 'car', 'truck', 'bus',
+            'train', 'motorcycle', 'bicycle'
+        ]
+
+        # Drivable area classes
+        self.drivable_classes = ['road']
+
+        # Transforms
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                               std=[0.229, 0.224, 0.225])
+        ])
+
+    def segment_image(self, image):
+        """Segment image into semantic classes"""
+        # Preprocess
+        if isinstance(image, np.ndarray):
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        input_tensor = self.transform(image).unsqueeze(0).to(self.device)
+
+        # Inference
+        with torch.no_grad():
+            output = self.model(input_tensor)
+            pred = torch.argmax(output, dim=1).squeeze().cpu().numpy()
+
+        return pred
+
+    def get_drivable_area(self, segmentation):
+        """Extract drivable area from segmentation"""
+        drivable_mask = np.zeros_like(segmentation, dtype=np.uint8)
+
+        for class_idx in range(len(self.classes)):
+            if self.classes[class_idx] in self.drivable_classes:
+                drivable_mask[segmentation == class_idx] = 255
+
+        return drivable_mask
+
+    def detect_obstacles(self, segmentation, point_cloud=None):
+        """Detect obstacles from semantic segmentation"""
+        obstacles = []
+
+        # Classes that are obstacles
+        obstacle_classes = ['person', 'rider', 'car', 'truck', 'bus',
+                          'motorcycle', 'bicycle', 'building', 'wall', 'fence']
+
+        for class_idx in range(len(self.classes)):
+            if self.classes[class_idx] in obstacle_classes:
+                mask = (segmentation == class_idx)
+
+                # Find connected components
+                contours, _ = cv2.findContours(mask.astype(np.uint8),
+                                             cv2.RETR_EXTERNAL,
+                                             cv2.CHAIN_APPROX_SIMPLE)
+
+                for contour in contours:
+                    area = cv2.contourArea(contour)
+
+                    if area > 100:  # Minimum area threshold
+                        # Get bounding box
+                        x, y, w, h = cv2.boundingRect(contour)
+
+                        obstacle = {
+                            'class': self.classes[class_idx],
+                            'bbox': [x, y, x + w, y + h],
+                            'area': area,
+                            'mask': mask
+                        }
+
+                        # Get 3D position if point cloud available
+                        if point_cloud is not None:
+                            obstacle['position_3d'] = self.get_obstacle_position(
+                                mask, point_cloud
+                            )
+
+                        obstacles.append(obstacle)
+
+        return obstacles
+```
+
+## 3.3 Point Cloud Processing
+
+### Point Cloud Filtering and Segmentation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, open3d, scipy
+
+import numpy as np
+import open3d as o3d
+from sklearn.cluster import DBSCAN
+
+class PointCloudProcessor:
+    """Process 3D point cloud data for perception"""
+
+    def __init__(self, voxel_size=0.05):
+        self.voxel_size = voxel_size
+
+    def filter_points(self, points, min_range=0.5, max_range=50.0):
+        """Filter points based on distance"""
+        distances = np.linalg.norm(points, axis=1)
+        mask = (distances >= min_range) & (distances <= max_range)
+        return points[mask]
+
+    def remove_ground(self, points, height_threshold=0.2):
+        """Remove ground points using simple height threshold"""
+        ground_mask = points[:, 2] < height_threshold
+        non_ground = points[~ground_mask]
+        ground = points[ground_mask]
+        return non_ground, ground
+
+    def voxel_downsample(self, points):
+        """Downsample point cloud using voxel grid"""
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+        pcd_down = pcd.voxel_down_sample(voxel_size=self.voxel_size)
+        return np.asarray(pcd_down.points)
+
+    def plane_segmentation(self, points, distance_threshold=0.02, ransac_n=3, iterations=1000):
+        """Segment planes using RANSAC"""
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+
+        # Segment plane
+        plane_model, inliers = pcd.segment_plane(
+            distance_threshold=distance_threshold,
+            ransac_n=ransac_n,
+            num_iterations=iterations
+        )
+
+        # Extract plane and other points
+        plane_cloud = pcd.select_by_index(inliers)
+        remaining_cloud = pcd.select_by_index(inliers, invert=True)
+
+        return np.asarray(plane_cloud.points), np.asarray(remaining_cloud.points), plane_model
+
+    def cluster_objects(self, points, eps=0.5, min_samples=10):
+        """Cluster points to identify separate objects"""
+        # Use DBSCAN clustering
+        clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(points)
+
+        # Get clusters
+        labels = clustering.labels_
+        unique_labels = set(labels)
+
+        clusters = []
+        for label in unique_labels:
+            if label != -1:  # Ignore noise
+                cluster_points = points[labels == label]
+                clusters.append({
+                    'label': label,
+                    'points': cluster_points,
+                    'size': len(cluster_points)
+                })
+
+        return clusters
+
+    def extract_features(self, cluster_points):
+        """Extract geometric features from point cluster"""
+        if len(cluster_points) < 3:
+            return None
+
+        # Compute bounding box
+        min_bounds = np.min(cluster_points, axis=0)
+        max_bounds = np.max(cluster_points, axis=0)
+        dimensions = max_bounds - min_bounds
+
+        # Compute centroid
+        centroid = np.mean(cluster_points, axis=0)
+
+        # Compute covariance for orientation
+        covariance = np.cov(cluster_points.T)
+        eigenvalues, eigenvectors = np.linalg.eig(covariance)
+
+        # Sort by eigenvalue magnitude
+        idx = eigenvalues.argsort()[::-1]
+        eigenvalues = eigenvalues[idx]
+        eigenvectors = eigenvectors[:, idx]
+
+        # Linearity, planarity, sphericity
+        linearity = (eigenvalues[0] - eigenvalues[1]) / eigenvalues[0]
+        planarity = (eigenvalues[1] - eigenvalues[2]) / eigenvalues[0]
+        sphericity = eigenvalues[2] / eigenvalues[0]
+
+        features = {
+            'position': centroid,
+            'dimensions': dimensions,
+            'volume': np.prod(dimensions),
+            'orientation': eigenvectors[:, 0],  # Principal axis
+            'linearity': linearity,
+            'planarity': planarity,
+            'sphericity': sphericity,
+            'num_points': len(cluster_points)
+        }
+
+        return features
+
+    def classify_object(self, features):
+        """Simple rule-based object classification"""
+        if features is None:
+            return 'unknown'
+
+        # Rules based on geometric features
+        vol = features['volume']
+        dim = features['dimensions']
+        height = dim[2]
+        aspect_xy = max(dim[0], dim[1]) / min(dim[0], dim[1])
+
+        # Person
+        if vol < 0.5 and 1.5 < height < 2.0 and aspect_xy < 1.5:
+            return 'person'
+
+        # Car
+        if 2 < height < 3 and aspect_xy > 2.0 and vol > 5:
+            return 'car'
+
+        # Pole/Tree
+        if aspect_xy < 0.3 and height > 2.0:
+            return 'pole'
+
+        # Building
+        if height > 3 and vol > 20:
+            return 'building'
+
+        return 'unknown'
+```
+
+### 3D Object Detection
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, open3d
+
+class PointObjectDetector:
+    """Detect 3D objects in point clouds"""
+
+    def __init__(self):
+        self.processor = PointCloudProcessor()
+
+    def detect_objects(self, point_cloud):
+        """Detect objects in point cloud"""
+        # Remove ground
+        non_ground, ground = self.processor.remove_ground(point_cloud)
+
+        # Cluster remaining points
+        clusters = self.processor.cluster_objects(non_ground)
+
+        # Process each cluster
+        detections = []
+        for cluster in clusters:
+            # Extract features
+            features = self.processor.extract_features(cluster['points'])
+
+            if features is not None:
+                # Classify object
+                class_name = self.processor.classify_object(features)
+
+                detection = {
+                    'class': class_name,
+                    'position': features['position'],
+                    'dimensions': features['dimensions'],
+                    'confidence': self.compute_confidence(features, class_name),
+                    'num_points': features['num_points']
+                }
+                detections.append(detection)
+
+        return detections
+
+    def compute_confidence(self, features, class_name):
+        """Compute detection confidence based on features"""
+        # Base confidence on geometric consistency
+        if class_name == 'person':
+            # Expected dimensions for person
+            height = features['dimensions'][2]
+            if 1.5 < height < 2.0:
+                return 0.9
+            elif 1.3 < height < 2.2:
+                return 0.7
+            else:
+                return 0.5
+
+        elif class_name == 'car':
+            volume = features['volume']
+            if 5 < volume < 15:
+                return 0.9
+            else:
+                return 0.6
+
+        # Default confidence
+        return 0.7
+
+    def track_objects_3d(self, detections, previous_tracks, max_distance=2.0):
+        """Track 3D objects across frames"""
+        if not previous_tracks:
+            # Initialize tracks
+            tracks = []
+            for i, det in enumerate(detections):
+                track = {
+                    'id': i,
+                    'positions': [det['position']],
+                    'classes': [det['class']],
+                    'confidence': det['confidence'],
+                    'last_seen': 0,
+                    'velocity': np.zeros(3)
+                }
+                tracks.append(track)
+            return tracks
+
+        tracks = previous_tracks.copy()
+
+        # Hungarian algorithm for assignment
+        from scipy.optimize import linear_sum_assignment
+
+        # Cost matrix based on position distance
+        cost_matrix = np.zeros((len(detections), len(tracks)))
+
+        for i, det in enumerate(detections):
+            for j, track in enumerate(tracks):
+                # Predict position based on velocity
+                pred_pos = track['positions'][-1] + track['velocity']
+                dist = np.linalg.norm(det['position'] - pred_pos)
+
+                # Higher cost for class mismatch
+                if det['class'] != track['classes'][-1]:
+                    dist += 1.0
+
+                cost_matrix[i, j] = dist
+
+        # Solve assignment
+        row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+        # Update matched tracks
+        matched_tracks = set()
+        for i, j in zip(row_indices, col_indices):
+            if cost_matrix[i, j] < max_distance:
+                # Update track
+                track = tracks[j]
+                new_pos = detections[i]['position']
+
+                # Update velocity (simple filter)
+                dt = 0.1  # Assume 10 Hz
+                new_vel = (new_pos - track['positions'][-1]) / dt
+                track['velocity'] = 0.7 * track['velocity'] + 0.3 * new_vel
+
+                track['positions'].append(new_pos)
+                track['classes'].append(detections[i]['class'])
+                track['confidence'] = detections[i]['confidence']
+                track['last_seen'] = 0
+                matched_tracks.add(j)
+
+        # Create new tracks for unmatched detections
+        new_id = max([t['id'] for t in tracks]) + 1 if tracks else 0
+        for i, det in enumerate(detections):
+            if i not in row_indices or col_indices[row_indices.tolist().index(i)] not in matched_tracks:
+                track = {
+                    'id': new_id,
+                    'positions': [det['position']],
+                    'classes': [det['class']],
+                    'confidence': det['confidence'],
+                    'last_seen': 0,
+                    'velocity': np.zeros(3)
+                }
+                tracks.append(track)
+                new_id += 1
+
+        # Update last_seen for unmatched tracks
+        for track in tracks:
+            if track['id'] not in [t['id'] for t in tracks if t['last_seen'] == 0]:
+                track['last_seen'] += 1
+
+        # Remove old tracks
+        tracks = [t for t in tracks if t['last_seen'] <= 5]
+
+        return tracks
+```
+
+## 3.4 ROS 2 Integration
+
+### Perception Node
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy, sensor_msgs, geometry_msgs, visualization_msgs
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image, PointCloud2, CameraInfo
+from geometry_msgs.msg import PoseArray, Pose
+from visualization_msgs.msg import MarkerArray, Marker
+from std_msgs.msg import Header
+import numpy as np
+
+class PerceptionNode(Node):
+    """Main perception node for autonomous robot"""
+
+    def __init__(self):
+        super().__init__('perception_node')
+
+        # Initialize components
+        self.object_detector = RobotObjectDetector()
+        self.point_processor = PointCloudProcessor()
+        self.sensor_fusion = MultiSensorFusion()
+        self.point_detector = PointObjectDetector()
+
+        # Subscribers
+        self.image_sub = self.create_subscription(
+            Image, '/camera/image_raw', self.image_callback, 10)
+        self.pointcloud_sub = self.create_subscription(
+            PointCloud2, '/lidar/points', self.pointcloud_callback, 10)
+        self.camera_info_sub = self.create_subscription(
+            CameraInfo, '/camera/camera_info', self.camera_info_callback, 10)
+
+        # Publishers
+        self.object_pose_pub = self.create_publisher(
+            PoseArray, '/detected_objects', 10)
+        self.marker_pub = self.create_publisher(
+            MarkerArray, '/detection_markers', 10)
+        self.fused_objects_pub = self.create_publisher(
+            PoseArray, '/fused_objects', 10)
+
+        # Camera parameters
+        self.camera_matrix = None
+        self.dist_coeffs = None
+
+        # Tracking
+        self.camera_tracks = []
+        self.point_tracks = []
+
+        # Timer for fusion
+        self.fusion_timer = self.create_timer(0.1, self.fuse_detections)
+
+    def camera_info_callback(self, msg):
+        """Handle camera info messages"""
+        self.camera_matrix = np.array([
+            [msg.k[0], 0, msg.k[2]],
+            [0, msg.k[4], msg.k[5]],
+            [0, 0, 1]
+        ])
+        self.dist_coeffs = np.array(msg.d)
+
+    def image_callback(self, msg):
+        """Handle camera images"""
+        # Convert ROS image to OpenCV
+        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+
+        # Detect objects
+        detections = self.object_detector.detect_objects(
+            cv_image, self.camera_matrix, self.dist_coeffs)
+
+        # Track objects
+        self.camera_tracks = self.object_detector.track_objects(
+            detections, self.camera_tracks)
+
+        # Publish results
+        self.publish_object_poses(self.camera_tracks, msg.header.frame_id)
+
+    def pointcloud_callback(self, msg):
+        """Handle point cloud messages"""
+        # Convert ROS point cloud to numpy
+        points = self.pointcloud_to_numpy(msg)
+
+        # Detect 3D objects
+        detections = self.point_detector.detect_objects(points)
+
+        # Track objects
+        self.point_tracks = self.point_detector.track_objects_3d(
+            detections, self.point_tracks)
+
+    def pointcloud_to_numpy(self, msg):
+        """Convert PointCloud2 to numpy array"""
+        # Implementation depends on point cloud format
+        # Simplified version
+        points = []
+        for point in pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True):
+            points.append(point)
+
+        return np.array(points)
+
+    def fuse_detections(self):
+        """Fuse camera and LiDAR detections"""
+        # Convert tracks to detection format
+        camera_dets = []
+        for track in self.camera_tracks:
+            det = {
+                'position': track['positions'][-1],
+                'class': track['classes'][-1],
+                'confidence': track['confidence']
+            }
+            if len(track['positions']) > 1:
+                det['velocity'] = (track['positions'][-1] - track['positions'][-2]) / 0.1
+            camera_dets.append(det)
+
+        lidar_dets = []
+        for track in self.point_tracks:
+            det = {
+                'position': track['positions'][-1],
+                'class': track['classes'][-1],
+                'confidence': track['confidence'],
+                'velocity': track['velocity']
+            }
+            lidar_dets.append(det)
+
+        # Fuse detections
+        fused_objects = self.sensor_fusion.fuse_camera_lidar(
+            camera_dets, lidar_dets)
+
+        # Publish fused objects
+        pose_array = PoseArray()
+        pose_array.header = Header()
+        pose_array.header.stamp = self.get_clock().now().to_msg()
+        pose_array.header.frame_id = "map"
+
+        for obj in fused_objects:
+            pose = Pose()
+            pose.position.x = obj['position'][0]
+            pose.position.y = obj['position'][1]
+            pose.position.z = obj['position'][2]
+            pose_array.poses.append(pose)
+
+        self.fused_objects_pub.publish(pose_array)
+
+    def publish_object_poses(self, tracks, frame_id):
+        """Publish detected object poses"""
+        pose_array = PoseArray()
+        pose_array.header = Header()
+        pose_array.header.stamp = self.get_clock().now().to_msg()
+        pose_array.header.frame_id = frame_id
+
+        for track in tracks:
+            pose = Pose()
+            pos = track['positions'][-1]
+            pose.position.x = pos[0]
+            pose.position.y = pos[1]
+            pose.orientation.w = 1.0
+            pose_array.poses.append(pose)
+
+        self.object_pose_pub.publish(pose_array)
+
+        # Also publish visualization markers
+        self.publish_detection_markers(tracks, frame_id)
+
+    def publish_detection_markers(self, tracks, frame_id):
+        """Publish visualization markers for detected objects"""
+        marker_array = MarkerArray()
+
+        for i, track in enumerate(tracks):
+            marker = Marker()
+            marker.header = Header()
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.header.frame_id = frame_id
+            marker.ns = "objects"
+            marker.id = track['id']
+            marker.type = Marker.CUBE
+            marker.action = Marker.ADD
+
+            # Position
+            pos = track['positions'][-1]
+            marker.pose.position.x = pos[0]
+            marker.pose.position.y = pos[1]
+            marker.pose.position.z = pos[2]
+            marker.pose.orientation.w = 1.0
+
+            # Size (example)
+            marker.scale.x = 0.5
+            marker.scale.y = 0.5
+            marker.scale.z = 1.0
+
+            # Color based on class
+            class_name = track['classes'][-1]
+            if class_name == 'person':
+                marker.color.r = 1.0
+                marker.color.g = 0.0
+                marker.color.b = 0.0
+            elif class_name == 'car':
+                marker.color.r = 0.0
+                marker.color.g = 1.0
+                marker.color.b = 0.0
+            else:
+                marker.color.r = 0.0
+                marker.color.g = 0.0
+                marker.color.b = 1.0
+
+            marker.color.a = 0.7
+
+            marker_array.markers.append(marker)
+
+        self.marker_pub.publish(marker_array)
+```
+
+## Exercises
+
+### Exercise 3.1: Kalman Filter for Tracking (Intermediate)
+
+**Learning Objective**: Implement Kalman filter for object tracking
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class ObjectTracker:
+    def __init__(self):
+        # State: [x, y, vx, vy]
+        self.ekf = ExtendedKalmanFilter(state_dim=4, measurement_dim=2)
+
+        # Initialize with constant velocity model
+        dt = 0.1
+        self.ekf.F = np.array([
+            [1, 0, dt, 0],
+            [0, 1, 0, dt],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ])
+
+        # Process and measurement noise
+        self.ekf.Q = np.eye(4) * 0.1
+        self.ekf.R = np.eye(2) * 0.5
+
+    def track_object(self, measurement):
+        """Track single object"""
+        # Predict
+        self.ekf.predict()
+
+        # Update with measurement
+        self.ekf.H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+        self.ekf.update(measurement)
+
+        return self.ekf.x[:2], self.ekf.x[2:4]  # Position and velocity
+```
+
+### Exercise 3.2: Multi-Target Tracking (Advanced)
+
+**Learning Objective**: Implement multi-target tracking with data association
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+class MultiObjectTracker:
+    def __init__(self):
+        self.tracks = []
+        self.next_id = 0
+        self.max_distance = 2.0
+
+    def update(self, measurements):
+        """Update tracks with new measurements"""
+        # Predict all tracks
+        for track in self.tracks:
+            track['tracker'].predict()
+
+        # Data association
+        associations = self.associate_measurements(measurements)
+
+        # Update associated measurements
+        for meas_idx, track_idx in associations:
+            self.tracks[track_idx]['tracker'].update(measurements[meas_idx])
+            self.tracks[track_idx]['missed'] = 0
+
+        # Create new tracks for unassociated measurements
+        unassociated = set(range(len(measurements))) - set(a[0] for a in associations)
+        for idx in unassociated:
+            new_track = {
+                'id': self.next_id,
+                'tracker': ObjectTracker(),
+                'missed': 0
+            }
+            new_track['tracker'].ekf.x[:2] = measurements[idx]
+            self.tracks.append(new_track)
+            self.next_id += 1
+
+        # Remove old tracks
+        self.tracks = [t for t in self.tracks if t['missed'] < 5]
+
+    def associate_measurements(self, measurements):
+        """Associate measurements to tracks using Hungarian algorithm"""
+        # Implementation similar to earlier examples
+        pass
+```
+
+## Summary
+
+In this chapter, we covered:
+- Bayesian state estimation with Kalman filters
+- Sensor fusion for multi-modal perception
+- Computer vision for object detection and tracking
+- Point cloud processing for 3D perception
+- Semantic segmentation for scene understanding
+- ROS 2 integration for perception systems
+
+Key takeaways:
+- Sensor fusion combines complementary sensor information
+- Kalman filters provide optimal state estimation under Gaussian assumptions
+- Computer vision enables rich 2D perception
+- Point clouds provide accurate 3D spatial information
+- Tracking requires robust data association
+- Perception systems must be efficient for real-time operation
+
+In the final chapter, we'll explore humanoid robot control and bipedal locomotion.

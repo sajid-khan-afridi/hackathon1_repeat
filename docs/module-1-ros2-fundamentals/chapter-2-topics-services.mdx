@@ -1,0 +1,970 @@
+---
+title: "Chapter 2: ROS 2 Topics & Services"
+sidebar_position: 2
+description: "Master ROS 2 communication patterns including publish-subscribe for data streams and request-response for service calls"
+keywords:
+  - ROS2
+  - topics
+  - publishers
+  - subscribers
+  - services
+  - QoS
+  - publish-subscribe
+  - request-response
+tags:
+  - ros2
+  - fundamentals
+  - communication
+  - topics
+  - services
+learning_objectives:
+  - "Implement publish-subscribe pattern for continuous data streams"
+  - "Create and use ROS 2 services for request-response communication"
+  - "Configure Quality of Service (QoS) profiles for reliable communication"
+  - "Understand when to use topics vs services"
+difficulty_level: beginner
+ros_version: humble
+prerequisites: ["ch01"]
+estimated_time: 75
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 2: ROS 2 Topics & Services
+
+## Introduction
+
+ROS 2 provides two primary communication patterns: **topics** for the publish-subscribe model and **services** for request-response interactions. Understanding when and how to use each pattern is fundamental to building effective robotics applications.
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Think of topics like a radio broadcast - one node publishes (broadcasts) information and any number of nodes can subscribe (listen) to it. Services are more like making a phone call - you send a request and wait for a specific response.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Topics implement a many-to-many distributed data bus using DDS middleware, enabling scalable, loosely-coupled communication patterns. Services provide synchronous request-response semantics with type safety and automatic code generation. The choice between them affects system architecture regarding latency, reliability, and coupling.
+</PersonalizedSection>
+
+## 2.1 Topics and the Publish-Subscribe Pattern
+
+Topics are named buses over which nodes exchange messages. They're ideal for continuous data streams like sensor readings or motor commands.
+
+### Creating a Publisher
+
+Let's create a publisher that sends sensor data:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, sensor_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+import math
+import time
+
+class ImuPublisher(Node):
+    """Publishes simulated IMU data."""
+
+    def __init__(self):
+        super().__init__('imu_publisher')
+
+        # Create publisher with QoS profile
+        self.publisher = self.create_publisher(
+            Imu,
+            'imu/data',
+            10  # Queue size
+        )
+
+        # Create timer for periodic publishing
+        self.timer = self.create_timer(0.01, self.timer_callback)  # 100 Hz
+        self.time_stamp = time.time()
+
+        self.get_logger().info('IMU Publisher started')
+
+    def timer_callback(self):
+        """Generate and publish IMU data."""
+        msg = Imu()
+        current_time = time.time()
+        dt = current_time - self.time_stamp
+
+        # Simulate orientation (quaternion)
+        angle = current_time * 0.5
+        msg.orientation.w = math.cos(angle * 0.5)
+        msg.orientation.x = 0.0
+        msg.orientation.y = math.sin(angle * 0.5)
+        msg.orientation.z = 0.0
+
+        # Simulate angular velocity
+        msg.angular_velocity.x = math.sin(current_time) * 0.1
+        msg.angular_velocity.y = math.cos(current_time) * 0.1
+        msg.angular_velocity.z = 0.0
+
+        # Simulate linear acceleration
+        msg.linear_acceleration.x = math.cos(current_time * 2) * 0.5
+        msg.linear_acceleration.y = math.sin(current_time * 2) * 0.5
+        msg.linear_acceleration.z = 9.81 + math.sin(current_time * 3) * 0.2
+
+        # Set timestamp
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'imu_link'
+
+        # Publish message
+        self.publisher.publish(msg)
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher = ImuPublisher()
+    try:
+        rclpy.spin(publisher)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        publisher.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+<PersonalizedSection hardwareAccess={false}>
+The IMU data above is simulated. In a real robot with hardware access, you would read actual sensor data from an IMU device and publish that instead of generating simulated values.
+</PersonalizedSection>
+
+<PersonalizedSection hardwareAccess={true}>
+When working with real hardware, you would typically interface with the IMU through:
+- I2C/SPI communication protocols
+- Serial communication
+- USB interface
+- ROS 2 drivers for specific IMU models
+</PersonalizedSection>
+
+### Creating a Subscriber
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, sensor_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+
+class ImuSubscriber(Node):
+    """Subscribes to and processes IMU data."""
+
+    def __init__(self):
+        super().__init__('imu_subscriber')
+
+        # Create subscriber
+        self.subscription = self.create_subscription(
+            Imu,
+            'imu/data',
+            self.listener_callback,
+            10  # Queue size
+        )
+
+        # Store last known values
+        self.last_orientation = None
+        self.last_time = None
+
+        self.get_logger().info('IMU Subscriber started')
+
+    def listener_callback(self, msg: Imu):
+        """Process incoming IMU messages."""
+        current_time = self.get_clock().now()
+
+        # Calculate roll and pitch from quaternion
+        import math
+        w, x, y, z = msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z
+
+        # Roll (x-axis rotation)
+        roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
+        # Pitch (y-axis rotation)
+        pitch = math.asin(2 * (w * y - z * x))
+
+        # Log orientation data
+        self.get_logger().info(
+            f'Roll: {math.degrees(roll):.1f}°, '
+            f'Pitch: {math.degrees(pitch):.1f}°, '
+            f'Angular vel z: {msg.angular_velocity.z:.2f} rad/s'
+        )
+
+        # Check for rapid rotation
+        angular_magnitude = math.sqrt(
+            msg.angular_velocity.x**2 +
+            msg.angular_velocity.y**2 +
+            msg.angular_velocity.z**2
+        )
+        if angular_magnitude > 1.0:
+            self.get_logger().warn(f'High angular velocity detected: {angular_magnitude:.2f} rad/s')
+
+        # Store values
+        self.last_orientation = msg.orientation
+        self.last_time = current_time
+
+def main(args=None):
+    rclpy.init(args=args)
+    subscriber = ImuSubscriber()
+    try:
+        rclpy.spin(subscriber)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        subscriber.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 2.2 Services for Request-Response Communication
+
+Services are used when you need immediate response to a request, such as triggering an action or querying a specific piece of information.
+
+### Creating a Service Server
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, example_interfaces
+from example_interfaces.srv import AddTwoInts
+import rclpy
+from rclpy.node import Node
+
+class AddTwoIntsServer(Node):
+    """Service server that adds two integers."""
+
+    def __init__(self):
+        super().__init__('add_two_ints_server')
+
+        # Create service
+        self.srv = self.create_service(
+            AddTwoInts,
+            'add_two_ints',
+            self.add_two_ints_callback
+        )
+
+        self.get_logger().info('AddTwoInts server ready')
+
+    def add_two_ints_callback(self, request, response):
+        """Handle service requests."""
+        response.sum = request.a + request.b
+
+        self.get_logger().info(
+            f'Incoming request: a={request.a}, b={request.b}'
+        )
+        self.get_logger().info(
+            f'Sending back response: [sum={response.sum}]'
+        )
+
+        return response
+
+def main(args=None):
+    rclpy.init(args=args)
+    server = AddTwoIntsServer()
+    try:
+        rclpy.spin(server)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Creating a Service Client
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, example_interfaces
+from example_interfaces.srv import AddTwoInts
+import rclpy
+from rclpy.node import Node
+
+class AddTwoIntsClient(Node):
+    """Service client for testing AddTwoInts service."""
+
+    def __init__(self):
+        super().__init__('add_two_ints_client')
+        self.cli = self.create_client(AddTwoInts, 'add_two_ints')
+
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting...')
+
+        self.request = AddTwoInts.Request()
+
+    def send_request(self, a, b):
+        """Send request to add two integers."""
+        self.request.a = a
+        self.request.b = b
+        self.future = self.cli.call_async(self.request)
+        rclpy.spin_until_future_complete(self, self.future)
+        return self.future.result()
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    # Test the service with multiple requests
+    client = AddTwoIntsClient()
+
+    test_cases = [
+        (1, 2),
+        (100, 200),
+        (-5, 10),
+        (0, 0),
+        (123456, 654321)
+    ]
+
+    for a, b in test_cases:
+        response = client.send_request(a, b)
+        client.get_logger().info(
+            f'Result of {a} + {b} = {response.sum}'
+        )
+
+    client.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 2.3 Quality of Service (QoS)
+
+QoS policies control how data is exchanged between nodes. They're crucial for ensuring reliable communication in robotics systems.
+
+<PersonalizedSection level="beginner">
+QoS is like setting the rules for how messages are delivered. Do you need every message (reliable)? Can you miss some (best effort)? How old can messages be (deadline)?
+</PersonalizedSection>
+
+### QoS Profiles Example
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, std_msgs
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy
+from std_msgs.msg import String
+
+class QoSDemoNode(Node):
+    """Demonstrates different QoS profiles."""
+
+    def __init__(self):
+        super().__init__('qos_demo_node')
+
+        # Best effort QoS (good for sensor data where freshness is key)
+        self.best_effort_qos = QoSProfile(
+            depth=10,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE
+        )
+
+        # Reliable QoS (good for commands where delivery is critical)
+        self.reliable_qos = QoSProfile(
+            depth=10,
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.VOLATILE
+        )
+
+        # Create publishers with different QoS
+        self.sensor_publisher = self.create_publisher(
+            String,
+            'sensor_data',
+            qos_profile=self.best_effort_qos
+        )
+
+        self.command_publisher = self.create_publisher(
+            String,
+            'robot_commands',
+            qos_profile=self.reliable_qos
+        )
+
+        self.timer = self.create_timer(0.1, self.timer_callback)
+        self.count = 0
+
+    def timer_callback(self):
+        # Publish sensor data with best effort
+        sensor_msg = String()
+        sensor_msg.data = f'Sensor reading {self.count}'
+        self.sensor_publisher.publish(sensor_msg)
+
+        # Publish commands with reliable delivery
+        if self.count % 10 == 0:
+            cmd_msg = String()
+            cmd_msg.data = 'EXECUTE_TASK'
+            self.command_publisher.publish(cmd_msg)
+
+        self.count += 1
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = QoSDemoNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 2.4 Custom Message Definitions
+
+Sometimes you need to define your own message types for specific applications.
+
+### Example Custom Message Definition
+
+File: `msg/TemperatureStatus.msg`
+```
+# Temperature sensor status message
+std_msgs/Header header
+float32 temperature      # Temperature in Celsius
+bool is_normal          # True if within normal range
+string sensor_id         # Unique sensor identifier
+```
+
+File: `srv/SetTemperatureThreshold.srv`
+```
+# Request
+float32 threshold
+---
+# Response
+bool success
+string message
+```
+
+## Exercises
+
+### Exercise 2.1: Create a Data Logger Node (Beginner)
+
+**Learning Objective**: Practice subscribing to multiple topics and saving data
+
+#### Problem
+Create a node that:
+- Subscribes to multiple topics (e.g., temperature, humidity)
+- Logs data to a CSV file
+- Includes timestamps for all data
+
+#### Starter Code
+```python
+# Complete this implementation
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float32, String
+import csv
+import os
+
+class DataLogger(Node):
+    def __init__(self):
+        super().__init__('data_logger')
+
+        # TODO: Create subscribers for temperature and humidity
+        # TODO: Setup CSV file for logging
+        # TODO: Implement callback functions
+
+    def temperature_callback(self, msg):
+        # TODO: Log temperature data with timestamp
+        pass
+
+    def humidity_callback(self, msg):
+        # TODO: Log humidity data with timestamp
+        pass
+```
+
+#### Solution
+```python
+# test: true
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float32
+import csv
+import os
+from datetime import datetime
+
+class DataLogger(Node):
+    def __init__(self):
+        super().__init__('data_logger')
+
+        # Create output directory
+        self.output_dir = 'logged_data'
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        # Setup CSV file
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.csv_file = os.path.join(self.output_dir, f'sensor_data_{timestamp}.csv')
+
+        with open(self.csv_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['timestamp', 'temperature', 'humidity'])
+
+        # Create subscribers
+        self.temp_sub = self.create_subscription(
+            Float32,
+            'temperature',
+            self.temperature_callback,
+            10
+        )
+
+        self.humidity_sub = self.create_subscription(
+            Float32,
+            'humidity',
+            self.humidity_callback,
+            10
+        )
+
+        # Data storage
+        self.current_data = {'temperature': None, 'humidity': None}
+
+        self.get_logger().info(f'Data logger started, saving to {self.csv_file}')
+
+    def temperature_callback(self, msg):
+        self.current_data['temperature'] = msg.data
+        self.log_data()
+
+    def humidity_callback(self, msg):
+        self.current_data['humidity'] = msg.data
+        self.log_data()
+
+    def log_data(self):
+        # Only log when we have both readings
+        if self.current_data['temperature'] is not None and \
+           self.current_data['humidity'] is not None:
+
+            timestamp = datetime.now().isoformat()
+
+            with open(self.csv_file, 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    timestamp,
+                    self.current_data['temperature'],
+                    self.current_data['humidity']
+                ])
+
+            self.get_logger().debug(
+                f'Logged: T={self.current_data["temperature"]:.1f}°C, '
+                f'H={self.current_data["humidity"]:.1f}%'
+            )
+
+            # Reset to wait for next pair
+            self.current_data = {'temperature': None, 'humidity': None}
+
+def main(args=None):
+    rclpy.init(args=args)
+    logger = DataLogger()
+    try:
+        rclpy.spin(logger)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        logger.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Exercise 2.2: Build a Command Service (Beginner)
+
+**Learning Objective**: Implement a service that controls robot behavior
+
+#### Problem
+Create a service that:
+- Accepts robot movement commands (forward, backward, left, right, stop)
+- Returns a status message
+- Validates commands before executing
+
+#### Solution
+```python
+# test: true
+from example_interfaces.srv import SetBool
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+import threading
+import time
+
+class RobotControlService(Node):
+    def __init__(self):
+        super().__init__('robot_control_service')
+
+        # Create service
+        self.service = self.create_service(
+            SetBool,
+            'robot/enable_control',
+            self.enable_control_callback
+        )
+
+        # Publisher for robot commands
+        self.cmd_publisher = self.create_publisher(
+            String,
+            'robot/command',
+            10
+        )
+
+        self.control_enabled = False
+        self.command_thread = None
+
+        self.get_logger().info('Robot Control Service ready')
+
+    def enable_control_callback(self, request, response):
+        """Enable or disable robot control."""
+        self.control_enabled = request.data
+
+        if request.data:
+            if self.command_thread is None or not self.command_thread.is_alive():
+                self.command_thread = threading.Thread(target=self.command_loop)
+                self.command_thread.start()
+            response.message = "Robot control enabled"
+            self.get_logger().info("Robot control ENABLED")
+        else:
+            response.message = "Robot control disabled"
+            self.get_logger().info("Robot control DISABLED")
+
+        response.success = True
+        return response
+
+    def command_loop(self):
+        """Thread that sends periodic commands when enabled."""
+        commands = ["forward", "left", "forward", "right", "stop"]
+        cmd_idx = 0
+
+        while self.control_enabled and rclpy.ok():
+            cmd_msg = String()
+            cmd_msg.data = commands[cmd_idx]
+            self.cmd_publisher.publish(cmd_msg)
+
+            cmd_idx = (cmd_idx + 1) % len(commands)
+            time.sleep(2.0)
+
+def main(args=None):
+    rclpy.init(args=args)
+    service = RobotControlService()
+    try:
+        rclpy.spin(service)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        service.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Exercise 2.3: Topic/Service Bridge (Intermediate)
+
+**Learning Objective**: Bridge between continuous data streams and service calls
+
+#### Problem
+Create a node that:
+- Subscribes to sensor data
+- Provides a service to request latest sensor value
+- Maintains a cache of recent data
+
+#### Solution
+```python
+# test: true
+from std_msgs.msg import Float32
+from example_interfaces.srv import GetFloat
+import rclpy
+from rclpy.node import Node
+from collections import deque
+import time
+
+class SensorDataService(Node):
+    def __init__(self):
+        super().__init__('sensor_data_service')
+
+        # Subscribe to sensor data
+        self.subscription = self.create_subscription(
+            Float32,
+            'sensor/data',
+            self.sensor_callback,
+            10
+        )
+
+        # Create service for data access
+        self.service = self.create_service(
+            GetFloat,
+            'sensor/get_value',
+            self.get_value_callback
+        )
+
+        # Data cache with timestamps
+        self.data_cache = deque(maxlen=100)  # Keep last 100 readings
+        self.last_value = 0.0
+        self.last_time = time.time()
+
+        self.get_logger().info('Sensor Data Service ready')
+
+    def sensor_callback(self, msg):
+        """Store incoming sensor data."""
+        current_time = time.time()
+
+        # Update cache
+        self.data_cache.append({
+            'value': msg.data,
+            'timestamp': current_time
+        })
+
+        # Update latest values
+        self.last_value = msg.data
+        self.last_time = current_time
+
+        # Log significant changes
+        if len(self.data_cache) > 1:
+            prev_value = self.data_cache[-2]['value']
+            if abs(msg.data - prev_value) > 1.0:
+                self.get_logger().info(
+                    f'Significant change: {prev_value:.2f} -> {msg.data:.2f}'
+                )
+
+    def get_value_callback(self, request, response):
+        """Service callback to return sensor value."""
+        # Check data freshness
+        age = time.time() - self.last_time
+        if age > 5.0:
+            self.get_logger().warn(f'Sensor data is {age:.1f}s old')
+
+        # Return latest value
+        response.data = self.last_value
+
+        self.get_logger().info(
+            f'Service request: returned value {response.data:.2f}'
+        )
+
+        return response
+
+    def get_statistics(self):
+        """Calculate basic statistics from cached data."""
+        if not self.data_cache:
+            return None
+
+        values = [d['value'] for d in self.data_cache]
+        return {
+            'count': len(values),
+            'min': min(values),
+            'max': max(values),
+            'avg': sum(values) / len(values),
+            'latest': self.last_value
+        }
+
+def main(args=None):
+    rclpy.init(args=args)
+    service = SensorDataService()
+    try:
+        rclpy.spin(service)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Print statistics
+        stats = service.get_statistics()
+        if stats:
+            print(f"\nSensor Statistics:")
+            print(f"  Samples: {stats['count']}")
+            print(f"  Min: {stats['min']:.2f}")
+            print(f"  Max: {stats['max']:.2f}")
+            print(f"  Average: {stats['avg']:.2f}")
+            print(f"  Latest: {stats['latest']:.2f}")
+
+        service.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Exercise 2.4: QoS Configuration Challenge (Intermediate)
+
+**Learning Objective**: Configure appropriate QoS for different scenarios
+
+#### Problem
+Implement nodes for these scenarios with appropriate QoS:
+1. Emergency stop signals (must be delivered)
+2. Video streaming (can drop frames)
+3. Configuration updates (need all updates, but not time-critical)
+
+#### Solution
+```python
+# test: true
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import (
+    QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy,
+    QoSHistoryPolicy, QoSLivelinessPolicy
+)
+from std_msgs.msg import String, Header
+import time
+
+class QoSConfigurator(Node):
+    """Demonstrates different QoS configurations."""
+
+    def __init__(self):
+        super().__init__('qos_configurator')
+
+        # Scenario 1: Emergency stop - must be delivered immediately
+        self.emergency_qos = QoSProfile(
+            depth=1,
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+            liveliness=QoSLivelinessPolicy.AUTOMATIC,
+            deadline=rclpy.duration.Duration(seconds=0, nanoseconds=100000000)  # 100ms
+        )
+
+        # Scenario 2: Video streaming - can drop frames
+        self.video_qos = QoSProfile(
+            depth=3,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST
+        )
+
+        # Scenario 3: Configuration updates - need all updates
+        self.config_qos = QoSProfile(
+            depth=100,
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+            history=QoSHistoryPolicy.KEEP_ALL
+        )
+
+        # Create publishers
+        self.emergency_pub = self.create_publisher(
+            String, 'emergency_stop', qos_profile=self.emergency_qos
+        )
+
+        self.video_pub = self.create_publisher(
+            String, 'video_frames', qos_profile=self.video_qos
+        )
+
+        self.config_pub = self.create_publisher(
+            String, 'config_updates', qos_profile=self.config_qos
+        )
+
+        # Create subscribers
+        self.create_subscription(
+            String, 'emergency_stop', self.emergency_callback,
+            qos_profile=self.emergency_qos
+        )
+
+        self.create_subscription(
+            String, 'video_frames', self.video_callback,
+            qos_profile=self.video_qos
+        )
+
+        self.create_subscription(
+            String, 'config_updates', self.config_callback,
+            qos_profile=self.config_qos
+        )
+
+        # Demo timers
+        self.emergency_timer = self.create_timer(5.0, self.emergency_demo)
+        self.video_timer = self.create_timer(0.033, self.video_demo)  # 30 FPS
+        self.config_timer = self.create_timer(2.0, self.config_demo)
+
+        self.frame_count = 0
+        self.config_version = 0
+
+    def emergency_callback(self, msg):
+        self.get_logger().fatal(f'EMERGENCY STOP RECEIVED: {msg.data}')
+        self.get_logger().info('QoS Profile: RELIABLE, TRANSIENT_LOCAL, 100ms deadline')
+
+    def video_callback(self, msg):
+        self.frame_count += 1
+        self.get_logger().debug(
+            f'Video frame {self.frame_count}: {msg.data}',
+            throttle_duration_sec=1.0
+        )
+
+    def config_callback(self, msg):
+        self.get_logger().info(f'Configuration updated: {msg.data}')
+        self.get_logger().info('QoS Profile: RELIABLE, TRANSIENT_LOCAL, KEEP_ALL')
+
+    def emergency_demo(self):
+        """Simulate emergency stop (rare)."""
+        if time.time() % 30 < 5:  # Every 30 seconds, 5 second window
+            msg = String()
+            msg.data = 'EMERGENCY_STOP_ACTIVATED'
+            self.emergency_pub.publish(msg)
+
+    def video_demo(self):
+        """Simulate video frames."""
+        msg = String()
+        msg.data = f'frame_{self.frame_count}'
+        self.video_pub.publish(msg)
+
+    def config_demo(self):
+        """Simulate configuration updates."""
+        self.config_version += 1
+        msg = String()
+        msg.data = f'config_v{self.config_version}: param1={self.config_version * 10}'
+        self.config_pub.publish(msg)
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = QoSConfigurator()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+#### Expected Output
+For Exercise 2.1:
+- CSV file created with timestamped sensor data
+- synchronized logging when both temperature and humidity available
+
+For Exercise 2.2:
+- Service responds to enable/disable requests
+- Robot commands published when enabled
+- Command loop stops when disabled
+
+For Exercise 2.3:
+- Continuous sensor data subscription
+- Service returns latest value on request
+- Warning if data is stale (>5s)
+
+For Exercise 2.4:
+- Emergency stops with immediate delivery
+- Video frames with possible drops (best effort)
+- All configuration updates delivered reliably
+
+#### Troubleshooting Steps
+
+- **Topic not receiving data**: Check topic names match exactly, verify QoS compatibility
+- **Service call times out**: Ensure service server is running, check QoS settings
+- **Message types don't match**: Verify message definitions are built and available
+- **DDS communication issues**: Check network configuration and domain ID
+
+## Summary
+
+In this chapter, we learned:
+- How to implement publish-subscribe pattern for continuous data streams
+- Creating and using ROS 2 services for request-response communication
+- Configuring Quality of Service (QoS) profiles for different scenarios
+- When to use topics vs services
+- Custom message and service definitions
+- Advanced QoS configurations for reliability and performance
+
+Key takeaways:
+- Topics are ideal for continuous data streams (sensors, actuator commands)
+- Services are best for request-response interactions (configuration, queries)
+- QoS policies significantly impact communication reliability and performance
+- Matching QoS settings is crucial for successful communication
+- Consider network topology and data requirements when choosing QoS
+
+In the next chapter, we'll explore ROS 2 parameters and launch files for system configuration and orchestration.

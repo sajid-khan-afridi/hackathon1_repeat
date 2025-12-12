@@ -1,0 +1,207 @@
+{
+  "queries": [
+    {
+      "id": "q01",
+      "query": "how to create ROS 2 publisher",
+      "type": "exact-match",
+      "target_chapter": "ch01",
+      "relevance_grades": {
+        "ch01": 3,
+        "ch02": 2,
+        "ch03": 1
+      }
+    },
+    {
+      "id": "q02",
+      "query": "ROS 2 node lifecycle states",
+      "type": "exact-match",
+      "target_chapter": "ch01",
+      "relevance_grades": {
+        "ch01": 3,
+        "ch02": 1
+      }
+    },
+    {
+      "id": "q03",
+      "query": "publish subscribe pattern ROS 2",
+      "type": "exact-match",
+      "target_chapter": "ch02",
+      "relevance_grades": {
+        "ch02": 3,
+        "ch01": 2
+      }
+    },
+    {
+      "id": "q04",
+      "query": "ROS 2 service client server",
+      "type": "exact-match",
+      "target_chapter": "ch02",
+      "relevance_grades": {
+        "ch02": 3,
+        "ch03": 1
+      }
+    },
+    {
+      "id": "q05",
+      "query": "ROS 2 launch file example",
+      "type": "exact-match",
+      "target_chapter": "ch03",
+      "relevance_grades": {
+        "ch03": 3,
+        "ch02": 1
+      }
+    },
+    {
+      "id": "q06",
+      "query": "ROS 2 parameters declaration",
+      "type": "exact-match",
+      "target_chapter": "ch03",
+      "relevance_grades": {
+        "ch03": 3
+      }
+    },
+    {
+      "id": "q07",
+      "query": "Isaac Sim installation setup",
+      "type": "exact-match",
+      "target_chapter": "ch04",
+      "relevance_grades": {
+        "ch04": 3
+      }
+    },
+    {
+      "id": "q08",
+      "query": "how to connect Isaac Sim to ROS 2",
+      "type": "conceptual",
+      "target_chapter": "ch04",
+      "relevance_grades": {
+        "ch04": 3,
+        "ch06": 2
+      }
+    },
+    {
+      "id": "q09",
+      "query": "create robot URDF model",
+      "type": "exact-match",
+      "target_chapter": "ch05",
+      "relevance_grades": {
+        "ch05": 3,
+        "ch06": 1
+      }
+    },
+    {
+      "id": "q10",
+      "query": "import robot into Isaac Sim",
+      "type": "exact-match",
+      "target_chapter": "ch05",
+      "relevance_grades": {
+        "ch05": 3,
+        "ch04": 1
+      }
+    },
+    {
+      "id": "q11",
+      "query": "add camera sensor Isaac Sim",
+      "type": "exact-match",
+      "target_chapter": "ch06",
+      "relevance_grades": {
+        "ch06": 3,
+        "ch04": 1
+      }
+    },
+    {
+      "id": "q12",
+      "query": "simulate lidar data ROS 2",
+      "type": "conceptual",
+      "target_chapter": "ch06",
+      "relevance_grades": {
+        "ch06": 3,
+        "ch09": 2
+      }
+    },
+    {
+      "id": "q13",
+      "query": "forward kinematics robot arm",
+      "type": "exact-match",
+      "target_chapter": "ch07",
+      "relevance_grades": {
+        "ch07": 3
+      }
+    },
+    {
+      "id": "q14",
+      "query": "inverse kinematics solver",
+      "type": "exact-match",
+      "target_chapter": "ch07",
+      "relevance_grades": {
+        "ch07": 3,
+        "ch10": 1
+      }
+    },
+    {
+      "id": "q15",
+      "query": "ROS 2 Nav2 navigation",
+      "type": "exact-match",
+      "target_chapter": "ch08",
+      "relevance_grades": {
+        "ch08": 3
+      }
+    },
+    {
+      "id": "q16",
+      "query": "path planning obstacle avoidance",
+      "type": "conceptual",
+      "target_chapter": "ch08",
+      "relevance_grades": {
+        "ch08": 3,
+        "ch09": 1
+      }
+    },
+    {
+      "id": "q17",
+      "query": "process camera data ROS 2",
+      "type": "conceptual",
+      "target_chapter": "ch09",
+      "relevance_grades": {
+        "ch09": 3,
+        "ch06": 2
+      }
+    },
+    {
+      "id": "q18",
+      "query": "sensor fusion techniques",
+      "type": "conceptual",
+      "target_chapter": "ch09",
+      "relevance_grades": {
+        "ch09": 3,
+        "ch06": 1
+      }
+    },
+    {
+      "id": "q19",
+      "query": "bipedal robot balance control",
+      "type": "exact-match",
+      "target_chapter": "ch10",
+      "relevance_grades": {
+        "ch10": 3
+      }
+    },
+    {
+      "id": "q20",
+      "query": "humanoid full body motion planning",
+      "type": "exact-match",
+      "target_chapter": "ch10",
+      "relevance_grades": {
+        "ch10": 3,
+        "ch07": 2,
+        "ch08": 1
+      }
+    }
+  ],
+  "grading_scale": {
+    "0": "irrelevant - no useful information",
+    "1": "marginal - tangentially related",
+    "2": "relevant - contains useful information",
+    "3": "highly relevant - directly answers query"
+  }
+}

@@ -1,0 +1,86 @@
+name: Validate Content Readability
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['docs/**/*.mdx']
+  push:
+    branches: [main]
+    paths: ['docs/**/*.mdx']
+  workflow_dispatch:
+
+jobs:
+  validate-readability:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install textstat
+
+    - name: Validate readability of all chapters
+      run: |
+        python3 scripts/validate-readability.py docs/
+
+    - name: Validate readability of changed files (PR only)
+      if: github.event_name == 'pull_request'
+      run: |
+        # Get changed files
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep '\.mdx$' || true)
+
+        if [ -n "$CHANGED_FILES" ]; then
+          echo "Validating readability of changed files:"
+          echo "$CHANGED_FILES"
+          echo "$CHANGED_FILES" | xargs python3 scripts/validate-readability.py
+        else
+          echo "No MDX files changed"
+        fi
+
+    - name: Upload validation results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: readability-results
+        path: tests/readability-results.json
+        retention-days: 30
+
+    - name: Comment on PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+
+          try {
+            const results = JSON.parse(fs.readFileSync('tests/readability-results.json', 'utf8'));
+            const summary = results.summary;
+
+            const comment = `## 📖 Readability Validation Results
+
+            - **Total Files**: ${summary.total_files}
+            - **✅ Passing**: ${summary.passing}
+            - **❌ Failing**: ${summary.failing}
+            - **Success Rate**: ${summary.pass_rate.toFixed(1)}%
+            - **Target Range**: Flesch-Kincaid Grade 12-14
+            - **Average Score**: ${summary.average_score.toFixed(1)}
+
+            ${summary.failing > 0 ? '⚠️ Some files failed readability validation. Please review and adjust content to match college-level technical writing.' : '✅ All files passed readability validation!'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('Could not read results file:', error.message);
+          }

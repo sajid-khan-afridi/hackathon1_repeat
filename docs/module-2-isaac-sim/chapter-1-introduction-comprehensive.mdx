@@ -1,0 +1,1273 @@
+---
+title: "Chapter 4: Isaac Sim Environment Setup"
+sidebar_position: 4
+description: "Learn to install, configure, and navigate NVIDIA Isaac Sim for robotics simulation, including ROS 2 bridge setup and basic scene creation"
+keywords:
+  - Isaac Sim
+  - NVIDIA
+  - simulation
+  - ROS 2
+  - robotics
+  - GPU
+  - Omniverse
+tags:
+  - isaac-sim
+  - simulation
+  - setup
+  - ros2-bridge
+learning_objectives:
+  - "Install and configure NVIDIA Isaac Sim 2023.1.0 or later"
+  - "Navigate Isaac Sim interface and understand core concepts"
+  - "Set up and configure ROS 2 bridge for bidirectional communication"
+  - "Create basic simulation scenes and import assets"
+difficulty_level: beginner
+ros_version: humble
+prerequisites: ["ch01", "ch02", "ch03"]
+estimated_time: 65
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 4: Isaac Sim Environment Setup
+
+## Introduction
+
+NVIDIA Isaac Sim is a powerful robotics simulation platform that provides photorealistic environments for developing and testing robotics algorithms. It's built on NVIDIA's Omniverse platform and offers advanced physics simulation, sensor simulation, and seamless integration with ROS 2.
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Think of Isaac Sim as a highly advanced video game where you can build and test robots in realistic environments. Instead of programming real hardware (which can be expensive and risky), you can test everything in simulation first.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Isaac Sim provides a comprehensive simulation ecosystem with PhysX-based physics, USD-based scene description, and real-time ray-traced rendering. It supports complex multi-robot scenarios, sensor fusion simulation, and deterministic physics for reproducible research results.
+</PersonalizedSection>
+
+## 4.1 System Requirements
+
+Before installing Isaac Sim, ensure your system meets these requirements:
+
+<PersonalizedSection hardwareAccess={true}>
+**Hardware Requirements:**
+- NVIDIA GPU with Turing architecture or newer (RTX 20 series or later)
+- Minimum 8 GB VRAM (16 GB recommended for complex scenes)
+- 16 GB RAM minimum (32 GB recommended)
+- SSD with at least 50 GB free space
+- Ubuntu 20.04 or 22.04 LTS (required)
+- Python 3.7-3.10 compatible environment
+
+**GPU Architecture Check:**
+```bash
+nvidia-smi --query-gpu=name,compute_cap --format=csv
+```
+Look for compute capability 7.0 or higher.
+</PersonalizedSection>
+
+<PersonalizedSection hardwareAccess={false}>
+**Cloud/VM Requirements:**
+- Cloud service with NVIDIA GPUs (AWS G4/G5, GCP A2/A3, or Azure NC series)
+- Minimum 4 vCPUs and 16 GB RAM
+- 100 GB storage for Isaac Sim and assets
+- Stable internet connection for Omniverse Cloud sync
+</PersonalizedSection>
+
+## 4.2 Installation Process
+
+### Step 1: Create NVIDIA Account
+
+1. Visit [NVIDIA Developer](https://developer.nvidia.com/)
+2. Create a free account or log in
+3. Navigate to Isaac Sim product page
+
+### Step 2: Download Isaac Sim
+
+```bash
+# Create installation directory
+mkdir -p ~/isaac_sim
+cd ~/isaac_sim
+
+# Download Isaac Sim 2023.1.0 (adjust version as needed)
+wget https://developer.nvidia.com/downloads/compute/machine-learning/isaac/sim/2023_1_0/isaac-sim-2023.1.0-linux.tar.gz
+
+# Extract the archive
+tar -xzf isaac-sim-2023.1.0-linux.tar.gz
+```
+
+### Step 3: Set Up Python Environment
+
+<PersonalizedSection level="beginner">
+Isaac Sim comes with its own Python environment. This prevents conflicts with your system Python.
+</PersonalizedSection>
+
+```python
+# test: true
+# Verify Python environment setup
+import sys
+import os
+
+# Check Isaac Sim Python version
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
+
+# Check required packages
+try:
+    import carb
+    print(f"Carb SDK version: {carb.__version__}")
+except ImportError:
+    print("Carb SDK not found - ensure Isaac Sim environment is active")
+
+# Check omni.kit.ui
+try:
+    import omni.kit.ui
+    print("OmniKit UI module available")
+except ImportError:
+    print("OmniKit UI module not found")
+
+# Check Isaac Sim specific modules
+try:
+    import isaac
+    print("Isaac Sim modules available")
+except ImportError:
+    print("Isaac Sim modules not found - may need to source environment")
+```
+
+### Step 4: Environment Configuration
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export ISAAC_SIM_PATH=$HOME/isaac_sim/isaac-sim
+export PYTHONPATH=$ISAAC_SIM_PATH/python:$PYTHONPATH
+export LD_LIBRARY_PATH=$ISAAC_SIM_PATH/lib:$LD_LIBRARY_PATH
+
+# Source the environment
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+## 4.3 First Launch
+
+### Launching Isaac Sim
+
+```bash
+cd ~/isaac_sim/isaac-sim
+./isaac-sim.sh
+```
+
+<PersonalizedSection level="beginner">
+The first launch might take a while as Isaac Sim downloads necessary assets. Be patient - this is normal!
+</PersonalizedSection>
+
+### Navigating the Interface
+
+1. **Viewport**: Main 3D view of the scene
+2. **Stage Tab**: Add/modify objects in the scene
+3. **Content Tab**: Browse and import assets
+4. **Render Settings**: Adjust visual quality
+5. **Physics Settings**: Configure physics simulation
+6. **Console**: View logs and debug information
+
+<PersonalizedSection level="advanced">
+Key shortcuts:
+- **Alt + LMB**: Rotate camera
+- **Alt + MMB**: Pan camera
+- **Alt + RMB**: Zoom camera
+- **F**: Frame selected object
+- **Ctrl + D**: Duplicate object
+- **Delete**: Remove selected object
+</PersonalizedSection>
+
+## 4.4 Creating Your First Scene
+
+### Basic Scene Creation
+
+```python
+# test: true
+# Script to create a basic simulation scene
+import omni.kit.commands
+from pxr import Gf, Sdf, Usd, UsdGeom
+
+def create_basic_scene():
+    """Create a basic scene with ground plane and lighting."""
+
+    # Get stage
+    stage = omni.usd.get_context().get_stage()
+
+    # Create ground plane
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Xform",
+        prim_path="/World/GroundPlane",
+        attributes={
+            "axis": "Y",
+            "size": 1000,
+            "color": (0.5, 0.5, 0.5, 1.0),
+            "doubleSided": True
+        }
+    )
+
+    # Create dome light for ambient lighting
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="DomeLight",
+        prim_path="/World/DomeLight",
+        attributes={
+            "intensity": 1000,
+            "color": (0.8, 0.8, 0.8, 1.0)
+        }
+    )
+
+    # Create directional light (sun)
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="DistantLight",
+        prim_path="/World/SunLight",
+        attributes={
+            "intensity": 5000,
+            "color": (1.0, 0.95, 0.8, 1.0),
+            "temperature": 6500
+        }
+    )
+
+    # Set default camera position
+    camera_prim = stage.GetPrimAtPath("/OmniverseKit_Persp")
+    if camera_prim:
+        camera = UsdGeom.Camera(camera_prim)
+        camera.GetCamera().SetClippingRange(0.1, 1000.0)
+
+    print("Basic scene created successfully!")
+
+# Run the scene creation
+create_basic_scene()
+```
+
+### Importing a Robot
+
+```python
+# test: true
+# Script to import a robot into the scene
+import omni.kit.commands
+from pxr import Gf
+
+def import_robot():
+    """Import a robot model into the scene."""
+
+    # Robot USD path (adjust for your robot)
+    robot_usd_path = "http://omniverse-content-library.s3-website-us-east-1.amazonaws.com/Assets/Isaac/2023.1/Isaac/Robots/Franka/franka.usd"
+
+    # Import the robot
+    result, robot_path = omni.kit.commands.execute(
+        "CreatePrimWithUsd",
+        prim_path="/World/Franka",
+        usd_path=robot_usd_path
+    )
+
+    if result:
+        # Position the robot
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=robot_path,
+            translation={"x": 0, "y": 0, "z": 0.8},
+            rotation={"x": 0, "y": 0, "z": 0}
+        )
+
+        # Enable physics for the robot
+        physics_api = omni.physics.get_physics_interface()
+        physics_api.apply_rigid_body_collider(robot_path + "/base_link")
+
+        print(f"Robot imported successfully at {robot_path}")
+    else:
+        print("Failed to import robot")
+
+# Import the robot
+import_robot()
+```
+
+## 4.5 ROS 2 Bridge Setup
+
+### Installing ROS 2 Bridge
+
+The ROS 2 bridge allows Isaac Sim to communicate with ROS 2 nodes.
+
+```bash
+# In Isaac Sim Python environment
+pip install ros2-bridge
+```
+
+### Configuring ROS 2 Bridge
+
+```python
+# test: true
+# Configure ROS 2 bridge in Isaac Sim
+import carb
+import omni.isaac.core.utils.nucleus as nucleus
+
+def configure_ros_bridge():
+    """Configure the ROS 2 bridge for Isaac Sim."""
+
+    # Get ROS 2 bridge extension
+    ros_bridge_extension = "/isaac/ros2_bridge"
+
+    # Enable the extension
+    carb.settings.get_settings().set("/persistent/app/extension/enabledExtensions", [
+        ros_bridge_extension
+    ])
+
+    # Configure bridge settings
+    settings = carb.settings.get_settings()
+
+    # ROS 2 domain settings
+    settings.set("/ros/ros2_bridge/domain_id", 0)
+    settings.set("/ros/ros2_bridge/namespace", "isaac")
+    settings.set("/ros/ros2_bridge/remappings", [])
+
+    # Frame ID mappings
+    settings.set("/ros/ros2_bridge/frame_id", "world")
+    settings.set("/ros/ros2_bridge/odom_frame_id", "odom")
+
+    # Publishing frequency (Hz)
+    settings.set("/ros/ros2_bridge/clock_publish_frequency", 60.0)
+    settings.set("/ros/ros2_bridge/transform_tree_publish_frequency", 60.0)
+
+    print("ROS 2 bridge configured successfully!")
+
+# Configure the bridge
+configure_ros_bridge()
+```
+
+### Publishing Robot State to ROS 2
+
+```python
+# test: true
+# Publish robot joint states to ROS 2
+import omni.isaac.core.utils.nucleus as nucleus
+from omni.isaac.core import ArticulationView
+from omni.isaac.core.robots import RobotDescription
+import numpy as np
+
+def setup_robot_state_publisher():
+    """Setup robot state publishing to ROS 2."""
+
+    # Define robot description
+    robot_description = RobotDescription(
+        name="franka",
+        robot_prim_path="/World/Franka",
+        usd_path=robot_usd_path,
+        articulation_controller=None
+    )
+
+    # Create articulation view
+    articulation_view = ArticulationView(
+        prim_paths_expr=f"/World/Franka/.*",
+        reset_robot_usd=False
+    )
+
+    # Apply physics settings
+    articulation_view.apply_physics_material(
+        physics_material_path="/World/PhysicsMaterial",
+        stronger_than_descendants=False
+    )
+
+    # Initialize articulation
+    articulation_view.initialize_physics()
+
+    # Create ROS 2 publisher
+    from omni.isaac.ros2_bridge import Ros2Bridge
+    ros_bridge = Ros2Bridge()
+
+    # Register robot state publisher
+    ros_bridge.register_publisher(
+        node_name="isaac_robot_state_publisher",
+        topic_name="joint_states",
+        publisher_type="joint_states",
+        articulation_view=articulation_view
+    )
+
+    print("Robot state publisher registered successfully!")
+
+    return articulation_view, ros_bridge
+
+# Setup the publisher
+articulation, bridge = setup_robot_state_publisher()
+```
+
+## 4.6 Sensor Simulation
+
+### Adding a Camera
+
+```python
+# test: true
+# Add and configure a camera sensor
+import omni.kit.commands
+from pxr import Gf
+
+def add_camera_sensor():
+    """Add a camera sensor to the robot."""
+
+    # Create camera
+    result, camera_path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Camera",
+        prim_path="/World/Franka/Camera",
+        attributes={
+            "focalLength": 24.0,
+            "horizontalAperture": 20.955,
+            "verticalAperture": 15.708,
+            "clippingRange": (0.1, 1000.0)
+        }
+    )
+
+    if result:
+        # Position camera on robot wrist
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=camera_path,
+            translation={"x": 0.0, "y": 0.0, "z": 0.5},
+            rotation={"x": 90, "y": 0, "z": 0}
+        )
+
+        # Parent to robot wrist
+        omni.kit.commands.execute(
+            "ParentPrim",
+            prim_path=camera_path,
+            parent_path="/World/Franka/panda_hand"
+        )
+
+        # Configure ROS 2 bridge for camera
+        from omni.isaac.ros2_bridge import Ros2Bridge
+        ros_bridge = Ros2Bridge()
+
+        ros_bridge.register_publisher(
+            node_name="isaac_camera_publisher",
+            topic_name="/camera/image_raw",
+            publisher_type="camera",
+            prim_path=camera_path
+        )
+
+        ros_bridge.register_publisher(
+            node_name="isaac_camera_info_publisher",
+            topic_name="/camera/camera_info",
+            publisher_type="camera_info",
+            prim_path=camera_path
+        )
+
+        print(f"Camera sensor added at {camera_path}")
+
+    return camera_path if result else None
+
+# Add camera sensor
+camera_path = add_camera_sensor()
+```
+
+### Adding a LiDAR Sensor
+
+```python
+# test: true
+# Add a LiDAR sensor to the robot
+import omni.kit.commands
+
+def add_lidar_sensor():
+    """Add a LiDAR sensor to the robot."""
+
+    # Create LiDAR
+    result, lidar_path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Lidar",
+        prim_path="/World/Franka/Lidar",
+        attributes={
+            "horizontalResolution": 360,
+            "verticalResolution": 32,
+            "horizontalFov": 360.0,
+            "maxRange": 10.0,
+            "minRange": 0.1,
+            "rotationRate": 10.0,
+            "drawPoints": True,
+            "drawLines": True
+        }
+    )
+
+    if result:
+        # Position LiDAR on robot base
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=lidar_path,
+            translation={"x": 0.0, "y": 0.0, "z": 1.0},
+            rotation={"x": 0, "y": 0, "z": 0}
+        )
+
+        # Parent to robot base
+        omni.kit.commands.execute(
+            "ParentPrim",
+            prim_path=lidar_path,
+            parent_path="/World/Franka/base_link"
+        )
+
+        # Configure ROS 2 bridge for LiDAR
+        from omni.isaac.ros2_bridge import Ros2Bridge
+        ros_bridge = Ros2Bridge()
+
+        ros_bridge.register_publisher(
+            node_name="isaac_lidar_publisher",
+            topic_name="/scan",
+            publisher_type="laser_scan",
+            prim_path=lidar_path
+        )
+
+        ros_bridge.register_publisher(
+            node_name="isaac_pointcloud_publisher",
+            topic_name="/points",
+            publisher_type="point_cloud",
+            prim_path=lidar_path
+        )
+
+        print(f"LiDAR sensor added at {lidar_path}")
+
+    return lidar_path if result else None
+
+# Add LiDAR sensor
+lidar_path = add_lidar_sensor()
+```
+
+## Exercises
+
+### Exercise 4.1: Scene Variations (Beginner)
+
+**Learning Objective**: Practice creating different simulation environments
+
+#### Problem
+Create three different scene variations:
+1. **Indoor Lab Scene**: With tables, chairs, and lab equipment
+2. **Outdoor Terrain**: With hills, obstacles, and varied terrain
+3. **Factory Floor**: With conveyor belts, shelves, and industrial equipment
+
+#### Starter Code
+```python
+# Complete this implementation
+import omni.kit.commands
+from pxr import Gf
+
+def create_scene_variation(scene_type):
+    """Create different scene variations."""
+
+    if scene_type == "indoor":
+        # TODO: Create indoor lab environment
+        # - Add tables and chairs
+        # - Add lab equipment (computers, monitors)
+        # - Set appropriate lighting
+
+    elif scene_type == "outdoor":
+        # TODO: Create outdoor terrain
+        # - Generate terrain with hills
+        # - Add rocks and obstacles
+        # - Add natural lighting
+
+    elif scene_type == "factory":
+        # TODO: Create factory floor
+        # - Add conveyor belts
+        # - Add shelves and storage
+        # - Add industrial lighting
+
+    pass
+```
+
+#### Solution
+```python
+# test: true
+import omni.kit.commands
+from pxr import Gf, Sdf, UsdGeom
+import random
+
+def create_scene_variation(scene_type):
+    """Create different scene variations."""
+    stage = omni.usd.get_context().get_stage()
+
+    if scene_type == "indoor":
+        # Create room walls
+        room_size = 10.0
+        wall_height = 3.0
+
+        # Floor
+        omni.kit.commands.execute(
+            "CreatePrim",
+            prim_type="Cube",
+            prim_path="/World/Room/Floor",
+            attributes={
+                "size": (room_size, 0.1, room_size),
+                "position": (0, 0, 0),
+                "color": (0.8, 0.8, 0.8, 1.0)
+            }
+        )
+
+        # Tables
+        for i in range(3):
+            x_pos = -3.0 + i * 3.0
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="Cube",
+                prim_path=f"/World/Room/Table_{i}",
+                attributes={
+                    "size": (1.5, 0.7, 0.8),
+                    "position": (x_pos, 0, 0.35),
+                    "color": (0.6, 0.4, 0.2, 1.0)
+                }
+            )
+
+        # Chairs
+        for i in range(3):
+            x_pos = -3.0 + i * 3.0
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="Cube",
+                prim_path=f"/World/Room/Chair_{i}",
+                attributes={
+                    "size": (0.5, 0.5, 0.5),
+                    "position": (x_pos, 0, 0.25),
+                    "color": (0.3, 0.2, 0.1, 1.0)
+                }
+            )
+
+        # Lab equipment
+        for i in range(2):
+            x_pos = -2.0 + i * 4.0
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="Cube",
+                prim_path=f"/World/Room/Computer_{i}",
+                attributes={
+                    "size": (0.6, 0.4, 0.5),
+                    "position": (x_pos, 0, 0.7),
+                    "color": (0.2, 0.2, 0.2, 1.0)
+                }
+            )
+
+        # Add ceiling light
+        omni.kit.commands.execute(
+            "CreatePrim",
+            prim_type="RectLight",
+            prim_path="/World/Room/CeilingLight",
+            attributes={
+                "intensity": 5000,
+                "color": (1.0, 1.0, 0.9, 1.0),
+                "position": (0, 0, 2.5),
+                "size": (8, 8)
+            }
+        )
+
+    elif scene_type == "outdoor":
+        # Create terrain with Perlin noise
+        from omni.isaac.core.utils.nucleus import get_assets_root_path
+        terrain_usd = f"{get_assets_root_path()}/Isaac/Environments/Terrains/terrain.usd"
+
+        result, terrain_path = omni.kit.commands.execute(
+            "CreatePrimWithUsd",
+            prim_path="/World/Terrain",
+            usd_path=terrain_usd
+        )
+
+        # Add rocks
+        for i in range(10):
+            x_pos = random.uniform(-8, 8)
+            y_pos = random.uniform(-8, 8)
+            z_pos = random.uniform(0.5, 1.5)
+            size = random.uniform(0.3, 0.8)
+
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type=f"/World/Terrain/Rock_{i}",
+                attributes={
+                    "size": (size, size, size),
+                    "position": (x_pos, y_pos, z_pos),
+                    "color": (0.5, 0.5, 0.5, 1.0)
+                }
+            )
+
+        # Add trees
+        for i in range(5):
+            x_pos = random.uniform(-10, 10)
+            y_pos = random.uniform(-10, 10)
+
+            tree_usd = f"{get_assets_root_path()}/Isaac/Environments/Trees/tree.usd"
+            omni.kit.commands.execute(
+                "CreatePrimWithUsd",
+                prim_path=f"/World/Terrain/Tree_{i}",
+                usd_path=tree_usd
+            )
+
+            omni.kit.commands.execute(
+                "TransformPrim",
+                path=f"/World/Terrain/Tree_{i}",
+                position=(x_pos, y_pos, 0),
+                scale=(1, 1, 1)
+            )
+
+        # Sun light
+        sun_path = "/World/SunLight"
+        if not stage.GetPrimAtPath(sun_path):
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="DistantLight",
+                prim_path=sun_path,
+                attributes={
+                    "intensity": 8000,
+                    "color": (1.0, 0.95, 0.7, 1.0),
+                    "rotation": (45, -30, 0)
+                }
+            )
+
+    elif scene_type == "factory":
+        # Factory floor
+        floor_path = "/World/Factory/Floor"
+        omni.kit.commands.execute(
+            "CreatePrim",
+            prim_type="Cube",
+            prim_path=floor_path,
+            attributes={
+                "size": (20, 0.2, 20),
+                "position": (0, 0, 0),
+                "color": (0.4, 0.4, 0.4, 1.0)
+            }
+        )
+
+        # Conveyor belts
+        for i in range(2):
+            y_pos = -5.0 + i * 10.0
+            belt_path = f"/World/Factory/Conveyor_{i}"
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="Cube",
+                prim_path=belt_path,
+                attributes={
+                    "size": (15, 0.2, 1.0),
+                    "position": (0, y_pos, 0.1),
+                    "color": (0.2, 0.2, 0.2, 1.0)
+                }
+            )
+
+            # Conveyor supports
+            for j in range(3):
+                x_pos = -5.0 + j * 5.0
+                omni.kit.commands.execute(
+                    "CreatePrim",
+                    prim_type="Cube",
+                    prim_path=f"{belt_path}/Support_{j}",
+                    attributes={
+                        "size": (0.2, 0.2, 1.5),
+                        "position": (x_pos, y_pos, 0.75),
+                        "color": (0.3, 0.3, 0.3, 1.0)
+                    }
+                )
+
+        # Shelves
+        for i in range(3):
+            x_pos = -7.5 + i * 7.5
+            for j in range(2):
+                shelf_path = f"/World/Factory/Shelf_{i}_{j}"
+                omni.kit.commands.execute(
+                    "CreatePrim",
+                    prim_type="Cube",
+                    prim_path=shelf_path,
+                    attributes={
+                        "size": (2, 0.3, 3),
+                        "position": (x_pos, -8 + j * 2, 1.5),
+                        "color": (0.7, 0.5, 0.3, 1.0)
+                    }
+                )
+
+        # Industrial lights
+        for i in range(4):
+            x_pos = -7.5 + i * 5.0
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="SphereLight",
+                prim_path=f"/World/Factory/Light_{i}",
+                attributes={
+                    "intensity": 10000,
+                    "color": (1.0, 1.0, 0.9, 1.0),
+                    "position": (x_pos, 0, 4.0),
+                    "radius": 1.0
+                }
+            )
+
+    print(f"Created {scene_type} scene successfully!")
+
+# Test each scene type
+create_scene_variation("indoor")
+# create_scene_variation("outdoor")
+# create_scene_variation("factory")
+```
+
+### Exercise 4.2: Custom Sensor Integration (Intermediate)
+
+**Learning Objective**: Integrate a custom sensor with ROS 2 bridge
+
+#### Problem
+Create a custom proximity sensor that:
+- Detects objects within 2 meters
+- Publishes distance measurements to ROS 2
+- Visualizes detection with colored rays
+
+#### Solution
+```python
+# test: true
+import omni.kit.commands
+import numpy as np
+from pxr import Gf
+from omni.isaac.core import ArticulationView
+from omni.isaac.ros2_bridge import Ros2Bridge
+
+class ProximitySensor:
+    """Custom proximity sensor implementation."""
+
+    def __init__(self, prim_path="/World/ProximitySensor", num_rays=36):
+        self.prim_path = prim_path
+        self.num_rays = num_rays
+        self.max_range = 2.0
+        self.detections = np.full(num_rays, self.max_range)
+
+        # Create sensor visualization
+        self._create_visualization()
+
+        # Setup ROS 2 bridge
+        self.ros_bridge = Ros2Bridge()
+        self.ros_bridge.register_publisher(
+            node_name="proximity_sensor",
+            topic_name="/proximity/range",
+            publisher_type="range",
+            prim_path=self.prim_path
+        )
+
+    def _create_visualization(self):
+        """Create visualization rays."""
+        for i in range(self.num_rays):
+            angle = (2 * np.pi * i) / self.num_rays
+
+            # Create ray visualization
+            omni.kit.commands.execute(
+                "CreatePrim",
+                prim_type="Cylinder",
+                prim_path=f"{self.prim_path}/Ray_{i}",
+                attributes={
+                    "radius": 0.01,
+                    "height": self.max_range,
+                    "color": (0, 1, 0, 0.5),
+                    "position": (0, 0, 0),
+                    "rotation": (90, 0, angle * 57.3),
+                    "visible": True
+                }
+            )
+
+    def update(self, dt):
+        """Update sensor readings."""
+        # Simulate proximity detection
+        # In real implementation, this would use physics ray casting
+
+        for i in range(self.num_rays):
+            angle = (2 * np.pi * i) / self.num_rays
+
+            # Check for obstacles (simplified)
+            # In real implementation, use omni.physics.get_physics_interface().raycast_all()
+
+            # Simulate varying distances
+            distance = self.max_range
+            if np.sin(angle * 3 + omni.get_timeline().get_current_time()) > 0.3:
+                distance = random.uniform(0.5, 2.0)
+
+            self.detections[i] = distance
+
+            # Update visualization
+            color = (1, 0, 0, 0.5) if distance < 1.0 else (0, 1, 0, 0.5)
+            ray_path = f"{self.prim_path}/Ray_{i}"
+
+            omni.kit.commands.execute(
+                "TransformPrim",
+                path=ray_path,
+                attributes={
+                    "height": distance,
+                    "color": color
+                }
+            )
+
+        # Publish to ROS 2
+        self._publish_to_ros()
+
+    def _publish_to_ros(self):
+        """Publish sensor data to ROS 2."""
+        # Publish range sensor data
+        # In real implementation, this would publish sensor_msgs/Range
+
+        message = {
+            "header": {
+                "stamp": omni.get_timeline().get_current_time(),
+                "frame_id": "proximity_sensor"
+            },
+            "radiation_type": 0,  # ULTRASOUND
+            "field_of_view": np.pi,
+            "min_range": 0.1,
+            "max_range": self.max_range,
+            "range": np.min(self.detections)
+        }
+
+        self.ros_bridge.publish_message(
+            topic_name="/proximity/range",
+            message=message
+        )
+
+# Create and use the sensor
+sensor = ProximitySensor()
+
+# Update function (would be called in simulation loop)
+def update_sensor(dt):
+    sensor.update(dt)
+```
+
+### Exercise 4.3: Multi-Robot Simulation (Intermediate)
+
+**Learning Objective**: Set up simulation with multiple interacting robots
+
+#### Problem
+Create a multi-robot scenario where:
+- 3 robots navigate in the same environment
+- Robots can detect and avoid each other
+- Each robot publishes to a unique namespace in ROS 2
+
+#### Solution
+```python
+# test: true
+import omni.kit.commands
+from omni.isaac.ros2_bridge import Ros2Bridge
+
+class MultiRobotSimulation:
+    """Manages multiple robots in simulation."""
+
+    def __init__(self, num_robots=3):
+        self.num_robots = num_robots
+        self.robot_paths = []
+        self.ros_bridges = {}
+
+        # Create robots
+        self._create_robots()
+
+        # Setup ROS 2 namespaces
+        self._setup_namespaces()
+
+    def _create_robots(self):
+        """Create multiple robot instances."""
+        robot_usd = "http://omniverse-content-library.s3-website-us-east-1.amazonaws.com/Assets/Isaac/2023.1/Isaac/Robots/JetBot/jetbot.usd"
+
+        for i in range(self.num_robots):
+            # Calculate spawn position
+            x = (i - self.num_robots/2) * 2.0
+            y = 0.0
+
+            robot_path = f"/World/JetBot_{i}"
+            self.robot_paths.append(robot_path)
+
+            # Import robot
+            result, path = omni.kit.commands.execute(
+                "CreatePrimWithUsd",
+                prim_path=robot_path,
+                usd_path=robot_usd
+            )
+
+            if result:
+                # Position robot
+                omni.kit.commands.execute(
+                    "TransformPrim",
+                    path=robot_path,
+                    translation={"x": x, "y": y, "z": 0.2},
+                    rotation={"x": 0, "y": 0, "z": 0}
+                )
+
+                # Enable physics
+                physics_api = omni.physics.get_physics_interface()
+                physics_api.apply_rigid_body_collider(f"{robot_path}/base_link")
+
+                # Add unique color for visualization
+                colors = [
+                    (1.0, 0.2, 0.2, 1.0),  # Red
+                    (0.2, 1.0, 0.2, 1.0),  # Green
+                    (0.2, 0.2, 1.0, 1.0)   # Blue
+                ]
+                color = colors[i % len(colors)]
+
+                # Apply color to base
+                omni.kit.commands.execute(
+                    "ChangePrimMaterial",
+                    path=f"{robot_path}/base_link/base",
+                    material_path="/World/Materials/Visual/Material",
+                    properties={
+                        "diffuse_color": color,
+                        "metallic": 0.0,
+                        "roughness": 0.7
+                    }
+                )
+
+    def _setup_namespaces(self):
+        """Setup unique ROS 2 namespaces for each robot."""
+        for i in range(self.num_robots):
+            namespace = f"robot_{i}"
+
+            # Create ROS 2 bridge for this robot
+            self.ros_bridges[namespace] = Ros2Bridge()
+
+            # Configure namespace
+            self.ros_bridges[namespace].set_namespace(namespace)
+
+            # Register joint states publisher
+            self.ros_bridges[namespace].register_publisher(
+                node_name="joint_state_publisher",
+                topic_name="joint_states",
+                publisher_type="joint_states",
+                prim_path=self.robot_paths[i]
+            )
+
+            # Register odom publisher
+            self.ros_bridges[namespace].register_publisher(
+                node_name="odom_publisher",
+                topic_name="odom",
+                publisher_type="odometry",
+                prim_path=self.robot_paths[i]
+            )
+
+            # Register TF publisher
+            self.ros_bridges[namespace].register_publisher(
+                node_name="tf_publisher",
+                topic_name="tf",
+                publisher_type="tf",
+                prim_path=self.robot_paths[i]
+            )
+
+            print(f"Configured ROS 2 namespace: {namespace}")
+
+# Create multi-robot simulation
+sim = MultiRobotSimulation(num_robots=3)
+```
+
+### Exercise 4.4: Simulation Performance Optimization (Advanced)
+
+**Learning Objective**: Optimize simulation performance for complex scenes
+
+#### Problem
+Implement performance optimization techniques:
+1. LOD (Level of Detail) for distant objects
+2. Physics substepping configuration
+3. Rendering optimization
+4. Memory management
+
+#### Solution
+```python
+# test: true
+import carb
+import omni.kit.commands
+from pxr import UsdGeom
+
+class PerformanceOptimizer:
+    """Optimizes simulation performance."""
+
+    def __init__(self):
+        self.optimization_level = "medium"  # low, medium, high
+
+    def apply_optimizations(self):
+        """Apply performance optimizations based on level."""
+
+        if self.optimization_level == "low":
+            self._low_quality_settings()
+        elif self.optimization_level == "medium":
+            self._medium_quality_settings()
+        elif self.optimization_level == "high":
+            self._high_quality_settings()
+
+        # Apply common optimizations
+        self._common_optimizations()
+
+    def _low_quality_settings(self):
+        """Low quality settings for maximum performance."""
+        settings = carb.settings.get_settings()
+
+        # Rendering
+        settings.set("/app/rendering/defaultMaterial/specularWorkflow", False)
+        settings.set("/app/rendering/multiSampleCount", 1)
+        settings.set("/app/rendering/shadows/enableShadows", False)
+        settings.set("/rtx/Translucent/EnableAtmosphericScattering", False)
+        settings.set("/rtx/dlss/enable", True)
+
+        # Physics
+        settings.set("/physics/disableCollisionPairs", True)
+        settings.set("/physics/useMultiThreadedSimulation", False)
+
+    def _medium_quality_settings(self):
+        """Balanced quality and performance."""
+        settings = carb.settings.get_settings()
+
+        # Rendering
+        settings.set("/app/rendering/multiSampleCount", 4)
+        settings.set("/app/rendering/shadows/enableShadows", True)
+        settings.set("/app/rendering/shadows/shadowResolution", 1024)
+        settings.set("/rtx/dlss/enable", True)
+
+        # Physics
+        settings.set("/physics/disableCollisionPairs", False)
+        settings.set("/physics/useMultiThreadedSimulation", True)
+        settings.set("/physics/solverType", "TGS")
+
+    def _high_quality_settings(self):
+        """High quality settings for best visuals."""
+        settings = carb.settings.get_settings()
+
+        # Rendering
+        settings.set("/app/rendering/multiSampleCount", 8)
+        settings.set("/app/rendering/shadows/enableShadows", True)
+        settings.set("/app/rendering/shadows/shadowResolution", 2048)
+        settings.set("/rtx/Translucent/EnableAtmosphericScattering", True)
+        settings.set("/rtx/dlss/enable", False)
+
+        # Physics
+        settings.set("/physics/disableCollisionPairs", False)
+        settings.set("/physics/useMultiThreadedSimulation", True)
+        settings.set("/physics/solverType", "TGS")
+        settings.set("/physics/positionIterationCount", 8)
+
+    def _common_optimizations(self):
+        """Apply common optimizations for all levels."""
+        settings = carb.settings.get_settings()
+
+        # Frame rate limiting
+        settings.set("/app/runLoops/default/runLoopMode", "manual")
+        settings.set("/app/runLoops/default/runRateLimit", 60.0)
+
+        # Memory management
+        settings.set("/persistent/app/viewport/textureStreamingEnabled", True)
+        settings.set("/persistent/app/memory/enableGarbageCollection", True)
+
+        # Physics substepping
+        settings.set("/physics/physxSubsteps", 2)
+
+        # Asset streaming
+        settings.set("/persistent/app/asset/assetStreamingEnabled", True)
+
+        # Configure LOD for distant objects
+        self._configure_lod()
+
+    def _configure_lod(self):
+        """Configure Level of Detail for performance."""
+
+        stage = omni.usd.get_context().get_stage()
+
+        # Find all mesh prims
+        for prim in stage.Traverse():
+            if prim.IsA(UsdGeom.Mesh):
+                mesh = UsdGeom.Mesh(prim)
+
+                # Add LOD attributes
+                mesh.CreateAttribute("lodLevels", "token[]")
+                mesh.CreateAttribute("lodSwitchDistance", "float")
+
+                # Set LOD values
+                lod_levels = ["high", "medium", "low"]
+                mesh.GetLodLevelsAttr().Set(lod_levels)
+                mesh.GetLodSwitchDistanceAttr().Set(10.0)
+
+                # Create LOD variants (simplified)
+                self._create_lod_variants(prim)
+
+    def _create_lod_variants(self, prim):
+        """Create simplified mesh variants for LOD."""
+        # Implementation would create simplified versions of meshes
+        # This is a placeholder for the actual LOD implementation
+        pass
+
+# Apply performance optimizations
+optimizer = PerformanceOptimizer()
+optimizer.apply_optimizations()
+
+# Performance monitoring
+class PerformanceMonitor:
+    """Monitor and report simulation performance."""
+
+    def __init__(self):
+        self.frame_times = []
+        self.memory_usage = []
+
+    def update(self):
+        """Update performance metrics."""
+        import psutil
+
+        # Get frame time
+        frame_time = omni.get_timeline().get_current_time() - self.last_time
+        self.frame_times.append(frame_time)
+        self.last_time = omni.get_timeline().get_current_time()
+
+        # Keep only last 100 samples
+        if len(self.frame_times) > 100:
+            self.frame_times = self.frame_times[-100:]
+
+        # Monitor memory
+        memory_percent = psutil.virtual_memory().percent
+        self.memory_usage.append(memory_percent)
+        if len(self.memory_usage) > 100:
+            self.memory_usage = self.memory_usage[-100:]
+
+    def get_stats(self):
+        """Get performance statistics."""
+        if not self.frame_times:
+            return {}
+
+        return {
+            "avg_fps": 1.0 / np.mean(self.frame_times),
+            "min_fps": 1.0 / np.max(self.frame_times),
+            "max_fps": 1.0 / np.min(self.frame_times),
+            "avg_memory": np.mean(self.memory_usage)
+        }
+
+# Create performance monitor
+monitor = PerformanceMonitor()
+```
+
+#### Expected Output
+
+For Exercise 4.1:
+- Three distinct scene environments with appropriate objects and lighting
+- Indoor scene with furniture and lab equipment
+- Outdoor terrain with natural obstacles
+- Factory floor with industrial equipment
+
+For Exercise 4.2:
+- Custom proximity sensor with 36 detection rays
+- Visual feedback with colored rays (red for close, green for far)
+- ROS 2 range message publishing
+
+For Exercise 4.3:
+- 3 robots with unique ROS 2 namespaces (robot_0, robot_1, robot_2)
+- Each robot publishes to its own topic namespace
+- Unique visualization colors for each robot
+
+For Exercise 4.4:
+- Configurable performance settings
+- FPS monitoring and reporting
+- Memory usage tracking
+- LOD system for distant objects
+
+#### Troubleshooting Steps
+
+- **Isaac Sim won't start**: Check NVIDIA GPU drivers and CUDA installation
+- **ROS 2 bridge not working**: Verify ROS 2 environment and bridge installation
+- **Simulation runs slow**: Reduce scene complexity or enable DLSS
+- **Objects fall through floor**: Check physics materials and collision settings
+
+## Summary
+
+In this chapter, we learned:
+- How to install and configure NVIDIA Isaac Sim
+- Creating and manipulating simulation scenes
+- Setting up ROS 2 bridge for bidirectional communication
+- Adding and configuring various sensors (camera, LiDAR)
+- Creating multi-robot simulations
+- Performance optimization techniques
+
+Key takeaways:
+- Isaac Sim provides a powerful platform for robotics simulation
+- ROS 2 bridge enables seamless integration with ROS 2 ecosystem
+- Proper scene setup is crucial for realistic simulation
+- Performance optimization is essential for complex scenes
+- Multi-robot scenarios require careful namespace management
+
+The next chapter will explore robot modeling using URDF and importing robots into Isaac Sim for more complex simulations.

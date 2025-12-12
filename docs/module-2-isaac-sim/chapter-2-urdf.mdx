@@ -1,0 +1,918 @@
+---
+title: "Chapter 2: Robot Models & URDF"
+sidebar_position: 2
+description: "Learn how to create and use Unified Robot Description Format (URDF) files to define robot models for simulation in Isaac Sim"
+keywords:
+  - URDF
+  - robot models
+  - Isaac Sim
+  - ROS 2
+  - links
+  - joints
+  - meshes
+  - visual
+  - collision
+  - simulation
+tags:
+  - isaac-sim
+  - modeling
+  - urdf
+  - robotics
+learning_objectives:
+  - "Create URDF files with links, joints, and visual/collision properties"
+  - "Import and validate URDF models in Isaac Sim"
+  - "Add sensors and actuators to robot models"
+  - "Test robot models with physics simulation"
+difficulty_level: intermediate
+ros_version: humble
+isaac_sim_version: "2023.1.0+"
+prerequisites:
+  - "Chapter 1: Isaac Sim Environment Setup"
+  - "Basic XML knowledge"
+  - "3D geometry concepts"
+estimated_time: 90
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 2: Robot Models & URDF
+
+## Introduction
+
+The **Unified Robot Description Format (URDF)** is an XML format for representing a robot model. It's the standard way to describe robot geometry, kinematics, and dynamics in ROS 2. In Isaac Sim, URDF files are used to import and simulate robots with accurate physical properties.
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Think of a URDF file as a blueprint for your robot. It defines all the parts (links) and how they connect (joints), similar to how you'd describe a puppet with its body segments and strings connecting them.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+URDF provides a standardized XML schema for defining robot kinematic and dynamic properties. In Isaac Sim, URDF models are parsed and converted into USD (Universal Scene Description) with physics properties, enabling high-fidelity simulation with PhysX.
+</PersonalizedSection>
+
+## 2.1 URDF Fundamentals
+
+### Basic URDF Structure
+
+A URDF file consists of two main elements:
+- **Links**: The rigid bodies of the robot
+- **Joints**: The connections between links that define relative motion
+
+```xml
+<!-- Basic URDF template -->
+<?xml version="1.0"?>
+<robot name="my_robot">
+  <!-- Links and joints go here -->
+</robot>
+```
+
+### Link Elements
+
+Each link can have four visual/collision properties:
+
+```xml
+<link name="base_link">
+  <!-- Inertial properties (required for dynamics) -->
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="1.0"/>
+    <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+             iyy="1.0" iyz="0.0"
+             izz="1.0"/>
+  </inertial>
+
+  <!-- Visual representation (how it looks) -->
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="1.0 1.0 0.1"/>
+    </geometry>
+    <material name="blue">
+      <color rgba="0 0 1 1"/>
+    </material>
+  </visual>
+
+  <!-- Collision representation (how it collides) -->
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="1.0 1.0 0.1"/>
+    </geometry>
+  </collision>
+</link>
+```
+
+### Joint Types
+
+URDF supports several joint types:
+
+```xml
+<!-- Revolute joint (rotates around one axis) -->
+<joint name="wheel_joint" type="revolute">
+  <parent link="base_link"/>
+  <child link="wheel_link"/>
+  <origin xyz="0.5 0 0" rpy="0 0 0"/>
+  <axis xyz="0 0 1"/>
+  <limit lower="-3.14" upper="3.14" effort="10.0" velocity="5.0"/>
+</joint>
+
+<!-- Prismatic joint (slides along one axis) -->
+<joint name="slider_joint" type="prismatic">
+  <parent link="base_link"/>
+  <child link="slider_link"/>
+  <origin xyz="0 0 0.5" rpy="0 0 0"/>
+  <axis xyz="0 0 1"/>
+  <limit lower="0" upper="1.0" effort="10.0" velocity="1.0"/>
+</joint>
+
+<!-- Fixed joint (no movement) -->
+<joint name="sensor_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="sensor_link"/>
+  <origin xyz="0 0 0.2" rpy="0 0 0"/>
+</joint>
+```
+
+## 2.2 Creating a Mobile Robot URDF
+
+Let's create a complete differential drive robot URDF:
+
+```xml
+<?xml version="1.0"?>
+<robot name="diff_drive_robot">
+
+  <!-- Base Link -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0"
+               iyy="0.5" iyz="0.0"
+               izz="1.0"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.2" length="0.1"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.2" length="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left Wheel -->
+  <link name="left_wheel_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.1" ixy="0.0" ixz="0.0"
+               iyy="0.1" iyz="0.0"
+               izz="0.1"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right Wheel -->
+  <link name="right_wheel_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.1" ixy="0.0" ixz="0.0"
+               iyy="0.1" iyz="0.0"
+               izz="0.1"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Caster Wheel -->
+  <link name="caster_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+               iyy="0.01" iyz="0.0"
+               izz="0.01"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Joints -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <origin xyz="0 0.18 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <origin xyz="0 -0.18 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_link"/>
+    <origin xyz="-0.15 0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+</robot>
+```
+
+## 2.3 Adding Sensors to URDF
+
+### Adding a Camera
+
+```xml
+<!-- Camera Link -->
+<link name="camera_link">
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="0.1"/>
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+             iyy="0.001" iyz="0.0"
+             izz="0.001"/>
+  </inertial>
+
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.05 0.05 0.05"/>
+    </geometry>
+    <material name="camera_color">
+      <color rgba="0 0.5 1 1"/>
+    </material>
+  </visual>
+</link>
+
+<!-- Camera Joint -->
+<joint name="camera_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="camera_link"/>
+  <origin xyz="0.2 0 0.1" rpy="0 0 0"/>
+</joint>
+
+<!-- Camera Optical Frame (for ROS 2 compatibility) -->
+<link name="camera_optical_frame"/>
+
+<joint name="camera_optical_joint" type="fixed">
+  <parent link="camera_link"/>
+  <child link="camera_optical_frame"/>
+  <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+</joint>
+```
+
+### Adding a LiDAR
+
+```xml
+<!-- LiDAR Link -->
+<link name="lidar_link">
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="0.3"/>
+    <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+             iyy="0.01" iyz="0.0"
+             izz="0.01"/>
+  </inertial>
+
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.05" length="0.1"/>
+    </geometry>
+    <material name="lidar_color">
+      <color rgba="0.2 0.2 0.2 1"/>
+    </material>
+  </visual>
+
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.05" length="0.1"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- LiDAR Joint -->
+<joint name="lidar_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="lidar_link"/>
+  <origin xyz="0 0 0.2" rpy="0 0 0"/>
+</joint>
+```
+
+## 2.4 Using Mesh Files
+
+<PersonalizedSection level="beginner">
+Instead of basic shapes, you can import 3D models (meshes) to make your robot look realistic. Common formats include STL, OBJ, and DAE.
+</PersonalizedSection>
+
+```xml
+<!-- Using STL mesh for visual -->
+<visual>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <geometry>
+    <mesh filename="package://my_robot_description/meshes/base_link.stl"
+          scale="0.001 0.001 0.001"/>
+  </geometry>
+  <material name="blue"/>
+</visual>
+
+<!-- Using COLLADA mesh with materials -->
+<visual>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <geometry>
+    <mesh filename="package://my_robot_description/meshes/wheel.dae"/>
+  </geometry>
+</visual>
+
+<!-- Simplified collision mesh -->
+<collision>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <geometry>
+    <mesh filename="package://my_robot_description/meshes/wheel_collision.stl"
+          scale="0.001 0.001 0.001"/>
+  </geometry>
+</collision>
+```
+
+## 2.5 ROS 2 Launch File with Robot State Publisher
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: launch_ros, robot_state_publisher, joint_state_publisher_gui
+import os
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import PathJoinSubstitution
+
+def generate_launch_description():
+    # Get the directory of the URDF file
+    pkg_share = FindPackageShare(package='my_robot_description').find('my_robot_description')
+    urdf_file = PathJoinSubstitution([pkg_share, 'urdf', 'diff_drive_robot.urdf'])
+
+    # Read the URDF file content
+    with open(urdf_file.perform(None)) as urdf_file_content:
+        robot_description = {'robot_description': urdf_file_content.read()}
+
+    return LaunchDescription([
+        # Robot State Publisher
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[robot_description]
+        ),
+
+        # Joint State Publisher GUI
+        Node(
+            package='joint_state_publisher_gui',
+            executable='joint_state_publisher_gui',
+            name='joint_state_publisher_gui',
+            output='screen'
+        ),
+
+        # RViz2
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', PathJoinSubstitution([pkg_share, 'config', 'robot_view.rviz'])],
+            output='screen'
+        )
+    ])
+```
+
+## 2.6 Importing URDF into Isaac Sim
+
+### Python Script for URDF Import
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.kit.importer.urdf, omni.isaac.core
+
+import carb
+import omni.kit.commands
+from omni.isaac.core import SimulationContext
+from omni.isaac.core.utils.nucleus import get_assets_root_path
+
+async def import_robot_urdf():
+    """Import a robot from URDF file into Isaac Sim"""
+
+    # Path to URDF file
+    urdf_path = "/path/to/your/robot.urdf"
+
+    # Import URDF command
+    (result, prim_path) = await omni.kit.commands.execute(
+        "URDFImportCommand",
+        urdf_path=urdf_path,
+        import_config=None,
+        create_robot=True
+    )
+
+    if result:
+        carb.log_info(f"Robot imported successfully at: {prim_path}")
+
+        # Add to Isaac Sim scene
+        from omni.isaac.core.robots import Robot
+        robot = Robot(prim_path=prim_path)
+
+        # Configure physics
+        robot.set_solver_position_iteration_count(32)
+        robot.set_solver_velocity_iteration_count(16)
+
+        # Enable physics
+        from omni.isaac.core.utils.stage import add_reference_to_stage
+        add_reference_to_stage(usd_path=robot.usd_path, prim_path="/World/Robot")
+
+    else:
+        carb.log_error("Failed to import URDF robot")
+
+# Run the import
+import asyncio
+asyncio.ensure_future(import_robot_urdf())
+```
+
+### Adding Actuators in Isaac Sim
+
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+# Dependencies: omni.isaac.core, omni.isaac.core.robots
+
+from omni.isaac.core import World
+from omni.isaac.core.robots import Robot
+import numpy as np
+
+def setup_robot_actuators():
+    """Configure actuators for robot joints"""
+
+    world = World()
+    robot = world.scene.add(
+        Robot(
+            prim_path="/World/Robot",
+            name="my_robot",
+            usd_path=None,  # Loaded from imported URDF
+            position=np.array([0.0, 0.0, 0.5])
+        )
+    )
+
+    # Configure differential drive
+    from omni.isaac.wheeled_robots.controllers import DifferentialDriveController
+
+    controller = DifferentialDriveController(
+        name="diff_controller",
+        wheel_radius=0.05,
+        wheel_base=0.36,
+        max_linear_speed=1.0,
+        max_angular_speed=1.0
+    )
+
+    robot.attach_controller(controller)
+
+    # Apply control commands
+    forward = np.array([1.0, 0.0])  # linear=1.0, angular=0.0
+    controller.apply(forward)
+
+    return robot, controller
+```
+
+## Exercises
+
+### Exercise 2.1: Create a Simple 2-DOF Arm (Beginner)
+
+**Learning Objective**: Understand URDF link and joint relationships
+
+#### Problem
+Create a URDF for a 2-DOF robotic arm with:
+- Base link (box: 0.1x0.1x0.2m)
+- Link 1 (box: 0.05x0.05x0.3m)
+- Link 2 (box: 0.05x0.05x0.2m)
+- Two revolute joints with limits [-π, π]
+
+#### Solution
+```xml
+<?xml version="1.0"?>
+<robot name="simple_arm">
+
+  <!-- Base Link -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.2"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.2"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Link 1 -->
+  <link name="link1">
+    <inertial>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.3"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.3"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Link 2 -->
+  <link name="link2">
+    <inertial>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.2"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.2"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Joint 1 -->
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link1"/>
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="10" velocity="5"/>
+  </joint>
+
+  <!-- Joint 2 -->
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <origin xyz="0 0 0.3" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="5" velocity="5"/>
+  </joint>
+
+</robot>
+```
+
+### Exercise 2.2: Add Gripper to the Arm (Beginner)
+
+**Learning Objective**: Practice adding end-effectors to robots
+
+#### Solution
+```xml
+<!-- Add to the previous URDF -->
+
+<!-- Gripper Base -->
+<link name="gripper_base">
+  <inertial>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <mass value="0.1"/>
+    <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.08 0.04 0.04"/>
+    </geometry>
+    <material name="green">
+      <color rgba="0 1 0 1"/>
+    </material>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.08 0.04 0.04"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Left Finger -->
+<link name="left_finger">
+  <inertial>
+    <origin xyz="0 0.01 0" rpy="0 0 0"/>
+    <mass value="0.05"/>
+    <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0.01 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.04 0.02 0.04"/>
+    </geometry>
+    <material name="yellow">
+      <color rgba="1 1 0 1"/>
+    </material>
+  </visual>
+  <collision>
+    <origin xyz="0 0.01 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.04 0.02 0.04"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Right Finger -->
+<link name="right_finger">
+  <inertial>
+    <origin xyz="0 -0.01 0" rpy="0 0 0"/>
+    <mass value="0.05"/>
+    <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 -0.01 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.04 0.02 0.04"/>
+    </geometry>
+    <material name="yellow">
+      <color rgba="1 1 0 1"/>
+    </material>
+  </visual>
+  <collision>
+    <origin xyz="0 -0.01 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.04 0.02 0.04"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Gripper Joints -->
+<joint name="gripper_joint" type="fixed">
+  <parent link="link2"/>
+  <child link="gripper_base"/>
+  <origin xyz="0 0 0.2" rpy="0 0 0"/>
+</joint>
+
+<joint name="left_finger_joint" type="prismatic">
+  <parent link="gripper_base"/>
+  <child link="left_finger"/>
+  <origin xyz="0 0.02 0.04" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+  <limit lower="0" upper="0.02" effort="5" velocity="0.1"/>
+</joint>
+
+<joint name="right_finger_joint" type="prismatic">
+  <parent link="gripper_base"/>
+  <child link="right_finger"/>
+  <origin xyz="0 -0.02 0.04" rpy="0 0 0"/>
+  <axis xyz="0 -1 0"/>
+  <limit lower="0" upper="0.02" effort="5" velocity="0.1"/>
+</joint>
+```
+
+### Exercise 2.3: Robot with Mecanum Wheels (Intermediate)
+
+**Learning Objective**: Create a more complex mobile robot with mecanum wheel configuration
+
+#### Solution Template
+```xml
+<!-- Mecanum wheel robot with 4 wheels -->
+<robot name="mecanum_robot">
+  <!-- Base link -->
+  <link name="base_link">
+    <!-- ... similar to diff drive but wider ... -->
+  </link>
+
+  <!-- Four mecanum wheels -->
+  <link name="front_left_wheel">
+    <!-- ... wheel geometry ... -->
+  </link>
+
+  <link name="front_right_wheel">
+    <!-- ... wheel geometry ... -->
+  </link>
+
+  <link name="rear_left_wheel">
+    <!-- ... wheel geometry ... -->
+  </link>
+
+  <link name="rear_right_wheel">
+    <!-- ... wheel geometry ... -->
+  </link>
+
+  <!-- Joints with specific mecanum roller orientation -->
+  <joint name="front_left_joint" type="continuous">
+    <!-- ... -->
+  </joint>
+
+  <!-- ... other joints ... -->
+</robot>
+```
+
+### Exercise 2.4: Add IMU Sensor Frame (Intermediate)
+
+**Learning Objective**: Understand sensor frame conventions in URDF
+
+#### Problem
+Add an IMU sensor to the differential drive robot with proper frame orientation and mounting.
+
+#### Solution
+```xml
+<!-- IMU Link -->
+<link name="imu_link">
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="0.02"/>
+    <inertia ixx="0.00001" ixy="0" ixz="0"
+             iyy="0.00001" iyz="0" izz="0.00001"/>
+  </inertial>
+
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.03 0.03 0.01"/>
+    </geometry>
+    <material name="imu_color">
+      <color rgba="1 0 1 1"/>
+    </material>
+  </visual>
+</link>
+
+<!-- IMU Joint - mounted at center of mass -->
+<joint name="imu_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="imu_link"/>
+  <origin xyz="0 0 0.05" rpy="0 0 0"/>
+</joint>
+```
+
+### Exercise 2.5: Simulate Robot in Isaac Sim (Advanced)
+
+**Learning Objective**: Import and test URDF in Isaac Sim with physics
+
+#### Python Script
+```python
+# test: true
+# Isaac Sim 2023.1.0+ | Python 3.10
+
+import asyncio
+from omni.isaac.core import World
+from omni.isaac.core.robots import Robot
+from omni.isaac.core.utils.nucleus import get_assets_root_path
+import omni.kit.commands
+
+async def test_robot_physics():
+    world = World()
+
+    # Import URDF
+    urdf_path = "/path/to/diff_drive_robot.urdf"
+    (result, _) = await omni.kit.commands.execute(
+        "URDFImportCommand",
+        urdf_path=urdf_path,
+        create_robot=True
+    )
+
+    if not result:
+        print("Failed to import URDF")
+        return
+
+    # Add robot to scene
+    robot = world.scene.add(
+        Robot(
+            prim_path="/World/DiffDrive",
+            name="diff_drive",
+            usd_path=None,
+            position=[0, 0, 0.3]
+        )
+    )
+
+    # Reset simulation
+    world.reset()
+
+    # Simulate for 5 seconds
+    for i in range(500):
+        world.step(render=False)
+        if i % 100 == 0:
+            pos = robot.get_world_pose()[0]
+            print(f"Step {i}: Position {pos}")
+
+    print("Physics simulation complete!")
+
+# Run simulation
+asyncio.ensure_future(test_robot_physics())
+```
+
+## Best Practices
+
+1. **Always include inertial properties**: Required for accurate physics simulation
+2. **Use separate collision and visual meshes**: Simpler collision meshes improve performance
+3. **Follow ROS 2 conventions**: Use proper coordinate frames (optical frames for sensors)
+4. **Validate URDF**: Use `check_urdf` tool to catch errors
+5. **Organize with XACRO**: For complex robots, use XACRO macros for modularity
+6. **Mass distribution**: Ensure total mass and center of mass are realistic
+7. **Joint limits**: Set appropriate effort and velocity limits
+8. **Material properties**: Define friction and restitution for realistic physics
+
+## Summary
+
+In this chapter, we covered:
+- URDF fundamentals with links and joints
+- Creating a complete differential drive robot
+- Adding sensors and actuators to robots
+- Using mesh files for realistic robot models
+- Importing and simulating URDF robots in Isaac Sim
+- Setting up ROS 2 launch files for visualization
+
+Key takeaways:
+- URDF is the standard format for robot description in ROS 2
+- Proper inertial properties are essential for physics simulation
+- Isaac Sim provides seamless URDF import with automatic conversion to USD
+- Robot models should have both visual and collision representations
+- Joint configuration determines robot kinematics
+
+In the next chapter, we'll explore sensors and physics simulation in Isaac Sim in detail.

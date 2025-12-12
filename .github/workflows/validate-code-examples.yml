@@ -1,0 +1,60 @@
+name: Validate ROS 2 Code Examples
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['docs/**/*.mdx']
+  push:
+    branches: [main]
+    paths: ['docs/**/*.mdx']
+  workflow_dispatch:
+
+jobs:
+  validate-examples:
+    runs-on: ubuntu-latest
+    container: ros:humble-ros-base-jammy
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Python dependencies
+      run: |
+        apt-get update
+        apt-get install -y python3-pip
+        pip3 install textstat
+
+    - name: Install ROS 2 packages
+      run: |
+        apt-get update
+        apt-get install -y \
+          ros-humble-rclpy \
+          ros-humble-rclcpp \
+          ros-humble-std-msgs \
+          ros-humble-geometry-msgs \
+          ros-humble-sensor-msgs \
+          ros-humble-nav-msgs \
+          ros-humble-tf2-ros
+
+    - name: Setup ROS environment
+      run: |
+        source /opt/ros/humble/setup.bash
+        echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+    - name: Extract code examples
+      run: |
+        source /opt/ros/humble/setup.bash
+        python3 scripts/extract-code-examples.py docs/
+
+    - name: Validate Python examples
+      run: |
+        source /opt/ros/humble/setup.bash
+        python3 scripts/validate-code-examples.py
+
+    - name: Upload validation results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-validation-results
+        path: tests/code-validation-results.json
+        retention-days: 30

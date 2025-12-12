@@ -1,0 +1,1223 @@
+---
+title: "Chapter 2: Navigation & Path Planning"
+sidebar_position: 2
+description: "Learn navigation stacks, path planning algorithms, and obstacle avoidance for autonomous mobile robots"
+keywords:
+  - navigation
+  - path planning
+  - SLAM
+  - A* algorithm
+  - Dijkstra
+  - RRT
+  - obstacle avoidance
+  - costmap
+  - localization
+tags:
+  - navigation
+  - path-planning
+  - mobile-robots
+  - autonomy
+learning_objectives:
+  - "Understand global and local path planning algorithms"
+  - "Implement obstacle avoidance strategies"
+  - "Configure ROS 2 Navigation2 stack"
+  - "Create custom navigation behaviors"
+difficulty_level: intermediate
+ros_version: humble
+prerequisites:
+  - "Chapter 2: ROS 2 Topics & Services"
+  - "Chapter 1: Robot Kinematics"
+  - "Grid-based maps concepts"
+estimated_time: 120
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# Chapter 2: Navigation & Path Planning
+
+## Introduction
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Navigation is how robots find their way from one place to another. Think of it like giving your robot a map and asking it to find the best route to a destination, just like using GPS navigation in your car.
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Robot navigation combines global path planning (finding optimal routes in known maps), local planning (avoiding dynamic obstacles), and localization (determining robot position). This chapter covers classical algorithms like A* and Dijkstra, sampling-based methods like RRT, and integration with ROS 2 Navigation2 stack.
+</PersonalizedSection>
+
+## 2.1 Map Representation
+
+### Occupancy Grid Maps
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, nav_msgs
+
+import numpy as np
+from nav_msgs.msg import OccupancyGrid, MapMetaData
+from geometry_msgs.msg import Pose, Point, Quaternion
+
+class OccupancyGridMap:
+    """Represents an occupancy grid map for navigation"""
+
+    def __init__(self, width=100, height=100, resolution=0.1):
+        self.width = width
+        self.height = height
+        self.resolution = resolution  # meters per cell
+
+        # Initialize map (0=free, 100=occupied, -1=unknown)
+        self.data = np.zeros((height, width), dtype=np.int8)
+
+        # Map origin in world coordinates
+        self.origin = Pose()
+        self.origin.position.x = -width * resolution / 2
+        self.origin.position.y = -height * resolution / 2
+        self.origin.orientation.w = 1.0
+
+    def world_to_grid(self, x, y):
+        """Convert world coordinates to grid indices"""
+        i = int((y - self.origin.position.y) / self.resolution)
+        j = int((x - self.origin.position.x) / self.resolution)
+        return i, j
+
+    def grid_to_world(self, i, j):
+        """Convert grid indices to world coordinates"""
+        x = j * self.resolution + self.origin.position.x
+        y = i * self.resolution + self.origin.position.y
+        return x, y
+
+    def set_obstacle(self, x, y, radius=0.5):
+        """Add circular obstacle to map"""
+        i_center, j_center = self.world_to_grid(x, y)
+        radius_cells = int(radius / self.resolution)
+
+        for i in range(max(0, i_center - radius_cells),
+                      min(self.height, i_center + radius_cells + 1)):
+            for j in range(max(0, j_center - radius_cells),
+                          min(self.width, j_center + radius_cells + 1)):
+                if np.sqrt((i - i_center)**2 + (j - j_center)**2) <= radius_cells:
+                    self.data[i, j] = 100  # Occupied
+
+    def is_free(self, x, y):
+        """Check if position is free"""
+        i, j = self.world_to_grid(x, y)
+        if 0 <= i < self.height and 0 <= j < self.width:
+            return self.data[i, j] == 0
+        return False
+
+    def to_ros_msg(self):
+        """Convert to ROS 2 OccupancyGrid message"""
+        msg = OccupancyGrid()
+        msg.header.stamp = rclpy.time.Time().to_msg()
+        msg.header.frame_id = "map"
+
+        # Map metadata
+        msg.info.resolution = self.resolution
+        msg.info.width = self.width
+        msg.info.height = self.height
+        msg.info.origin = self.origin
+
+        # Map data (flattened)
+        msg.data = self.data.flatten().tolist()
+
+        return msg
+
+    def inflate_obstacles(self, inflation_radius=0.3):
+        """Inflate obstacles to account for robot size"""
+        radius_cells = int(inflation_radius / self.resolution)
+        inflated = np.copy(self.data)
+
+        # Find occupied cells
+        occupied = np.where(self.data == 100)
+
+        for i_occ, j_occ in zip(occupied[0], occupied[1]):
+            # Inflate around occupied cell
+            for di in range(-radius_cells, radius_cells + 1):
+                for dj in range(-radius_cells, radius_cells + 1):
+                    i = i_occ + di
+                    j = j_occ + dj
+
+                    if 0 <= i < self.height and 0 <= j < self.width:
+                        if np.sqrt(di**2 + dj**2) <= radius_cells:
+                            if self.data[i, j] != 100:  # Don't overwrite obstacles
+                                inflated[i, j] = 99  # Inflated space
+
+        self.data = inflated
+```
+
+### Costmap for Navigation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class NavigationCostmap:
+    """Costmap with lethal and non-lethal costs for navigation"""
+
+    def __init__(self, width=100, height=100, resolution=0.1):
+        self.width = width
+        self.height = height
+        self.resolution = resolution
+        self.data = np.zeros((height, width), dtype=np.uint8)
+
+        # Cost parameters
+        self.LETHAL_OBSTACLE = 253
+        self.INSCRIBED_INFLATED_OBSTACLE = 252
+        self.NO_INFORMATION = 255
+
+    def compute_costs(self, obstacles, goals):
+        """Compute costmap with obstacles and goals"""
+        # Initialize all cells as free
+        self.data.fill(0)
+
+        # Add obstacles with high cost
+        for obs_x, obs_y in obstacles:
+            i, j = self.world_to_grid(obs_x, obs_y)
+            if 0 <= i < self.height and 0 <= j < self.width:
+                self.data[i, j] = self.LETHAL_OBSTACLE
+
+        # Compute distance transform for inflation
+        from scipy.ndimage import distance_transform_edt
+
+        # Binary mask of free space
+        free_mask = (self.data < self.INSCRIBED_INFLATED_OBSTACLE)
+
+        # Compute distance to nearest obstacle
+        distances = distance_transform_edt(free_mask)
+
+        # Convert distances to costs
+        max_dist = 2.0 / self.resolution  # 2 meter influence
+        costs = np.clip(254 - (distances / max_dist) * 254, 0, 251)
+
+        # Apply costs to free space
+        self.data[free_mask] = costs[free_mask].astype(np.uint8)
+
+        # Add goal areas with negative cost (attraction)
+        for goal_x, goal_y in goals:
+            i_goal, j_goal = self.world_to_grid(goal_x, goal_y)
+            radius = 10  # cells
+
+            for i in range(max(0, i_goal - radius),
+                          min(self.height, i_goal + radius + 1)):
+                for j in range(max(0, j_goal - radius),
+                              min(self.width, j_goal + radius + 1)):
+                    dist = np.sqrt((i - i_goal)**2 + (j - j_goal)**2)
+                    if dist <= radius:
+                        cost_reduction = int((1 - dist/radius) * 50)
+                        self.data[i, j] = max(0, self.data[i, j] - cost_reduction)
+```
+
+## 2.2 Global Path Planning
+
+### A* Algorithm Implementation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, heapq
+
+import heapq
+import numpy as np
+
+class AStarPlanner:
+    """A* path planning algorithm for grid maps"""
+
+    def __init__(self, grid_map):
+        self.map = grid_map
+        self.movements = [
+            (0, 1, 1.0),   # East
+            (1, 0, 1.0),   # South
+            (0, -1, 1.0),  # West
+            (-1, 0, 1.0),  # North
+            (1, 1, np.sqrt(2)),   # SE
+            (1, -1, np.sqrt(2)),  # SW
+            (-1, 1, np.sqrt(2)),  # NE
+            (-1, -1, np.sqrt(2))  # NW
+        ]
+
+    def heuristic(self, a, b):
+        """Heuristic function (Euclidean distance)"""
+        return np.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+
+    def is_valid(self, i, j):
+        """Check if cell is valid and free"""
+        return (0 <= i < self.map.height and
+                0 <= j < self.map.width and
+                self.map.data[i, j] < 100)  # Not occupied
+
+    def plan(self, start_world, goal_world):
+        """Plan path from start to goal using A*"""
+        # Convert to grid coordinates
+        start_i, start_j = self.map.world_to_grid(*start_world)
+        goal_i, goal_j = self.map.world_to_grid(*goal_world)
+
+        if not self.is_valid(start_i, start_j) or not self.is_valid(goal_i, goal_j):
+            return None  # Invalid start or goal
+
+        # Priority queue: (f_score, counter, node)
+        counter = 0
+        open_set = [(0, counter, (start_i, start_j))]
+
+        # Track costs and parents
+        g_score = { (start_i, start_j): 0 }
+        parent = {}
+        closed_set = set()
+
+        while open_set:
+            # Get node with lowest f_score
+            _, _, (i, j) = heapq.heappop(open_set)
+
+            if (i, j) == (goal_i, goal_j):
+                # Reconstruct path
+                path = []
+                current = (i, j)
+                while current in parent:
+                    path.append(self.map.grid_to_world(*current))
+                    current = parent[current]
+                path.append(self.map.grid_to_world(start_i, start_j))
+                return path[::-1]  # Reverse path
+
+            closed_set.add((i, j))
+
+            # Check neighbors
+            for di, dj, cost in self.movements:
+                ni, nj = i + di, j + dj
+
+                if not self.is_valid(ni, nj):
+                    continue
+
+                if (ni, nj) in closed_set:
+                    continue
+
+                # Calculate tentative g_score
+                tentative_g = g_score[(i, j)] + cost
+
+                if (ni, nj) not in g_score or tentative_g < g_score[(ni, nj)]:
+                    parent[(ni, nj)] = (i, j)
+                    g_score[(ni, nj)] = tentative_g
+                    f_score = tentative_g + self.heuristic((ni, nj), (goal_i, goal_j))
+
+                    counter += 1
+                    heapq.heappush(open_set, (f_score, counter, (ni, nj)))
+
+        return None  # No path found
+
+    def smooth_path(self, path, iterations=100):
+        """Path smoothing using shortcut connections"""
+        if len(path) < 3:
+            return path
+
+        smoothed = path.copy()
+
+        for _ in range(iterations):
+            # Pick two random points
+            if len(smoothed) < 3:
+                break
+
+            i = np.random.randint(0, len(smoothed) - 1)
+            j = np.random.randint(i + 2, len(smoothed))
+
+            # Check if direct path is clear
+            if self.is_path_clear(smoothed[i], smoothed[j]):
+                # Shortcut
+                smoothed = smoothed[:i+1] + smoothed[j:]
+
+        return smoothed
+
+    def is_path_clear(self, start, goal, resolution=0.1):
+        """Check if path between two points is clear of obstacles"""
+        # Bresenham's line algorithm
+        x0, y0 = self.map.world_to_grid(*start)
+        x1, y1 = self.map.world_to_grid(*goal)
+
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
+
+        while True:
+            if not self.is_valid(x0, y0):
+                return False
+
+            if x0 == x1 and y0 == y1:
+                break
+
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
+
+        return True
+```
+
+### Dijkstra's Algorithm
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, heapq
+
+class DijkstraPlanner:
+    """Dijkstra's algorithm for shortest path planning"""
+
+    def __init__(self, grid_map):
+        self.map = grid_map
+        self.movements = [
+            (0, 1, 1.0),   # East
+            (1, 0, 1.0),   # South
+            (0, -1, 1.0),  # West
+            (-1, 0, 1.0),  # North
+            (1, 1, np.sqrt(2)),
+            (1, -1, np.sqrt(2)),
+            (-1, 1, np.sqrt(2)),
+            (-1, -1, np.sqrt(2))
+        ]
+
+    def plan(self, start_world, goal_world):
+        """Plan shortest path using Dijkstra's algorithm"""
+        # Convert to grid coordinates
+        start_i, start_j = self.map.world_to_grid(*start_world)
+        goal_i, goal_j = self.map.world_to_grid(*goal_world)
+
+        # Priority queue: (distance, counter, node)
+        counter = 0
+        pq = [(0, counter, (start_i, start_j))]
+
+        # Track distances
+        distances = { (start_i, start_j): 0 }
+        parent = {}
+        visited = set()
+
+        while pq:
+            _, _, (i, j) = heapq.heappop(pq)
+
+            if (i, j) in visited:
+                continue
+            visited.add((i, j))
+
+            if (i, j) == (goal_i, goal_j):
+                # Reconstruct path
+                path = []
+                current = (i, j)
+                while current in parent:
+                    path.append(self.map.grid_to_world(*current))
+                    current = parent[current]
+                path.append(self.map.grid_to_world(start_i, start_j))
+                return path[::-1]
+
+            # Update neighbors
+            for di, dj, cost in self.movements:
+                ni, nj = i + di, j + dj
+
+                if not self.is_valid(ni, nj):
+                    continue
+
+                if (ni, nj) in visited:
+                    continue
+
+                # Consider cell cost (higher cost for obstacles)
+                cell_cost = self.map.data[ni, nj] / 255.0 * 10
+                total_cost = distances[(i, j)] + cost + cell_cost
+
+                if (ni, nj) not in distances or total_cost < distances[(ni, nj)]:
+                    distances[(ni, nj)] = total_cost
+                    parent[(ni, nj)] = (i, j)
+                    counter += 1
+                    heapq.heappush(pq, (total_cost, counter, (ni, nj)))
+
+        return None
+
+    def is_valid(self, i, j):
+        """Check if cell is valid"""
+        return (0 <= i < self.map.height and
+                0 <= j < self.map.width and
+                self.map.data[i, j] < 100)
+```
+
+## 2.3 Sampling-Based Planners
+
+### Rapidly-exploring Random Tree (RRT)
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class RRTPlanner:
+    """RRT sampling-based path planner"""
+
+    def __init__(self, grid_map, max_iter=5000, step_size=0.5):
+        self.map = grid_map
+        self.max_iter = max_iter
+        self.step_size = step_size
+
+    def plan(self, start_world, goal_world, goal_tolerance=0.5):
+        """Plan path using RRT"""
+        start = np.array(start_world)
+        goal = np.array(goal_world)
+
+        # Initialize tree
+        nodes = [start]
+        parent = {0: None}
+
+        for iteration in range(self.max_iter):
+            # Sample random point
+            if np.random.random() < 0.1:  # 10% chance to sample goal
+                sample = goal
+            else:
+                sample = self.sample_free()
+
+            # Find nearest node
+            nearest_idx = self.find_nearest(nodes, sample)
+
+            # Steer towards sample
+            new_node = self.steer(nodes[nearest_idx], sample)
+
+            # Check if new node is valid
+            if self.is_collision_free(nodes[nearest_idx], new_node):
+                new_idx = len(nodes)
+                nodes.append(new_node)
+                parent[new_idx] = nearest_idx
+
+                # Check if goal reached
+                if np.linalg.norm(new_node - goal) < goal_tolerance:
+                    # Reconstruct path
+                    path = [goal]
+                    current_idx = new_idx
+                    while current_idx is not None:
+                        path.append(nodes[current_idx])
+                        current_idx = parent[current_idx]
+                    return path[::-1]
+
+        return None  # No path found
+
+    def sample_free(self):
+        """Sample random free configuration"""
+        while True:
+            x = np.random.uniform(self.map.origin.position.x,
+                                 self.map.origin.position.x + self.map.width * self.map.resolution)
+            y = np.random.uniform(self.map.origin.position.y,
+                                 self.map.origin.position.y + self.map.height * self.map.resolution)
+
+            if self.map.is_free(x, y):
+                return np.array([x, y])
+
+    def find_nearest(self, nodes, point):
+        """Find nearest node in tree"""
+        distances = [np.linalg.norm(node - point) for node in nodes]
+        return np.argmin(distances)
+
+    def steer(self, from_node, to_node):
+        """Steer from one node towards another"""
+        direction = to_node - from_node
+        distance = np.linalg.norm(direction)
+
+        if distance <= self.step_size:
+            return to_node
+        else:
+            unit_direction = direction / distance
+            return from_node + unit_direction * self.step_size
+
+    def is_collision_free(self, from_node, to_node, num_checks=10):
+        """Check if path between nodes is collision-free"""
+        # Interpolate and check multiple points
+        for t in np.linspace(0, 1, num_checks):
+            point = from_node + t * (to_node - from_node)
+            if not self.map.is_free(point[0], point[1]):
+                return False
+        return True
+```
+
+### RRT* (Optimal RRT)
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class RRTStarPlanner(RRTPlanner):
+    """RRT* optimal path planner"""
+
+    def __init__(self, grid_map, max_iter=5000, step_size=0.5, rewire_radius=1.0):
+        super().__init__(grid_map, max_iter, step_size)
+        self.rewire_radius = rewire_radius
+
+    def plan(self, start_world, goal_world, goal_tolerance=0.5):
+        """Plan optimal path using RRT*"""
+        start = np.array(start_world)
+        goal = np.array(goal_world)
+
+        # Initialize tree with costs
+        nodes = [start]
+        parent = {0: None}
+        cost = {0: 0}
+
+        for iteration in range(self.max_iter):
+            # Sample random point
+            if np.random.random() < 0.1:
+                sample = goal
+            else:
+                sample = self.sample_free()
+
+            # Find nearest nodes
+            near_indices = self.find_near(nodes, sample, self.rewire_radius)
+            if not near_indices:
+                # Use standard nearest if no nearby nodes
+                near_indices = [self.find_nearest(nodes, sample)]
+
+            # Choose best parent
+            best_parent_idx = None
+            best_cost = float('inf')
+            best_new_node = None
+
+            for idx in near_indices:
+                new_node = self.steer(nodes[idx], sample)
+                if self.is_collision_free(nodes[idx], new_node):
+                    new_cost = cost[idx] + np.linalg.norm(nodes[idx] - new_node)
+                    if new_cost < best_cost:
+                        best_cost = new_cost
+                        best_parent_idx = idx
+                        best_new_node = new_node
+
+            if best_parent_idx is None:
+                continue
+
+            # Add new node
+            new_idx = len(nodes)
+            nodes.append(best_new_node)
+            parent[new_idx] = best_parent_idx
+            cost[new_idx] = best_cost
+
+            # Rewire tree
+            for idx in near_indices:
+                if idx != best_parent_idx:
+                    new_cost = cost[new_idx] + np.linalg.norm(best_new_node - nodes[idx])
+                    if new_cost < cost[idx] and self.is_collision_free(best_new_node, nodes[idx]):
+                        parent[idx] = new_idx
+                        cost[idx] = new_cost
+
+            # Check if goal reached
+            if np.linalg.norm(best_new_node - goal) < goal_tolerance:
+                # Find goal connection
+                goal_idx = None
+                min_goal_cost = float('inf')
+
+                for idx, node in enumerate(nodes):
+                    if np.linalg.norm(node - goal) < goal_tolerance:
+                        if self.is_collision_free(node, goal):
+                            goal_cost = cost[idx] + np.linalg.norm(node - goal)
+                            if goal_cost < min_goal_cost:
+                                min_goal_cost = goal_cost
+                                goal_idx = idx
+
+                if goal_idx is not None:
+                    # Reconstruct optimal path
+                    path = [goal]
+                    current_idx = goal_idx
+                    path_cost = min_goal_cost
+
+                    while current_idx is not None:
+                        path.append(nodes[current_idx])
+                        current_idx = parent[current_idx]
+
+                    return path[::-1], path_cost
+
+        return None, float('inf')
+```
+
+## 2.4 Local Path Planning
+
+### Dynamic Window Approach (DWA)
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class DWAPlanner:
+    """Dynamic Window Approach for local planning"""
+
+    def __init__(self, robot):
+        self.robot = robot
+        self.max_v = 1.0  # Max linear velocity (m/s)
+        self.max_w = 1.0  # Max angular velocity (rad/s)
+        self.max_acc = 0.5  # Max linear acceleration (m/s^2)
+        self.max_dw = 1.0  # Max angular acceleration (rad/s^2)
+
+        # Simulation parameters
+        self.dt = 0.1
+        self.predict_time = 2.0
+        self.v_resolution = 0.1
+        self.w_resolution = 0.1
+
+        # Weights
+        self.weight_heading = 1.0
+        self.weight_dist = 1.0
+        self.weight_velocity = 1.0
+
+    def plan(self, current_pose, goal_pose, obstacles, current_v=0, current_w=0):
+        """Plan local trajectory using DWA"""
+        best_traj = None
+        best_vw = (0, 0)
+        best_score = -float('inf')
+
+        # Generate velocity window
+        v_min = max(0, current_v - self.max_acc * self.dt)
+        v_max = min(self.max_v, current_v + self.max_acc * self.dt)
+        w_min = current_w - self.max_dw * self.dt
+        w_max = current_w + self.max_dw * self.dt
+
+        # Search velocities
+        v_range = np.arange(v_min, v_max + self.v_resolution, self.v_resolution)
+        w_range = np.arange(w_min, w_max + self.w_resolution, self.w_resolution)
+
+        for v in v_range:
+            for w in w_range:
+                # Predict trajectory
+                traj = self.predict_trajectory(current_pose, v, w, self.predict_time)
+
+                # Evaluate trajectory
+                score = self.evaluate_trajectory(traj, goal_pose, obstacles, v)
+
+                if score > best_score:
+                    best_score = score
+                    best_traj = traj
+                    best_vw = (v, w)
+
+        return best_vw, best_traj
+
+    def predict_trajectory(self, pose, v, w, predict_time):
+        """Predict robot trajectory"""
+        traj = [pose.copy()]
+
+        x, y, theta = pose
+        t = 0
+
+        while t < predict_time:
+            # Update pose
+            x += v * np.cos(theta) * self.dt
+            y += v * np.sin(theta) * self.dt
+            theta += w * self.dt
+
+            traj.append(np.array([x, y, theta]))
+            t += self.dt
+
+        return np.array(traj)
+
+    def evaluate_trajectory(self, traj, goal, obstacles, v):
+        """Evaluate trajectory with multiple criteria"""
+        # Heading angle to goal
+        last_pos = traj[-1][:2]
+        goal_vec = goal[:2] - last_pos
+        heading_score = np.dot(goal_vec / np.linalg.norm(goal_vec),
+                               np.array([np.cos(traj[-1, 2]),
+                                        np.sin(traj[-1, 2])]))
+
+        # Distance to goal
+        dist_score = -np.linalg.norm(goal[:2] - last_pos)
+
+        # Forward velocity
+        velocity_score = v / self.max_v
+
+        # Obstacle clearance
+        min_dist = float('inf')
+        for obs in obstacles:
+            for point in traj[:, :2]:
+                dist = np.linalg.norm(obs - point)
+                min_dist = min(min_dist, dist)
+
+        if min_dist < 0.3:  # Too close to obstacle
+            obstacle_score = -float('inf')
+        else:
+            obstacle_score = min_dist / 5.0  # Normalize
+
+        # Combine scores
+        total_score = (self.weight_heading * heading_score +
+                      self.weight_dist * dist_score / 10.0 +
+                      self.weight_velocity * velocity_score +
+                      obstacle_score)
+
+        return total_score
+```
+
+### Artificial Potential Fields
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class APFPlanner:
+    """Artificial Potential Fields path planner"""
+
+    def __init__(self, k_att=1.0, k_rep=1.0, influence_radius=2.0):
+        self.k_att = k_att  # Attractive force coefficient
+        self.k_rep = k_rep  # Repulsive force coefficient
+        self.influence_radius = influence_radius
+
+    def plan(self, start, goal, obstacles, max_iter=1000, step_size=0.1):
+        """Plan path using potential fields"""
+        current = np.array(start)
+        path = [current.copy()]
+
+        for _ in range(max_iter):
+            # Calculate forces
+            f_att = self.attractive_force(current, goal)
+            f_rep = self.repulsive_force(current, obstacles)
+            f_total = f_att + f_rep
+
+            # Update position
+            if np.linalg.norm(f_total) > 0:
+                direction = f_total / np.linalg.norm(f_total)
+                current = current + direction * step_size
+                path.append(current.copy())
+
+            # Check if reached goal
+            if np.linalg.norm(current - goal) < 0.1:
+                break
+
+        return np.array(path)
+
+    def attractive_force(self, pos, goal):
+        """Calculate attractive force towards goal"""
+        return self.k_att * (goal - pos)
+
+    def repulsive_force(self, pos, obstacles):
+        """Calculate repulsive force from obstacles"""
+        force = np.zeros(2)
+
+        for obs in obstacles:
+            # Distance to obstacle
+            dist = np.linalg.norm(obs - pos)
+
+            if dist < self.influence_radius:
+                # Repulsive force
+                if dist < 0.1:  # Too close
+                    dist = 0.1  # Avoid division by zero
+
+                direction = (pos - obs) / dist
+                magnitude = self.k_rep * (1/dist - 1/self.influence_radius) / dist**2
+
+                force += magnitude * direction
+
+        return force
+```
+
+## 2.5 ROS 2 Navigation2 Integration
+
+### Custom Planner Plugin
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: nav2_core, rclpy, numpy
+
+from nav2_core import GlobalPlanner
+from nav_msgs.msg import OccupancyGrid, Path
+from geometry_msgs.msg import PoseStamped
+import rclpy
+import numpy as np
+
+class CustomAStarPlanner(GlobalPlanner):
+    """Custom A* planner for Navigation2"""
+
+    def __init__(self):
+        super().__init__()
+        self.costmap = None
+        self.planner = None
+
+    def configure(self, node, costmap, name):
+        """Configure planner"""
+        self.node = node
+        self.costmap = costmap
+        self.name = name
+
+        # Get parameters
+        node.get_parameter(name + '.use_astar', True)
+
+    def createPlan(self, start, goal):
+        """Create path plan"""
+        # Get costmap data
+        costmap_data = self.costmap.getCostmap()
+
+        # Convert to our format
+        grid_map = self.convert_costmap(costmap_data)
+
+        # Create planner
+        self.planner = AStarPlanner(grid_map)
+
+        # Extract positions
+        start_pos = [start.pose.position.x, start.pose.position.y]
+        goal_pos = [goal.pose.position.x, goal.pose.position.y]
+
+        # Plan path
+        path_points = self.planner.plan(start_pos, goal_pos)
+
+        if path_points is None:
+            self.node.get_logger().warn("No path found!")
+            return Path()
+
+        # Convert to ROS 2 Path message
+        path = Path()
+        path.header.frame_id = "map"
+        path.header.stamp = self.node.get_clock().now().to_msg()
+
+        for point in path_points:
+            pose = PoseStamped()
+            pose.header = path.header
+            pose.pose.position.x = point[0]
+            pose.pose.position.y = point[1]
+            pose.pose.orientation.w = 1.0
+            path.poses.append(pose)
+
+        return path
+
+    def convert_costmap(self, costmap_data):
+        """Convert Navigation2 costmap to our format"""
+        # Create occupancy grid
+        occ_map = OccupancyGridMap(
+            width=costmap_data.metadata.size_x,
+            height=costmap_data.metadata.size_y,
+            resolution=costmap_data.metadata.resolution
+        )
+
+        # Convert costs (255=lethal, 0=free)
+        data = np.array(costmap_data.data).reshape(
+            costmap_data.metadata.size_y,
+            costmap_data.metadata.size_x
+        )
+
+        # Map cost values to occupancy values
+        occ_map.data = np.where(data == 255, 100,
+                       np.where(data == 0, 0, 50))
+
+        return occ_map
+
+    def activate(self):
+        """Activate planner"""
+        pass
+
+    def deactivate(self):
+        """Deactivate planner"""
+        pass
+
+    def cleanup(self):
+        """Clean up resources"""
+        pass
+```
+
+### Behavior Tree Navigation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: py_trees, rclpy, geometry_msgs
+
+import py_trees
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import LaserScan
+import rclpy
+
+class NavigateToGoal(py_trees.behaviour.Behaviour):
+    """Behavior tree node for navigation to goal"""
+
+    def __init__(self, name, node, goal_pose):
+        super().__init__(name)
+        self.node = node
+        self.goal_pose = goal_pose
+        self.cmd_pub = None
+        self.current_pose = None
+
+    def setup(self):
+        """Setup ROS 2 communication"""
+        self.cmd_pub = self.node.create_publisher(Twist, '/cmd_vel', 10)
+        self.pose_sub = self.node.create_subscription(
+            PoseWithCovarianceStamped,
+            '/amcl_pose',
+            self.pose_callback,
+            10)
+
+    def pose_callback(self, msg):
+        """Handle pose updates"""
+        self.current_pose = msg.pose.pose
+
+    def update(self):
+        """Execute navigation behavior"""
+        if self.current_pose is None:
+            return py_trees.common.Status.RUNNING
+
+        # Calculate distance and angle to goal
+        dx = self.goal_pose.position.x - self.current_pose.position.x
+        dy = self.goal_pose.position.y - self.current_pose.position.y
+        distance = np.sqrt(dx**2 + dy**2)
+
+        # Check if reached goal
+        if distance < 0.1:
+            return py_trees.common.Status.SUCCESS
+
+        # Calculate desired angle
+        desired_angle = np.arctan2(dy, dx)
+        current_angle = 2 * np.arctan2(self.current_pose.orientation.y,
+                                        self.current_pose.orientation.w)
+
+        # PID control
+        angle_error = self.normalize_angle(desired_angle - current_angle)
+
+        cmd = Twist()
+        if abs(angle_error) > 0.1:
+            # Rotate in place
+            cmd.angular.z = 0.5 * angle_error
+        else:
+            # Move forward
+            cmd.linear.x = min(0.5, distance)
+            cmd.angular.z = 0.2 * angle_error
+
+        self.cmd_pub.publish(cmd)
+
+        return py_trees.common.Status.RUNNING
+
+    def normalize_angle(self, angle):
+        """Normalize angle to [-pi, pi]"""
+        while angle > np.pi:
+            angle -= 2 * np.pi
+        while angle < -np.pi:
+            angle += 2 * np.pi
+        return angle
+```
+
+## Exercises
+
+### Exercise 2.1: Map Building (Beginner)
+
+**Learning Objective**: Create an occupancy grid map from sensor data
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, matplotlib
+
+def build_map_from_scans(scans, poses, map_size=100, resolution=0.1):
+    """Build occupancy grid from laser scans"""
+    # Initialize map
+    occ_map = OccupancyGridMap(map_size, map_size, resolution)
+
+    # Process each scan
+    for scan, pose in zip(scans, poses):
+        x, y, theta = pose
+
+        # Process scan points
+        for i, range_val in enumerate(scan.ranges):
+            if range_val < scan.range_min or range_val > scan.range_max:
+                continue
+
+            # Calculate point position
+            angle = theta + scan.angle_min + i * scan.angle_increment
+            point_x = x + range_val * np.cos(angle)
+            point_y = y + range_val * np.sin(angle)
+
+            # Mark as free (ray tracing) and occupied
+            ray_trace(occ_map, (x, y), (point_x, point_y))
+            occ_map.set_obstacle(point_x, point_y, 0.1)
+
+    return occ_map
+
+def ray_trace(occ_map, start, end):
+    """Mark free cells along ray from start to end"""
+    # Implementation using Bresenham's algorithm
+    x0, y0 = occ_map.world_to_grid(*start)
+    x1, y1 = occ_map.world_to_grid(*end)
+
+    # ... Bresenham implementation ...
+```
+
+### Exercise 2.2: Implement Theta* (Intermediate)
+
+**Learning Objective**: Implement Theta* algorithm for any-angle path planning
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+class ThetaStarPlanner(AStarPlanner):
+    """Theta* algorithm for any-angle path planning"""
+
+    def plan(self, start_world, goal_world):
+        """Plan path using Theta*"""
+        # Convert to grid coordinates
+        start_i, start_j = self.map.world_to_grid(*start_world)
+        goal_i, goal_j = self.map.world_to_grid(*goal_world)
+
+        # Initialize
+        g_score = { (start_i, start_j): 0 }
+        parent = { (start_i, start_j): (start_i, start_j) }
+        open_set = [(0, (start_i, start_j))]
+        closed_set = set()
+
+        while open_set:
+            # Get node with lowest cost
+            current = min(open_set, key=lambda x: x[0])
+            open_set.remove(current)
+            cost, (i, j) = current
+
+            if (i, j) == (goal_i, goal_j):
+                # Reconstruct path
+                path = []
+                current = (i, j)
+                while current != parent[current]:
+                    path.append(self.map.grid_to_world(*current))
+                    current = parent[current]
+                path.append(self.map.grid_to_world(*current))
+                return path[::-1]
+
+            closed_set.add((i, j))
+
+            # Check neighbors
+            for di, dj, move_cost in self.movements:
+                ni, nj = i + di, j + dj
+
+                if not self.is_valid(ni, nj):
+                    continue
+
+                if (ni, nj) in closed_set:
+                    continue
+
+                # Check if parent and neighbor have line of sight
+                pi, pj = parent[(i, j)]
+                if self.line_of_sight((pi, pj), (ni, nj)):
+                    # Direct connection to parent
+                    new_g = g_score[(pi, pj)] + np.sqrt((ni-pi)**2 + (nj-pj)**2)
+                    new_parent = (pi, pj)
+                else:
+                    # Connection through current node
+                    new_g = g_score[(i, j)] + move_cost
+                    new_parent = (i, j)
+
+                if (ni, nj) not in g_score or new_g < g_score[(ni, nj)]:
+                    g_score[(ni, nj)] = new_g
+                    parent[(ni, nj)] = new_parent
+
+                    f_score = new_g + self.heuristic((ni, nj), (goal_i, goal_j))
+                    open_set.append((f_score, (ni, nj)))
+
+        return None
+
+    def line_of_sight(self, start, end):
+        """Check if line of sight exists between two cells"""
+        # Use Bresenham's line algorithm
+        x0, y0 = start
+        x1, y1 = end
+
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
+
+        while True:
+            if not self.is_valid(x0, y0):
+                return False
+
+            if x0 == x1 and y0 == y1:
+                break
+
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
+
+        return True
+```
+
+### Exercise 2.3: Hybrid A*-DWA Planner (Advanced)
+
+**Learning Objective**: Combine global and local planners
+
+#### Solution
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+
+class HybridPlanner:
+    """Hybrid planner combining A* global planning with DWA local planning"""
+
+    def __init__(self, grid_map, robot):
+        self.global_planner = AStarPlanner(grid_map)
+        self.local_planner = DWAPlanner(robot)
+        self.robot = robot
+
+    def plan(self, start, goal, obstacles):
+        """Plan using hybrid approach"""
+        # 1. Global path planning
+        global_path = self.global_planner.plan(start, goal)
+
+        if global_path is None:
+            return None
+
+        # 2. Local path following with dynamic replanning
+        current_pos = start
+        final_path = [current_pos]
+
+        # Follow waypoints
+        look_ahead_distance = 2.0
+        path_index = 0
+
+        while path_index < len(global_path) - 1:
+            # Find waypoint ahead
+            for i in range(path_index, len(global_path)):
+                if np.linalg.norm(np.array(global_path[i]) - current_pos) > look_ahead_distance:
+                    local_goal = global_path[i]
+                    path_index = i
+                    break
+            else:
+                local_goal = global_path[-1]
+                path_index = len(global_path) - 1
+
+            # Local planning to waypoint
+            v, w, traj = self.local_planner.plan(
+                current_pos, local_goal, obstacles
+            )
+
+            # Add trajectory to final path
+            if traj is not None and len(traj) > 1:
+                final_path.extend(traj[1:, :2].tolist())
+                current_pos = traj[-1, :2]
+
+            # Check if reached final goal
+            if np.linalg.norm(current_pos - goal) < 0.1:
+                break
+
+        return final_path
+```
+
+## Summary
+
+In this chapter, we covered:
+- Occupancy grid maps and costmaps
+- Global planning algorithms: A*, Dijkstra, Theta*
+- Sampling-based planners: RRT and RRT*
+- Local planning with DWA and potential fields
+- ROS 2 Navigation2 integration
+- Behavior trees for complex navigation
+
+Key takeaways:
+- Global planners find optimal paths in known maps
+- Local planners handle dynamic obstacles and generate smooth trajectories
+- Sampling-based methods work well in high-dimensional spaces
+- ROS 2 Navigation2 provides a complete navigation stack
+- Hybrid approaches combine global optimality with local reactiveness
+- Behavior trees enable complex navigation strategies
+
+In the next chapter, we'll explore perception and sensor fusion for autonomous robots.

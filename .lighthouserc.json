@@ -1,11 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": [
-        "http://localhost:3000/hackathon1_repeat/",
-        "http://localhost:3000/hackathon1_repeat/docs/intro",
-        "http://localhost:3000/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-publishers"
-      ],
+      "staticDistDir": "./build",
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --headless"

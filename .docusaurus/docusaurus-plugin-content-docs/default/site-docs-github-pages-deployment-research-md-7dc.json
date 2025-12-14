@@ -14,7 +14,11 @@
   "frontMatter": {},
   "sidebar": "tutorialSidebar",
   "previous": {
-    "title": "Chapter 1: Introduction to Isaac Sim",
-    "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction"
+    "title": "Chapter Authoring Guide",
+    "permalink": "/hackathon1_repeat/docs/contributing/chapter-authoring"
+  },
+  "next": {
+    "title": "Chapter 1: Robot Kinematics",
+    "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-1-kinematics"
   }
 }

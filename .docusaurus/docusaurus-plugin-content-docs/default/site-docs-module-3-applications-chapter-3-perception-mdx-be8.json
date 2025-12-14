@@ -1,0 +1,85 @@
+{
+  "id": "module-3-applications/chapter-3-perception",
+  "title": "Chapter 3: Perception & Sensor Fusion",
+  "description": "Learn perception algorithms and sensor fusion techniques for autonomous robots, including object detection, tracking, and state estimation",
+  "source": "@site/docs/module-3-applications/chapter-3-perception.mdx",
+  "sourceDirName": "module-3-applications",
+  "slug": "/module-3-applications/chapter-3-perception",
+  "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-3-perception",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/module-3-applications/chapter-3-perception.mdx",
+  "tags": [
+    {
+      "inline": true,
+      "label": "perception",
+      "permalink": "/hackathon1_repeat/docs/tags/perception"
+    },
+    {
+      "inline": true,
+      "label": "sensor-fusion",
+      "permalink": "/hackathon1_repeat/docs/tags/sensor-fusion"
+    },
+    {
+      "inline": true,
+      "label": "computer-vision",
+      "permalink": "/hackathon1_repeat/docs/tags/computer-vision"
+    },
+    {
+      "inline": true,
+      "label": "autonomous-systems",
+      "permalink": "/hackathon1_repeat/docs/tags/autonomous-systems"
+    }
+  ],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "title": "Chapter 3: Perception & Sensor Fusion",
+    "sidebar_position": 3,
+    "description": "Learn perception algorithms and sensor fusion techniques for autonomous robots, including object detection, tracking, and state estimation",
+    "keywords": [
+      "perception",
+      "sensor fusion",
+      "Kalman filter",
+      "object detection",
+      "computer vision",
+      "point cloud",
+      "state estimation",
+      "Bayesian filtering"
+    ],
+    "tags": [
+      "perception",
+      "sensor-fusion",
+      "computer-vision",
+      "autonomous-systems"
+    ],
+    "learning_objectives": [
+      "Implement Kalman filter for sensor fusion",
+      "Apply computer vision for object detection",
+      "Process and filter point cloud data",
+      "Design robust perception pipelines"
+    ],
+    "difficulty_level": "advanced",
+    "ros_version": "humble",
+    "prerequisites": [
+      "Chapter 2: Navigation & Path Planning",
+      "Linear algebra and probability",
+      "OpenCV basics"
+    ],
+    "estimated_time": 120,
+    "personalization_variants": {
+      "experience_level": true,
+      "ros_familiarity": true,
+      "hardware_access": true
+    }
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Chapter 2: Navigation & Path Planning",
+    "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-2-navigation"
+  },
+  "next": {
+    "title": "Chapter 4: Humanoid Robot Control",
+    "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-4-humanoid"
+  }
+}

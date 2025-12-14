@@ -51,7 +51,7 @@
     "permalink": "/hackathon1_repeat/docs/category/module-2-nvidia-isaac-sim"
   },
   "next": {
-    "title": "GitHub Pages Deployment with GitHub Actions for Docusaurus",
-    "permalink": "/hackathon1_repeat/docs/github-pages-deployment-research"
+    "title": "Chapter 2: Robot Models & URDF",
+    "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-2-urdf"
   }
 }

@@ -1,0 +1,113 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/hackathon1_repeat/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/hackathon1_repeat/docs",
+          "mainDocId": "intro",
+          "docs": [
+            {
+              "id": "contributing/chapter-authoring",
+              "path": "/hackathon1_repeat/docs/contributing/chapter-authoring",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "github-pages-deployment-research",
+              "path": "/hackathon1_repeat/docs/github-pages-deployment-research",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "intro",
+              "path": "/hackathon1_repeat/docs/intro",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2-fundamentals/chapter-1-nodes-lifecycle",
+              "path": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-nodes-lifecycle",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2-fundamentals/chapter-1-publishers",
+              "path": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-publishers",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2-fundamentals/chapter-2-topics-services",
+              "path": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-2-topics-services",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2-fundamentals/chapter-3-parameters-launch",
+              "path": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-3-parameters-launch",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-isaac-sim/chapter-1-introduction",
+              "path": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-isaac-sim/chapter-1-introduction-comprehensive",
+              "path": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction-comprehensive",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-isaac-sim/chapter-2-urdf",
+              "path": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-2-urdf",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-isaac-sim/chapter-3-sensors",
+              "path": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-3-sensors",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-applications/chapter-1-kinematics",
+              "path": "/hackathon1_repeat/docs/module-3-applications/chapter-1-kinematics",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-applications/chapter-2-navigation",
+              "path": "/hackathon1_repeat/docs/module-3-applications/chapter-2-navigation",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-applications/chapter-3-perception",
+              "path": "/hackathon1_repeat/docs/module-3-applications/chapter-3-perception",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-applications/chapter-4-humanoid",
+              "path": "/hackathon1_repeat/docs/module-3-applications/chapter-4-humanoid",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/module-1-ros-2-fundamentals",
+              "path": "/hackathon1_repeat/docs/category/module-1-ros-2-fundamentals",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/module-2-nvidia-isaac-sim",
+              "path": "/hackathon1_repeat/docs/category/module-2-nvidia-isaac-sim",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/hackathon1_repeat/docs/intro",
+                "label": "intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

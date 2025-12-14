@@ -1,0 +1,610 @@
+openapi: 3.1.0
+info:
+  title: RAG Chatbot API
+  description: |
+    AI-powered question answering API for the Physical AI & Humanoid Robotics Textbook.
+
+    ## Features
+    - Natural language queries about robotics textbook content
+    - Source citations with chapter references
+    - Confidence scores for answer reliability
+    - Streaming responses for real-time feedback
+    - Module-specific filtering
+    - Rate limiting (10/hour anonymous, 50/hour authenticated)
+
+    ## Authentication
+    Anonymous users are identified by session tokens. Authenticated users can use JWT tokens
+    for increased rate limits and personalized features.
+  version: 1.0.0
+  contact:
+    name: RAG Chatbot Support
+    url: https://github.com/sajid-khan-afridi/hackathon1_repeat
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.robotics-textbook.com/api/v1
+    description: Production server
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+
+tags:
+  - name: Query
+    description: RAG query operations
+  - name: Chat
+    description: Chat session management
+  - name: Health
+    description: Service health checks
+
+paths:
+  /query:
+    post:
+      operationId: submitQuery
+      tags:
+        - Query
+      summary: Submit a question to the RAG chatbot
+      description: |
+        Processes a natural language question and returns an AI-generated answer
+        with source citations from the robotics textbook.
+
+        **Rate Limits:**
+        - Anonymous users: 10 queries per hour
+        - Authenticated users: 50 queries per hour
+
+        **Streaming:**
+        Use `Accept: text/event-stream` header to receive streaming responses.
+      security:
+        - BearerAuth: []
+        - SessionAuth: []
+        - {}  # Anonymous access allowed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              simple:
+                summary: Simple question
+                value:
+                  query: "What is inverse kinematics?"
+              with_filter:
+                summary: Question with module filter
+                value:
+                  query: "How do ROS 2 publishers work?"
+                  filters:
+                    module: 1
+                  topK: 3
+              continue_conversation:
+                summary: Continue existing conversation
+                value:
+                  query: "Can you show me an example?"
+                  sessionId: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Successful response with answer and sources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                success:
+                  summary: Successful answer
+                  value:
+                    answer: "Inverse kinematics (IK) is the mathematical process of calculating the joint angles needed to position a robot's end-effector at a desired location..."
+                    sources:
+                      - chapterId: "module-3-applications/chapter-1-kinematics"
+                        chapterTitle: "Kinematics and Motion Planning"
+                        relevanceScore: 0.92
+                        excerpt: "Inverse kinematics solves for joint configurations given a desired end-effector pose..."
+                    confidence: 0.87
+                    sessionId: "550e8400-e29b-41d4-a716-446655440000"
+                    tokensUsed:
+                      input: 456
+                      output: 234
+                      total: 690
+                low_confidence:
+                  summary: Low confidence answer with warning
+                  value:
+                    answer: "Based on the available content, here is what I found..."
+                    sources: []
+                    confidence: 0.25
+                    sessionId: "550e8400-e29b-41d4-a716-446655440000"
+                    tokensUsed:
+                      input: 200
+                      output: 100
+                      total: 300
+                    filterMessage: "Low confidence result. Consider rephrasing your question."
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/StreamChunk'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                empty_query:
+                  summary: Empty query
+                  value:
+                    error:
+                      code: "INVALID_QUERY"
+                      message: "Query cannot be empty"
+                      correlationId: "abc-123-def"
+                query_too_long:
+                  summary: Query exceeds limit
+                  value:
+                    error:
+                      code: "QUERY_TOO_LONG"
+                      message: "Query exceeds 500 character limit"
+                      correlationId: "abc-123-def"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limited:
+                  summary: Rate limit exceeded
+                  value:
+                    error:
+                      code: "RATE_LIMIT_EXCEEDED"
+                      message: "Rate limit reached. Please wait or sign in for increased limits."
+                      correlationId: "abc-123-def"
+                      retryAfter: 3600
+          headers:
+            Retry-After:
+              description: Seconds until rate limit resets
+              schema:
+                type: integer
+            X-RateLimit-Limit:
+              description: Total allowed requests per window
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: Remaining requests in current window
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix timestamp when window resets
+              schema:
+                type: integer
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service unavailable (LLM timeout or vector store down)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                llm_timeout:
+                  summary: LLM service timeout
+                  value:
+                    error:
+                      code: "LLM_TIMEOUT"
+                      message: "Response generation is taking longer than expected. Please try again."
+                      correlationId: "abc-123-def"
+                vector_unavailable:
+                  summary: Vector store unavailable
+                  value:
+                    error:
+                      code: "VECTOR_STORE_UNAVAILABLE"
+                      message: "Search service is temporarily unavailable. Here are some common questions..."
+                      correlationId: "abc-123-def"
+                      fallbackFaq:
+                        - question: "What is ROS 2?"
+                          answer: "ROS 2 is a flexible framework for writing robot software..."
+
+  /chat/sessions/{sessionId}:
+    get:
+      operationId: getChatSession
+      tags:
+        - Chat
+      summary: Get chat session history
+      description: Retrieves the message history for a chat session.
+      security:
+        - BearerAuth: []
+        - SessionAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Chat session identifier
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+          description: Maximum number of messages to return
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Return messages before this timestamp (for pagination)
+      responses:
+        '200':
+          description: Chat session with message history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSessionResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      operationId: deleteChatSession
+      tags:
+        - Chat
+      summary: Delete a chat session
+      description: Permanently deletes a chat session and all associated messages.
+      security:
+        - BearerAuth: []
+        - SessionAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Session deleted successfully
+        '404':
+          description: Session not found
+
+  /health:
+    get:
+      operationId: healthCheck
+      tags:
+        - Health
+      summary: Service health check
+      description: Returns the health status of the RAG chatbot service and its dependencies.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                version: "1.0.0"
+                dependencies:
+                  database: healthy
+                  vectorStore: healthy
+                  llmService: healthy
+                timestamp: "2025-12-14T10:30:00Z"
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: unhealthy
+                version: "1.0.0"
+                dependencies:
+                  database: healthy
+                  vectorStore: unhealthy
+                  llmService: healthy
+                timestamp: "2025-12-14T10:30:00Z"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from authentication service
+    SessionAuth:
+      type: apiKey
+      in: header
+      name: X-Session-Token
+      description: Session token for anonymous users
+
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: User's question text
+          example: "What is inverse kinematics?"
+        sessionId:
+          type: string
+          format: uuid
+          description: Existing session ID to continue conversation
+        filters:
+          $ref: '#/components/schemas/QueryFilters'
+        topK:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of source documents to retrieve
+
+    QueryFilters:
+      type: object
+      properties:
+        module:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Filter by textbook module number
+        difficulty:
+          type: string
+          enum:
+            - beginner
+            - intermediate
+            - advanced
+          description: Filter by content difficulty level
+        tags:
+          type: array
+          items:
+            type: string
+          description: Filter by topic tags
+
+    QueryResponse:
+      type: object
+      required:
+        - answer
+        - sources
+        - confidence
+        - sessionId
+        - tokensUsed
+      properties:
+        answer:
+          type: string
+          description: AI-generated answer text
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceCitation'
+          description: Source citations from textbook
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: |
+            Answer confidence score:
+            - 0.0-0.2: No relevant content (answer declined)
+            - 0.2-0.3: Low confidence (warning shown)
+            - 0.3-0.7: Medium confidence
+            - 0.7-1.0: High confidence
+        sessionId:
+          type: string
+          format: uuid
+          description: Chat session identifier
+        tokensUsed:
+          $ref: '#/components/schemas/TokenUsage'
+        filterMessage:
+          type: string
+          description: Optional message about filter behavior
+
+    SourceCitation:
+      type: object
+      required:
+        - chapterId
+        - chapterTitle
+        - relevanceScore
+        - excerpt
+      properties:
+        chapterId:
+          type: string
+          description: Chapter identifier (e.g., 'module-1/chapter-2')
+          example: "module-3-applications/chapter-1-kinematics"
+        chapterTitle:
+          type: string
+          description: Human-readable chapter title
+          example: "Kinematics and Motion Planning"
+        relevanceScore:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Vector similarity score
+        excerpt:
+          type: string
+          maxLength: 1000
+          description: Relevant text excerpt from chapter
+
+    TokenUsage:
+      type: object
+      required:
+        - input
+        - output
+        - total
+      properties:
+        input:
+          type: integer
+          minimum: 0
+          description: Input tokens consumed
+        output:
+          type: integer
+          minimum: 0
+          description: Output tokens generated
+        total:
+          type: integer
+          minimum: 0
+          description: Total tokens used
+
+    StreamChunk:
+      type: object
+      description: Server-Sent Event chunk for streaming responses
+      properties:
+        chunk:
+          type: string
+          description: Text chunk of the answer
+        done:
+          type: boolean
+          description: Whether streaming is complete
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceCitation'
+          description: Sources (only sent when done=true)
+        confidence:
+          type: number
+          format: float
+          description: Confidence score (only sent when done=true)
+        tokensUsed:
+          $ref: '#/components/schemas/TokenUsage'
+          description: Token usage (only sent when done=true)
+        error:
+          type: string
+          description: Error message if stream interrupted
+
+    ChatSessionResponse:
+      type: object
+      required:
+        - sessionId
+        - messages
+        - createdAt
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        createdAt:
+          type: string
+          format: date-time
+        lastActivityAt:
+          type: string
+          format: date-time
+
+    ChatMessage:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+        content:
+          type: string
+        tokensUsed:
+          $ref: '#/components/schemas/TokenUsage'
+        confidence:
+          type: number
+          format: float
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceCitation'
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - correlationId
+          properties:
+            code:
+              type: string
+              description: Error code for programmatic handling
+              enum:
+                - INVALID_QUERY
+                - QUERY_TOO_LONG
+                - RATE_LIMIT_EXCEEDED
+                - SESSION_NOT_FOUND
+                - UNAUTHORIZED
+                - LLM_TIMEOUT
+                - VECTOR_STORE_UNAVAILABLE
+                - DATABASE_ERROR
+                - INTERNAL_ERROR
+            message:
+              type: string
+              description: Human-readable error message
+            correlationId:
+              type: string
+              description: Request correlation ID for debugging
+            retryAfter:
+              type: integer
+              description: Seconds until retry is allowed (for rate limits)
+            fallbackFaq:
+              type: array
+              items:
+                type: object
+                properties:
+                  question:
+                    type: string
+                  answer:
+                    type: string
+              description: Fallback FAQ content (when vector store unavailable)
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+        - dependencies
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+            - degraded
+        version:
+          type: string
+        dependencies:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+            vectorStore:
+              type: string
+              enum: [healthy, unhealthy]
+            llmService:
+              type: string
+              enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time

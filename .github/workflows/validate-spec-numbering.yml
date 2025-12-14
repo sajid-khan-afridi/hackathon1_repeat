@@ -1,0 +1,24 @@
+name: Validate Spec Numbering
+
+on:
+  push:
+    branches: [ main, '00*', '01*', '02*', '03*', '04*', '05*', '06*', '07*' ]
+    paths:
+      - 'specs/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'specs/**'
+
+jobs:
+  validate-spec-numbering:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validate spec numbering
+      run: |
+        chmod +x scripts/validate-spec-numbering.sh
+        npm run validate:specs

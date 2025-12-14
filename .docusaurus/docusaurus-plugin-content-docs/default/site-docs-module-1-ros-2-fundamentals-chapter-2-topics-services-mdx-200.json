@@ -1,0 +1,89 @@
+{
+  "id": "module-1-ros2-fundamentals/chapter-2-topics-services",
+  "title": "Chapter 2: ROS 2 Topics & Services",
+  "description": "Master ROS 2 communication patterns including publish-subscribe for data streams and request-response for service calls",
+  "source": "@site/docs/module-1-ros2-fundamentals/chapter-2-topics-services.mdx",
+  "sourceDirName": "module-1-ros2-fundamentals",
+  "slug": "/module-1-ros2-fundamentals/chapter-2-topics-services",
+  "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-2-topics-services",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/module-1-ros2-fundamentals/chapter-2-topics-services.mdx",
+  "tags": [
+    {
+      "inline": true,
+      "label": "ros2",
+      "permalink": "/hackathon1_repeat/docs/tags/ros-2"
+    },
+    {
+      "inline": true,
+      "label": "fundamentals",
+      "permalink": "/hackathon1_repeat/docs/tags/fundamentals"
+    },
+    {
+      "inline": true,
+      "label": "communication",
+      "permalink": "/hackathon1_repeat/docs/tags/communication"
+    },
+    {
+      "inline": true,
+      "label": "topics",
+      "permalink": "/hackathon1_repeat/docs/tags/topics"
+    },
+    {
+      "inline": true,
+      "label": "services",
+      "permalink": "/hackathon1_repeat/docs/tags/services"
+    }
+  ],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "title": "Chapter 2: ROS 2 Topics & Services",
+    "sidebar_position": 2,
+    "description": "Master ROS 2 communication patterns including publish-subscribe for data streams and request-response for service calls",
+    "keywords": [
+      "ROS2",
+      "topics",
+      "publishers",
+      "subscribers",
+      "services",
+      "QoS",
+      "publish-subscribe",
+      "request-response"
+    ],
+    "tags": [
+      "ros2",
+      "fundamentals",
+      "communication",
+      "topics",
+      "services"
+    ],
+    "learning_objectives": [
+      "Implement publish-subscribe pattern for continuous data streams",
+      "Create and use ROS 2 services for request-response communication",
+      "Configure Quality of Service (QoS) profiles for reliable communication",
+      "Understand when to use topics vs services"
+    ],
+    "difficulty_level": "beginner",
+    "ros_version": "humble",
+    "prerequisites": [
+      "ch01"
+    ],
+    "estimated_time": 75,
+    "personalization_variants": {
+      "experience_level": true,
+      "ros_familiarity": true,
+      "hardware_access": true
+    }
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Chapter 1: ROS 2 Publishers and Subscribers",
+    "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-publishers"
+  },
+  "next": {
+    "title": "Chapter 3: ROS 2 Parameters & Launch",
+    "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-3-parameters-launch"
+  }
+}

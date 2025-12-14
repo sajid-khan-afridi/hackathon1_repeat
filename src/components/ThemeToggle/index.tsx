@@ -3,7 +3,7 @@ import useIsBrowser from '@docusaurus/useIsBrowser';
 import { useColorMode } from '@docusaurus/theme-common';
 import styles from './styles.module.css';
 
-export default function ThemeToggle(): JSX.Element {
+export default function ThemeToggle(): JSX.Element | null {
   const isBrowser = useIsBrowser();
   const { colorMode, setColorMode } = useColorMode();
 
@@ -16,6 +16,7 @@ export default function ThemeToggle(): JSX.Element {
 
   return (
     <button
+      type="button"
       className={styles.themeToggle}
       onClick={() => setColorMode(isDark ? 'light' : 'dark')}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}

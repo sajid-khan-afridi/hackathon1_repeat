@@ -1,42 +1,43 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DocusaurusContextProvider } from '@docusaurus/theme-common/internal';
 import ThemeToggle from './index';
 
-const mockSetLightTheme = jest.fn();
-const mockSetDarkTheme = jest.fn();
+// Mock the hooks
+jest.mock('@docusaurus/useIsBrowser');
+jest.mock('@docusaurus/theme-common', () => ({
+  useColorMode: jest.fn(),
+}));
+
+// Import the mocked hooks
+import useIsBrowser from '@docusaurus/useIsBrowser';
+import { useColorMode } from '@docusaurus/theme-common';
 
 describe('ThemeToggle', () => {
+  const mockSetColorMode = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsBrowser as jest.Mock).mockReturnValue(true);
+    (useColorMode as jest.Mock).mockReturnValue({
+      colorMode: 'light',
+      setColorMode: mockSetColorMode,
+    });
   });
 
   it('renders null on server side', () => {
-    const { container } = render(
-      <DocusaurusContextProvider>
-        <ThemeToggle />
-      </DocusaurusContextProvider>,
-      { wrapper: ({ children }) => <div>{children}</div> }
-    );
+    (useIsBrowser as jest.Mock).mockReturnValue(false);
+
+    const { container } = render(<ThemeToggle />);
     expect(container.firstChild).toBeNull();
   });
 
   it('shows sun icon in dark mode', () => {
-    render(
-      <DocusaurusContextProvider
-        value={{
-          isClient: true,
-          siteConfig: {},
-          i18n: { currentLocale: 'en' },
-          colorMode: {
-              colorMode: 'dark' as const,
-              setColorMode: mockSetLightTheme,
-            }
-        }}
-      >
-        <ThemeToggle />
-      </DocusaurusContextProvider>
-    );
+    (useColorMode as jest.Mock).mockReturnValue({
+      colorMode: 'dark',
+      setColorMode: mockSetColorMode,
+    });
+
+    render(<ThemeToggle />);
 
     const toggle = screen.getByRole('button', { name: /Switch to light mode/i });
     expect(toggle).toBeInTheDocument();
@@ -47,21 +48,12 @@ describe('ThemeToggle', () => {
   });
 
   it('shows moon icon in light mode', () => {
-    render(
-      <DocusaurusContextProvider
-        value={{
-          isClient: true,
-          siteConfig: {},
-          i18n: { currentLocale: 'en' },
-          colorMode: {
-              colorMode: 'light' as const,
-              setColorMode: mockSetDarkTheme,
-            }
-        }}
-      >
-        <ThemeToggle />
-      </DocusaurusContextProvider>
-    );
+    (useColorMode as jest.Mock).mockReturnValue({
+      colorMode: 'light',
+      setColorMode: mockSetColorMode,
+    });
+
+    render(<ThemeToggle />);
 
     const toggle = screen.getByRole('button', { name: /Switch to dark mode/i });
     expect(toggle).toBeInTheDocument();
@@ -72,67 +64,35 @@ describe('ThemeToggle', () => {
   });
 
   it('calls setColorMode when clicked in light mode', () => {
-    render(
-      <DocusaurusContextProvider
-        value={{
-          isClient: true,
-          siteConfig: {},
-          i18n: { currentLocale: 'en' },
-          colorMode: {
-              colorMode: 'light' as const,
-              setColorMode: mockSetDarkTheme,
-            }
-        }}
-      >
-        <ThemeToggle />
-      </DocusaurusContextProvider>
-    );
+    (useColorMode as jest.Mock).mockReturnValue({
+      colorMode: 'light',
+      setColorMode: mockSetColorMode,
+    });
+
+    render(<ThemeToggle />);
 
     const toggle = screen.getByRole('button');
     fireEvent.click(toggle);
 
-    expect(mockSetDarkTheme).toHaveBeenCalledWith('dark');
+    expect(mockSetColorMode).toHaveBeenCalledWith('dark');
   });
 
   it('calls setColorMode when clicked in dark mode', () => {
-    render(
-      <DocusaurusContextProvider
-        value={{
-          isClient: true,
-          siteConfig: {},
-          i18n: { currentLocale: 'en' },
-          colorMode: {
-              colorMode: 'dark' as const,
-              setColorMode: mockSetLightTheme,
-            }
-        }}
-      >
-        <ThemeToggle />
-      </DocusaurusContextProvider>
-    );
+    (useColorMode as jest.Mock).mockReturnValue({
+      colorMode: 'dark',
+      setColorMode: mockSetColorMode,
+    });
+
+    render(<ThemeToggle />);
 
     const toggle = screen.getByRole('button');
     fireEvent.click(toggle);
 
-    expect(mockSetLightTheme).toHaveBeenCalledWith('light');
+    expect(mockSetColorMode).toHaveBeenCalledWith('light');
   });
 
   it('has proper accessibility attributes', () => {
-    render(
-      <DocusaurusContextProvider
-        value={{
-          isClient: true,
-          siteConfig: {},
-          i18n: { currentLocale: 'en' },
-          colorMode: {
-              colorMode: 'light' as const,
-              setColorMode: mockSetDarkTheme,
-            }
-        }}
-      >
-        <ThemeToggle />
-      </DocusaurusContextProvider>
-    );
+    render(<ThemeToggle />);
 
     const toggle = screen.getByRole('button');
 

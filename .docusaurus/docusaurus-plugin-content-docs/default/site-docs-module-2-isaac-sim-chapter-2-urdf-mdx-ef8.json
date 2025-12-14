@@ -1,0 +1,88 @@
+{
+  "id": "module-2-isaac-sim/chapter-2-urdf",
+  "title": "Chapter 2: Robot Models & URDF",
+  "description": "Learn how to create and use Unified Robot Description Format (URDF) files to define robot models for simulation in Isaac Sim",
+  "source": "@site/docs/module-2-isaac-sim/chapter-2-urdf.mdx",
+  "sourceDirName": "module-2-isaac-sim",
+  "slug": "/module-2-isaac-sim/chapter-2-urdf",
+  "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-2-urdf",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/module-2-isaac-sim/chapter-2-urdf.mdx",
+  "tags": [
+    {
+      "inline": true,
+      "label": "isaac-sim",
+      "permalink": "/hackathon1_repeat/docs/tags/isaac-sim"
+    },
+    {
+      "inline": true,
+      "label": "modeling",
+      "permalink": "/hackathon1_repeat/docs/tags/modeling"
+    },
+    {
+      "inline": true,
+      "label": "urdf",
+      "permalink": "/hackathon1_repeat/docs/tags/urdf"
+    },
+    {
+      "inline": true,
+      "label": "robotics",
+      "permalink": "/hackathon1_repeat/docs/tags/robotics"
+    }
+  ],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "title": "Chapter 2: Robot Models & URDF",
+    "sidebar_position": 2,
+    "description": "Learn how to create and use Unified Robot Description Format (URDF) files to define robot models for simulation in Isaac Sim",
+    "keywords": [
+      "URDF",
+      "robot models",
+      "Isaac Sim",
+      "ROS 2",
+      "links",
+      "joints",
+      "meshes",
+      "visual",
+      "collision",
+      "simulation"
+    ],
+    "tags": [
+      "isaac-sim",
+      "modeling",
+      "urdf",
+      "robotics"
+    ],
+    "learning_objectives": [
+      "Create URDF files with links, joints, and visual/collision properties",
+      "Import and validate URDF models in Isaac Sim",
+      "Add sensors and actuators to robot models",
+      "Test robot models with physics simulation"
+    ],
+    "difficulty_level": "intermediate",
+    "ros_version": "humble",
+    "isaac_sim_version": "2023.1.0+",
+    "prerequisites": [
+      "Chapter 1: Isaac Sim Environment Setup",
+      "Basic XML knowledge",
+      "3D geometry concepts"
+    ],
+    "estimated_time": 90,
+    "personalization_variants": {
+      "experience_level": true,
+      "ros_familiarity": true,
+      "hardware_access": true
+    }
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Chapter 1: Introduction to Isaac Sim",
+    "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-1-introduction"
+  },
+  "next": {
+    "title": "Chapter 3: Sensors & Physics Simulation",
+    "permalink": "/hackathon1_repeat/docs/module-2-isaac-sim/chapter-3-sensors"
+  }
+}

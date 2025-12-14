@@ -1,6 +1,6 @@
 # Feature Specification: MDX Textbook Chapters for Physical AI & Humanoid Robotics
 
-**Feature Branch**: `001-mdx-textbook-chapters`
+**Feature Branch**: `002-mdx-textbook-chapters`
 **Created**: 2025-12-12
 **Status**: Draft
 **Input**: User description: "Phase 2 Content Creation - Create 10 MDX chapters for Physical AI & Humanoid Robotics textbook covering ROS 2, NVIDIA Isaac Sim, and robotics fundamentals. Chapters must include: (1) proper MDX frontmatter with learning objectives, tags, and metadata for content-indexer skill, (2) executable Python/C++ code examples tested in ROS 2 Humble, (3) exercises with solutions at beginner/intermediate levels, (4) chapter structure optimized for content-adapter skill personalization (experience_level, ros_familiarity, hardware_access variants), (5) technical terminology preserved for urdu-translator skill compatibility. Agent orchestration: content-publisher-agent creates chapters using mdx-writer skill, then indexes via content-indexer skill into Qdrant. Personalization-agent validates content-adapter compatibility. RAG-chatbot-agent tests searchability via rag-pipeline skill. Quality gates: code examples execute 100%, Flesch-Kincaid 12-14, NDCG@10 > 0.8 on test queries after indexing."

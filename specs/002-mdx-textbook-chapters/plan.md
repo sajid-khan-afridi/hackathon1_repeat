@@ -1,6 +1,6 @@
 # Implementation Plan: MDX Textbook Chapters for Physical AI & Humanoid Robotics
 
-**Branch**: `001-mdx-textbook-chapters` | **Date**: 2025-12-12 | **Spec**: [specs/002-mdx-textbook-chapters/spec.md](./spec.md)
+**Branch**: `002-mdx-textbook-chapters` | **Date**: 2025-12-12 | **Spec**: [specs/002-mdx-textbook-chapters/spec.md](./spec.md)
 **Input**: Feature specification from `/specs/002-mdx-textbook-chapters/spec.md`
 
 **Note**: This plan follows Phase 2 (Content Creation) of the project constitution.

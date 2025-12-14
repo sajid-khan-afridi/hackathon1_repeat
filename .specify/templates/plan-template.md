@@ -3,6 +3,17 @@
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
+<!--
+IMPORTANT: Branch numbering follows phase-based numbering from the constitution:
+- Phase 1 (Book Infrastructure): 001-*
+- Phase 2 (Content Creation): 002-*
+- Phase 3 (RAG Chatbot Core): 003-*
+- Phase 4A (Authentication): 004-*
+- Phase 4B (Personalization): 005-*
+- Phase 5 (Translation): 006-*
+- Phase 6 (Integration & Deployment): 007-*
+-->
+
 **Note**: This template is filled in by the `/sp.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary

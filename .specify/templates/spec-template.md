@@ -1,9 +1,22 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
+**Feature Branch**: `[###-feature-name]`
+**Created**: [DATE]
+**Status**: Draft
 **Input**: User description: "$ARGUMENTS"
+
+<!--
+IMPORTANT: Branch naming follows phase-based numbering from the constitution:
+- Phase 1 (Book Infrastructure): 001-*
+- Phase 2 (Content Creation): 002-*
+- Phase 3 (RAG Chatbot Core): 003-*
+- Phase 4A (Authentication): 004-*
+- Phase 4B (Personalization): 005-*
+- Phase 5 (Translation): 006-*
+- Phase 6 (Integration & Deployment): 007-*
+
+Examples: 001-docusaurus-book-infra, 002-mdx-textbook-chapters, 003-rag-chatbot-core
+-->
 
 ## User Scenarios & Testing *(mandatory)*
 

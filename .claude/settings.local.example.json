@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_comment": "Copy this file to settings.local.json for local overrides (gitignored)",
+
+  "integrations": {
+    "qdrant": {
+      "url": "http://localhost:6333"
+    },
+    "neon": {
+      "poolMax": 5
+    },
+    "openai": {
+      "chatModel": "gpt-4o-mini"
+    }
+  },
+
+  "defaults": {
+    "chunkSize": 300,
+    "verbose": true
+  }
+}

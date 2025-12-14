@@ -1,15 +1,8 @@
-import React, {type ReactNode} from 'react';
+import React, { type ReactNode } from 'react';
 import clsx from 'clsx';
-import {
-  useThemeConfig,
-  ErrorCauseBoundary,
-  ThemeClassNames,
-} from '@docusaurus/theme-common';
-import {
-  splitNavbarItems,
-  useNavbarMobileSidebar,
-} from '@docusaurus/theme-common/internal';
-import NavbarItem, {type Props as NavbarItemConfig} from '@theme/NavbarItem';
+import { useThemeConfig, ErrorCauseBoundary, ThemeClassNames } from '@docusaurus/theme-common';
+import { splitNavbarItems, useNavbarMobileSidebar } from '@docusaurus/theme-common/internal';
+import NavbarItem, { type Props as NavbarItemConfig } from '@theme/NavbarItem';
 import NavbarColorModeToggle from '@theme/Navbar/ColorModeToggle';
 import SearchBar from '@theme/SearchBar';
 import NavbarMobileSidebarToggle from '@theme/Navbar/MobileSidebar/Toggle';
@@ -23,7 +16,7 @@ function useNavbarItems() {
   return useThemeConfig().navbar.items as NavbarItemConfig[];
 }
 
-function NavbarItems({items}: {items: NavbarItemConfig[]}): ReactNode {
+function NavbarItems({ items }: { items: NavbarItemConfig[] }): ReactNode {
   return (
     <>
       {items.map((item, i) => (
@@ -34,9 +27,10 @@ function NavbarItems({items}: {items: NavbarItemConfig[]}): ReactNode {
               `A theme navbar item failed to render.
 Please double-check the following navbar item (themeConfig.navbar.items) of your Docusaurus config:
 ${JSON.stringify(item, null, 2)}`,
-              {cause: error},
+              { cause: error }
             )
-          }>
+          }
+        >
           <NavbarItem {...item} />
         </ErrorCauseBoundary>
       ))}
@@ -44,27 +38,18 @@ ${JSON.stringify(item, null, 2)}`,
   );
 }
 
-function NavbarContentLayout({
-  left,
-  right,
-}: {
-  left: ReactNode;
-  right: ReactNode;
-}) {
+function NavbarContentLayout({ left, right }: { left: ReactNode; right: ReactNode }) {
   return (
     <div className="navbar__inner">
-      <div
-        className={clsx(
-          ThemeClassNames.layout.navbar.containerLeft,
-          'navbar__items',
-        )}>
+      <div className={clsx(ThemeClassNames.layout.navbar.containerLeft, 'navbar__items')}>
         {left}
       </div>
       <div
         className={clsx(
           ThemeClassNames.layout.navbar.containerRight,
-          'navbar__items navbar__items--right',
-        )}>
+          'navbar__items navbar__items--right'
+        )}
+      >
         {right}
       </div>
     </div>

@@ -22,15 +22,13 @@ interface TermData {
  * <TechnicalTerm term="ROS 2" explanation="Robot Operating System 2" />
  * <TechnicalTerm term="publisher" />
  */
-export default function TechnicalTerm({
-  term,
-  explanation,
-}: TechnicalTermProps): JSX.Element {
+export default function TechnicalTerm({ term, explanation }: TechnicalTermProps): React.ReactElement {
   const { language } = useLanguageContext();
 
   // Generate a stable ID for accessibility linking
   const termId = useMemo(
-    () => `term-${term.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`,
+    () =>
+      `term-${term.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`,
     [term]
   );
 
@@ -42,28 +40,17 @@ export default function TechnicalTerm({
 
   // For English, only use explicit explanation prop
   // For Urdu, use contextual explanation from glossary
-  const termExplanation = language === 'ur'
-    ? (explanation || termData?.contextualExplanation || '')
-    : (explanation || '');
+  const termExplanation =
+    language === 'ur' ? explanation || termData?.contextualExplanation || '' : explanation || '';
 
   // For Urdu translation, show term with contextual explanation
   if (language === 'ur' && termData?.contextualExplanation) {
     return (
-      <span
-        className="technical-term"
-        role="term"
-        aria-describedby={termId}
-        tabIndex={0}
-      >
+      <span className="technical-term" role="term" aria-describedby={termId} tabIndex={0}>
         <span className="term-original" lang="en">
           {term}
         </span>
-        <span
-          id={termId}
-          className="term-transliteration"
-          lang="ur"
-          role="definition"
-        >
+        <span id={termId} className="term-transliteration" lang="ur" role="definition">
           ({termData.contextualExplanation})
         </span>
       </span>

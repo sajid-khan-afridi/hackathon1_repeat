@@ -10,28 +10,32 @@ jest.mock('@site/src/context/LanguageContext', () => ({
 }));
 
 // Mock the glossary data
-jest.mock('@site/src/data/technical-terms.json', () => ({
-  terms: [
-    {
-      term: 'ROS 2',
-      category: 'platform',
-      translationStatus: 'preserve',
-      contextualExplanation: 'روبوٹ آپریٹنگ سسٹم 2',
-    },
-    {
-      term: 'publisher',
-      category: 'ros-concept',
-      translationStatus: 'preserve',
-      contextualExplanation: 'پبلشر - پیغامات بھیجنے والا نوڈ',
-    },
-    {
-      term: 'subscriber',
-      category: 'ros-concept',
-      translationStatus: 'preserve',
-      contextualExplanation: 'سبسکرائبر - پیغامات وصول کرنے والا نوڈ',
-    },
-  ],
-}), { virtual: true });
+jest.mock(
+  '@site/src/data/technical-terms.json',
+  () => ({
+    terms: [
+      {
+        term: 'ROS 2',
+        category: 'platform',
+        translationStatus: 'preserve',
+        contextualExplanation: 'روبوٹ آپریٹنگ سسٹم 2',
+      },
+      {
+        term: 'publisher',
+        category: 'ros-concept',
+        translationStatus: 'preserve',
+        contextualExplanation: 'پبلشر - پیغامات بھیجنے والا نوڈ',
+      },
+      {
+        term: 'subscriber',
+        category: 'ros-concept',
+        translationStatus: 'preserve',
+        contextualExplanation: 'سبسکرائبر - پیغامات وصول کرنے والا نوڈ',
+      },
+    ],
+  }),
+  { virtual: true }
+);
 
 describe('TechnicalTerm', () => {
   beforeEach(() => {

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "robotics-textbook",
+  "description": "Claude Code settings for the Robotics Textbook project",
+  "version": "1.0.0",
+
+  "project": {
+    "type": "documentation",
+    "framework": "docusaurus",
+    "language": "typescript"
+  },
+
+  "skills": {
+    "directory": ".claude/skills",
+    "validation": {
+      "requireSkillJson": true,
+      "requireReadme": true,
+      "requireEntryPoint": true
+    }
+  },
+
+  "agents": {
+    "directory": ".claude/agents",
+    "available": [
+      "auth-user-agent",
+      "backend-api-agent",
+      "content-publisher-agent",
+      "infra-devops-setup",
+      "personalization-agent",
+      "rag-chatbot-agent",
+      "ui-component-agent"
+    ]
+  },
+
+  "commands": {
+    "directory": ".claude/commands",
+    "prefix": "/sp."
+  },
+
+  "defaults": {
+    "collectionName": "robotics_textbook",
+    "embeddingModel": "text-embedding-3-small",
+    "chatModel": "gpt-4o-mini",
+    "chunkSize": 500,
+    "chunkOverlap": 50
+  },
+
+  "integrations": {
+    "qdrant": {
+      "defaultCollection": "robotics_textbook"
+    },
+    "neon": {
+      "poolMax": 10
+    },
+    "openai": {
+      "embeddingModel": "text-embedding-3-small",
+      "chatModel": "gpt-4o-mini"
+    }
+  },
+
+  "documentation": {
+    "convention": "README.md",
+    "style": "markdown"
+  },
+
+  "validation": {
+    "scriptPath": "scripts/validate-claude-skills.js",
+    "runOnCommit": true
+  }
+}

@@ -1,289 +1,352 @@
 """
-Utility functions for MDX processing and preservation.
+MDX processing utilities for Urdu translation.
+Handles frontmatter, JSX components, and image extraction.
 """
 
 import re
 from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class JSXComponent:
+    """Represents an extracted JSX component."""
+    name: str
+    full_match: str
+    start_index: int
+    end_index: int
+    self_closing: bool = False
+    props: Optional[Dict[str, str]] = None
+
+
+@dataclass
+class ImageInfo:
+    """Represents an extracted image."""
+    alt_text: str
+    url: str
+    full_match: str
+    jsx: bool = False
 
 
 class MDXProcessor:
-    """Handles MDX-specific elements during translation."""
+    """
+    Processes MDX content for translation.
+    Handles frontmatter extraction, JSX components, and RTL support.
+    """
 
     def __init__(self):
-        self.jsx_components = []
-        self.imports = []
-        self.exports = []
-        self.frontmatter = {}
+        # Patterns for different MDX elements
+        self.frontmatter_pattern = re.compile(
+            r'^---\n([\s\S]*?)\n---\n?',
+            re.MULTILINE
+        )
+        self.jsx_component_pattern = re.compile(
+            r'<([A-Z][a-zA-Z]*)\s*([^>]*?)>([\s\S]*?)</\1>',
+            re.MULTILINE
+        )
+        self.jsx_self_closing_pattern = re.compile(
+            r'<([A-Z][a-zA-Z]*)\s*([^/>]*?)\s*/>',
+            re.MULTILINE
+        )
 
-    def extract_frontmatter(self, content: str) -> Tuple[str, Dict, str]:
+    def extract_frontmatter(self, content: str) -> Tuple[str, Dict[str, str], str]:
         """
-        Extract and preserve frontmatter from MDX content.
+        Extract frontmatter from MDX content.
+
+        Args:
+            content: Raw MDX content
 
         Returns:
-            Tuple of (content_without_frontmatter, frontmatter_dict, raw_frontmatter)
+            Tuple of (content without frontmatter, parsed frontmatter dict, raw frontmatter)
         """
-        frontmatter_pattern = r'^---\n(.*?)\n---'
-        match = re.match(frontmatter_pattern, content, re.DOTALL)
+        match = self.frontmatter_pattern.match(content)
 
-        if match:
-            raw_frontmatter = match.group(0)
-            frontmatter_content = match.group(1)
+        if not match:
+            return content, {}, ""
 
-            # Parse YAML frontmatter
-            frontmatter_dict = self._parse_yaml(frontmatter_content)
+        raw_frontmatter = match.group(1)
+        content_without = content[match.end():]
 
-            # Remove frontmatter from content
-            content_without_frontmatter = content[match.end():].lstrip('\n')
-
-            return content_without_frontmatter, frontmatter_dict, raw_frontmatter
-
-        return content, {}, ""
-
-    def _parse_yaml(self, yaml_content: str) -> Dict:
-        """Simple YAML parser for frontmatter."""
-        result = {}
-        lines = yaml_content.split('\n')
-
-        for line in lines:
-            line = line.strip()
-            if line and ':' in line:
+        # Parse frontmatter into dict
+        frontmatter_dict = {}
+        for line in raw_frontmatter.split('\n'):
+            if ':' in line:
                 key, value = line.split(':', 1)
                 key = key.strip()
-                value = value.strip()
+                value = value.strip().strip('"').strip("'")
+                frontmatter_dict[key] = value
 
-                # Remove quotes if present
-                if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1]
-                elif value.startswith("'") and value.endswith("'"):
-                    value = value[1:-1]
+        return content_without, frontmatter_dict, raw_frontmatter
 
-                result[key] = value
-
-        return result
-
-    def extract_jsx_components(self, content: str) -> Tuple[str, List[Dict]]:
+    def extract_jsx_components(self, content: str) -> Tuple[str, List[JSXComponent]]:
         """
-        Extract JSX components and replace with placeholders.
+        Extract JSX components from content, replacing with placeholders.
+
+        Args:
+            content: MDX content
 
         Returns:
-            Tuple of (content_with_placeholders, list_of_components)
+            Tuple of (content with placeholders, list of components)
         """
-        # Pattern for JSX components: <ComponentName ...props> ...children </ComponentName>
-        jsx_pattern = r'<([A-Z][a-zA-Z0-9]*)(.*?)>(.*?)</\1>'
-
         components = []
-        content_with_placeholders = content
+        modified_content = content
+        placeholder_idx = 0
 
-        for match in re.finditer(jsx_pattern, content, re.DOTALL):
-            component_name = match.group(1)
-            props = match.group(2)
-            children = match.group(3)
-
-            placeholder = f"__JSX_COMPONENT_{len(components)}__"
-            components.append({
-                "name": component_name,
-                "props": props,
-                "children": children,
-                "full_match": match.group(0)
-            })
-
-            content_with_placeholders = content_with_placeholders.replace(
+        # First, handle regular JSX components
+        for match in self.jsx_component_pattern.finditer(content):
+            component = JSXComponent(
+                name=match.group(1),
+                full_match=match.group(0),
+                start_index=match.start(),
+                end_index=match.end(),
+                self_closing=False,
+                props=self._parse_props(match.group(2))
+            )
+            components.append(component)
+            placeholder = f"__JSX_COMPONENT_{placeholder_idx}__"
+            modified_content = modified_content.replace(
                 match.group(0),
                 placeholder,
                 1
             )
+            placeholder_idx += 1
 
-        # Also handle self-closing components
-        self_closing_pattern = r'<([A-Z][a-zA-Z0-9]*)(.*?)\s*/>'
+        # Then handle self-closing components
+        for match in self.jsx_self_closing_pattern.finditer(content):
+            # Skip if already captured as part of a component
+            if any(match.start() >= c.start_index and match.end() <= c.end_index
+                   for c in components if not c.self_closing):
+                continue
 
-        for match in re.finditer(self_closing_pattern, content_with_placeholders):
-            component_name = match.group(1)
-            props = match.group(2)
-
-            placeholder = f"__JSX_SELF_CLOSING_{len(components)}__"
-            components.append({
-                "name": component_name,
-                "props": props,
-                "children": None,
-                "full_match": match.group(0),
-                "self_closing": True
-            })
-
-            content_with_placeholders = content_with_placeholders.replace(
+            component = JSXComponent(
+                name=match.group(1),
+                full_match=match.group(0),
+                start_index=match.start(),
+                end_index=match.end(),
+                self_closing=True,
+                props=self._parse_props(match.group(2))
+            )
+            components.append(component)
+            placeholder = f"__JSX_SELF_CLOSING_{placeholder_idx}__"
+            modified_content = modified_content.replace(
                 match.group(0),
                 placeholder,
                 1
             )
+            placeholder_idx += 1
 
-        return content_with_placeholders, components
+        return modified_content, components
 
-    def restore_jsx_components(self, content: str, components: List[Dict]) -> str:
-        """Restore JSX components from placeholders."""
-        restored_content = content
-
-        for i, component in enumerate(components):
-            if component.get("self_closing"):
-                placeholder = f"__JSX_SELF_CLOSING_{i}__"
-                replacement = f"<{component['name']}{component['props']}/>"
-            else:
-                placeholder = f"__JSX_COMPONENT_{i}__"
-                replacement = f"<{component['name']}{component['props']}>{component['children']}</{component['name']}>"
-
-            restored_content = restored_content.replace(placeholder, replacement, 1)
-
-        return restored_content
-
-    def extract_imports_exports(self, content: str) -> Tuple[str, List[str], List[str]]:
-        """
-        Extract import and export statements.
-
-        Returns:
-            Tuple of (content_without_imports_exports, imports, exports)
-        """
-        # Extract imports
-        import_pattern = r'^import\s+.*?;?\s*$'
-        imports = []
-
-        # Extract exports
-        export_pattern = r'^export\s+.*?;?\s*$'
-        exports = []
-
-        lines = content.split('\n')
-        filtered_lines = []
-
-        for line in lines:
-            if re.match(import_pattern, line.strip()):
-                imports.append(line.strip())
-            elif re.match(export_pattern, line.strip()):
-                exports.append(line.strip())
-            else:
-                filtered_lines.append(line)
-
-        content_without_imports_exports = '\n'.join(filtered_lines)
-
-        return content_without_imports_exports, imports, exports
-
-    def restore_imports_exports(
+    def restore_jsx_components(
         self,
         content: str,
-        imports: List[str],
-        exports: List[str],
-        frontmatter: str
+        components: List[JSXComponent]
     ) -> str:
-        """Restore imports and exports to content."""
-        lines = content.split('\n')
+        """
+        Restore JSX components from placeholders.
 
-        # Add imports at the beginning (after frontmatter if present)
-        if imports:
-            lines.insert(0, '')
-            for imp in reversed(imports):
-                lines.insert(0, imp)
+        Args:
+            content: Content with placeholders
+            components: List of original components
 
-        # Add exports at the end
-        if exports:
-            lines.append('')
-            lines.extend(exports)
+        Returns:
+            Content with restored JSX components
+        """
+        modified = content
 
-        # Add frontmatter at the very beginning
-        if frontmatter:
-            lines.insert(0, frontmatter)
+        for i, component in enumerate(components):
+            if component.self_closing:
+                placeholder = f"__JSX_SELF_CLOSING_{i}__"
+            else:
+                placeholder = f"__JSX_COMPONENT_{i}__"
 
-        return '\n'.join(lines)
+            modified = modified.replace(placeholder, component.full_match)
+
+        return modified
 
     def add_rtl_to_components(self, content: str) -> str:
-        """Add RTL support to common MDX components."""
-        # Common components that need RTL support
-        rtl_components = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+        """
+        Add RTL (right-to-left) direction attribute to HTML components.
 
-        for component in rtl_components:
-            # Add dir="rtl" to components that don't have it
-            pattern = rf'<{component}([^>]*)>'
-            replacement = f'<{component}\\1 dir="rtl">'
+        Args:
+            content: HTML/MDX content
 
-            # Make sure we don't add dir twice
-            content = re.sub(
-                pattern,
-                lambda m: f'<{component}{m.group(1)} dir="rtl">' if 'dir=' not in m.group(1) else m.group(0),
-                content
-            )
+        Returns:
+            Content with dir="rtl" added to appropriate tags
+        """
+        # Tags that should get RTL attribute
+        rtl_tags = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    'li', 'td', 'th', 'blockquote']
 
-        return content
+        modified = content
+
+        for tag in rtl_tags:
+            # Pattern to find tags without dir attribute
+            pattern = re.compile(f'<{tag}(?![^>]*dir=)([^>]*)>', re.IGNORECASE)
+            modified = pattern.sub(f'<{tag} dir="rtl"\\1>', modified)
+
+        return modified
+
+    def _parse_props(self, props_str: str) -> Dict[str, str]:
+        """
+        Parse JSX props string into dictionary.
+
+        Args:
+            props_str: Raw props string like 'type="warning" onClick={handler}'
+
+        Returns:
+            Dictionary of prop names to values
+        """
+        props = {}
+        if not props_str:
+            return props
+
+        # Match both string and JSX expression props
+        pattern = re.compile(r'(\w+)=(?:"([^"]*)"|{([^}]*)})')
+
+        for match in pattern.finditer(props_str):
+            key = match.group(1)
+            value = match.group(2) or match.group(3)
+            props[key] = value
+
+        return props
 
 
 class ImageProcessor:
-    """Handles image processing for translation."""
+    """
+    Processes images in MDX content.
+    Handles both Markdown and JSX image formats.
+    """
 
     def __init__(self):
-        self.images = []
+        # Markdown image: ![alt](url)
+        self.md_image_pattern = re.compile(
+            r'!\[([^\]]*)\]\(([^)]+)\)'
+        )
+        # JSX img tag: <img src="..." alt="..." />
+        self.jsx_image_pattern = re.compile(
+            r'<img\s+([^>]*?)/>',
+            re.IGNORECASE
+        )
 
-    def extract_images(self, content: str) -> Tuple[str, List[Dict]]:
+    def extract_images(self, content: str) -> Tuple[str, List[ImageInfo]]:
         """
-        Extract images and their alt text.
+        Extract images from content, replacing with placeholders.
+
+        Args:
+            content: MDX content
 
         Returns:
-            Tuple of (content_with_placeholders, list_of_images)
+            Tuple of (content with placeholders, list of images)
         """
-        # Pattern for markdown images: ![alt text](url)
-        image_pattern = r'!\[([^\]]*)\]\(([^)]+)\)'
-
         images = []
-        content_with_placeholders = content
+        modified_content = content
+        placeholder_idx = 0
 
-        for match in re.finditer(image_pattern, content):
-            alt_text = match.group(1)
-            url = match.group(2)
-
-            placeholder = f"__IMAGE_{len(images)}__"
-            images.append({
-                "alt_text": alt_text,
-                "url": url,
-                "full_match": match.group(0)
-            })
-
-            content_with_placeholders = content_with_placeholders.replace(
+        # Extract Markdown images
+        for match in self.md_image_pattern.finditer(content):
+            image = ImageInfo(
+                alt_text=match.group(1),
+                url=match.group(2),
+                full_match=match.group(0),
+                jsx=False
+            )
+            images.append(image)
+            placeholder = f"__IMAGE_{placeholder_idx}__"
+            modified_content = modified_content.replace(
                 match.group(0),
                 placeholder,
                 1
             )
+            placeholder_idx += 1
 
-        # Also handle JSX <img> tags
-        jsx_img_pattern = r'<img([^>]*?)\s+alt=["\']([^"\']*)["\']([^>]*?)>'
+        # Extract JSX images
+        for match in self.jsx_image_pattern.finditer(content):
+            props_str = match.group(1)
+            alt_match = re.search(r'alt="([^"]*)"', props_str)
+            src_match = re.search(r'src="([^"]*)"', props_str)
 
-        for match in re.finditer(jsx_img_pattern, content_with_placeholders):
-            before_alt = match.group(1)
-            alt_text = match.group(2)
-            after_alt = match.group(3)
-
-            placeholder = f"__JSX_IMG_{len(images)}__"
-            images.append({
-                "alt_text": alt_text,
-                "url": None,  # URL might be in src attribute
-                "before_alt": before_alt,
-                "after_alt": after_alt,
-                "full_match": match.group(0),
-                "jsx": True
-            })
-
-            content_with_placeholders = content_with_placeholders.replace(
+            image = ImageInfo(
+                alt_text=alt_match.group(1) if alt_match else "",
+                url=src_match.group(1) if src_match else "",
+                full_match=match.group(0),
+                jsx=True
+            )
+            images.append(image)
+            placeholder = f"__JSX_IMG_{placeholder_idx}__"
+            modified_content = modified_content.replace(
                 match.group(0),
                 placeholder,
                 1
             )
+            placeholder_idx += 1
 
-        return content_with_placeholders, images
+        return modified_content, images
 
-    def restore_images(self, content: str, images: List[Dict]) -> str:
-        """Restore images with translated alt text."""
-        restored_content = content
+    def restore_images(
+        self,
+        content: str,
+        images: List[ImageInfo],
+        translate_alt: bool = False
+    ) -> str:
+        """
+        Restore images from placeholders.
+
+        Args:
+            content: Content with placeholders
+            images: List of original images
+            translate_alt: Whether alt text was translated
+
+        Returns:
+            Content with restored images
+        """
+        modified = content
 
         for i, image in enumerate(images):
-            if image.get("jsx"):
+            if image.jsx:
                 placeholder = f"__JSX_IMG_{i}__"
-                replacement = f'<img{image["before_alt"]} alt="{image["alt_text"]}"{image["after_alt"]}>'
             else:
                 placeholder = f"__IMAGE_{i}__"
-                replacement = f'![{image["alt_text"]}]({image["url"]})'
 
-            restored_content = restored_content.replace(placeholder, replacement, 1)
+            modified = modified.replace(placeholder, image.full_match)
 
-        return restored_content
+        return modified
+
+    def translate_alt_texts(
+        self,
+        images: List[ImageInfo],
+        translations: Dict[str, str]
+    ) -> List[ImageInfo]:
+        """
+        Update image alt texts with translations.
+
+        Args:
+            images: List of images
+            translations: Dict mapping original alt to translated alt
+
+        Returns:
+            List of images with updated alt texts
+        """
+        updated = []
+
+        for image in images:
+            if image.alt_text in translations:
+                new_alt = translations[image.alt_text]
+                if image.jsx:
+                    new_match = image.full_match.replace(
+                        f'alt="{image.alt_text}"',
+                        f'alt="{new_alt}"'
+                    )
+                else:
+                    new_match = f'![{new_alt}]({image.url})'
+
+                updated.append(ImageInfo(
+                    alt_text=new_alt,
+                    url=image.url,
+                    full_match=new_match,
+                    jsx=image.jsx
+                ))
+            else:
+                updated.append(image)
+
+        return updated

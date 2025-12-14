@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -9,7 +9,7 @@ import Heading from '@theme/Heading';
 import styles from './index.module.css';
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero', styles.heroBanner)}>
       <div className={styles.heroContent}>
@@ -25,12 +25,14 @@ function HomepageHeader() {
           <div className={styles.heroButtons}>
             <Link
               className={clsx('button button--primary button--lg', styles.primaryButton)}
-              to="/docs/intro">
+              to="/docs/intro"
+            >
               Start Learning
             </Link>
             <Link
               className={clsx('button button--outline button--lg', styles.secondaryButton)}
-              to="/docs/module-1-ros2-fundamentals/chapter-1-publishers">
+              to="/docs/module-1-ros2-fundamentals/chapter-1-publishers"
+            >
               Explore Modules
             </Link>
           </div>
@@ -77,11 +79,12 @@ def main():
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Master Physical AI and Humanoid Robotics with comprehensive tutorials on ROS 2, NVIDIA Isaac Sim, and advanced robotics concepts.">
+      description="Master Physical AI and Humanoid Robotics with comprehensive tutorials on ROS 2, NVIDIA Isaac Sim, and advanced robotics concepts."
+    >
       <HomepageHeader />
       <main>
         <HomepageFeatures />

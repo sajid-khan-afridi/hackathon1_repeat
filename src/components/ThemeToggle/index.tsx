@@ -3,7 +3,7 @@ import useIsBrowser from '@docusaurus/useIsBrowser';
 import { useColorMode } from '@docusaurus/theme-common';
 import styles from './styles.module.css';
 
-export default function ThemeToggle(): JSX.Element | null {
+export default function ThemeToggle(): React.ReactElement | null {
   const isBrowser = useIsBrowser();
   const { colorMode, setColorMode } = useColorMode();
 

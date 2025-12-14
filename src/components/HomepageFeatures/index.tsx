@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
@@ -18,9 +18,8 @@ const FeatureList: FeatureItem[] = [
     icon: '🤖',
     description: (
       <>
-        Master Robot Operating System 2 with comprehensive tutorials on publishers,
-        subscribers, services, and actions. Build real-world robotics applications
-        from scratch.
+        Master Robot Operating System 2 with comprehensive tutorials on publishers, subscribers,
+        services, and actions. Build real-world robotics applications from scratch.
       </>
     ),
     link: '/docs/module-1-ros2-fundamentals/chapter-1-publishers',
@@ -30,8 +29,8 @@ const FeatureList: FeatureItem[] = [
     icon: '🎮',
     description: (
       <>
-        Learn simulation-driven development with NVIDIA Isaac Sim. Create realistic
-        robot simulations, test algorithms, and accelerate development workflows.
+        Learn simulation-driven development with NVIDIA Isaac Sim. Create realistic robot
+        simulations, test algorithms, and accelerate development workflows.
       </>
     ),
     link: '/docs/module-2-isaac-sim/chapter-1-introduction',
@@ -41,8 +40,8 @@ const FeatureList: FeatureItem[] = [
     icon: '🦾',
     description: (
       <>
-        Explore advanced topics in humanoid robotics including inverse kinematics,
-        motion planning, balance control, and real-time decision making.
+        Explore advanced topics in humanoid robotics including inverse kinematics, motion planning,
+        balance control, and real-time decision making.
       </>
     ),
     link: '/docs/intro',
@@ -52,8 +51,8 @@ const FeatureList: FeatureItem[] = [
     icon: '⚡',
     description: (
       <>
-        Apply your knowledge through practical projects and exercises. Each chapter
-        includes working code examples you can run and modify.
+        Apply your knowledge through practical projects and exercises. Each chapter includes working
+        code examples you can run and modify.
       </>
     ),
     highlight: true,
@@ -63,8 +62,8 @@ const FeatureList: FeatureItem[] = [
     icon: '🏆',
     description: (
       <>
-        Learn industry-standard tools and best practices used by professional robotics
-        engineers at leading companies and research labs.
+        Learn industry-standard tools and best practices used by professional robotics engineers at
+        leading companies and research labs.
       </>
     ),
     highlight: true,
@@ -74,19 +73,21 @@ const FeatureList: FeatureItem[] = [
     icon: '💡',
     description: (
       <>
-        Completely free and open source. Contribute to the textbook, suggest improvements,
-        and help build the robotics education community.
+        Completely free and open source. Contribute to the textbook, suggest improvements, and help
+        build the robotics education community.
       </>
     ),
     highlight: true,
   },
 ];
 
-function Feature({title, icon, description, link, highlight}: FeatureItem) {
+function Feature({ title, icon, description, link, highlight }: FeatureItem) {
   const content = (
     <>
       <div className={styles.featureIcon}>{icon}</div>
-      <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
+      <Heading as="h3" className={styles.featureTitle}>
+        {title}
+      </Heading>
       <p className={styles.featureDescription}>{description}</p>
       {link && (
         <Link className={styles.featureLink} to={link}>
@@ -98,7 +99,7 @@ function Feature({title, icon, description, link, highlight}: FeatureItem) {
 
   return (
     <div className={clsx('col col--4', styles.featureCol)}>
-      <div className={clsx(styles.featureCard, {[styles.featureHighlight]: highlight})}>
+      <div className={clsx(styles.featureCard, { [styles.featureHighlight]: highlight })}>
         {content}
       </div>
     </div>

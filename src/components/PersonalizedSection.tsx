@@ -22,7 +22,7 @@ export default function PersonalizedSection({
   rosFamiliarity,
   hardwareAccess,
   children,
-}: PersonalizedSectionProps): JSX.Element | null {
+}: PersonalizedSectionProps): React.ReactElement | null {
   const { userProfile } = useUserContext();
 
   // Generate accessible label describing the personalization criteria

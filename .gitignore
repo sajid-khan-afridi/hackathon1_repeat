@@ -99,4 +99,13 @@ temp/
 
 # Cypress
 cypress/videos/
-cypress/screenshots/.docusaurus/
+cypress/screenshots/
+
+# Docusaurus
+.docusaurus/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Test results
+test-results/

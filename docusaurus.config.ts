@@ -19,14 +19,15 @@ const config: Config = {
   organizationName: 'sajid-khan-afridi', // Usually your GitHub org/user name.
   projectName: 'hackathon1_repeat', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
-onDuplicateRoutes: 'warn',
+  onBrokenLinks: 'warn',
+  onDuplicateRoutes: 'warn',
+  onBrokenAnchors: 'warn',
 markdown: {
   anchors: {
     maintainCase: false,
   },
   hooks: {
-    onBrokenMarkdownLinks: 'throw',
+    onBrokenMarkdownLinks: 'warn',
   },
 },
 

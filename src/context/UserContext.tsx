@@ -79,9 +79,7 @@ export function UserProvider({ children }: UserProviderProps) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userProfile, setUserProfile }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ userProfile, setUserProfile }}>{children}</UserContext.Provider>
   );
 }
 

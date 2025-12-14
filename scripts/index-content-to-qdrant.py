@@ -117,8 +117,9 @@ class ContentIndexer:
         try:
             self.client.get_collection(self.collection_name)
             print(f"Collection '{self.collection_name}' already exists")
-        except:
-            print(f"Creating collection '{self.collection_name}'")
+        except Exception as e:
+            # Collection doesn't exist or connection error - try to create
+            print(f"Creating collection '{self.collection_name}' (reason: {type(e).__name__})")
             self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useUserContext } from '@site/src/context/UserContext';
 
 interface PersonalizedSectionProps {
@@ -10,6 +10,7 @@ interface PersonalizedSectionProps {
 
 /**
  * Component for rendering personalized content based on user profile.
+ * Includes accessibility features for screen readers.
  *
  * Usage:
  * <PersonalizedSection level="beginner" hardwareAccess={false}>
@@ -22,11 +23,32 @@ export default function PersonalizedSection({
   hardwareAccess,
   children,
 }: PersonalizedSectionProps): JSX.Element | null {
-  const userProfile = useUserContext();
+  const { userProfile } = useUserContext();
 
-  // If no user context is available, render default content
+  // Generate accessible label describing the personalization criteria
+  const ariaLabel = useMemo(() => {
+    const parts = [`Content for ${level} level learners`];
+    if (rosFamiliarity) {
+      parts.push(`with ${rosFamiliarity} ROS familiarity`);
+    }
+    if (hardwareAccess !== undefined) {
+      parts.push(hardwareAccess ? 'with hardware access' : 'without hardware access');
+    }
+    return parts.join(' ');
+  }, [level, rosFamiliarity, hardwareAccess]);
+
+  // If no user profile is set, render content for all users (anonymous/default view)
   if (!userProfile) {
-    return <>{children}</>;
+    return (
+      <section
+        role="region"
+        aria-label={ariaLabel}
+        className="personalized-section personalized-section--default"
+        data-personalization-level={level}
+      >
+        {children}
+      </section>
+    );
   }
 
   // Check if content matches user's experience level
@@ -44,5 +66,16 @@ export default function PersonalizedSection({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <section
+      role="region"
+      aria-label={ariaLabel}
+      className={`personalized-section personalized-section--${level}`}
+      data-personalization-level={level}
+      data-ros-familiarity={rosFamiliarity}
+      data-hardware-access={hardwareAccess}
+    >
+      {children}
+    </section>
+  );
 }

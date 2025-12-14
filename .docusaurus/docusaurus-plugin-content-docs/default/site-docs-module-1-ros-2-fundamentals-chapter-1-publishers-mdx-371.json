@@ -51,7 +51,7 @@
     "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-1-nodes-lifecycle"
   },
   "next": {
-    "title": "Module 2: NVIDIA Isaac Sim",
-    "permalink": "/hackathon1_repeat/docs/category/module-2-nvidia-isaac-sim"
+    "title": "Chapter 2: ROS 2 Topics & Services",
+    "permalink": "/hackathon1_repeat/docs/module-1-ros2-fundamentals/chapter-2-topics-services"
   }
 }

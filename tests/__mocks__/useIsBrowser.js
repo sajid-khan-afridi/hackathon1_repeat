@@ -1,4 +1,4 @@
 // Mock for @docusaurus/useIsBrowser
-module.exports = {
-  default: () => true,
-};
+const useIsBrowser = jest.fn(() => true);
+module.exports = useIsBrowser;
+module.exports.default = useIsBrowser;

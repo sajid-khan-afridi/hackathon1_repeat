@@ -2,6 +2,24 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+        resolveJsonModule: true,
+        baseUrl: '.',
+        paths: {
+          '@site/*': ['./*'],
+          '@docusaurus/theme-common/internal': ['./tests/__mocks__/theme-common-internal'],
+        },
+        typeRoots: ['./node_modules/@types', './tests/__mocks__'],
+      },
+    }],
+  },
   moduleNameMapper: {
     '\\.(css|less|scss|sass|md)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -19,23 +37,6 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/*.stories.{js,jsx,ts,tsx}',
   ],
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-        noUnusedLocals: false,
-        noUnusedParameters: false,
-        resolveJsonModule: true,
-        baseUrl: '.',
-        paths: {
-          '@site/*': ['./*'],
-          '@docusaurus/theme-common/internal': ['./tests/__mocks__/theme-common-internal'],
-        },
-      },
-    }],
-  },
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: 'coverage',
   coverageThreshold: {

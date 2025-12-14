@@ -1,0 +1,86 @@
+{
+  "id": "module-3-applications/chapter-2-navigation",
+  "title": "Chapter 2: Navigation & Path Planning",
+  "description": "Learn navigation stacks, path planning algorithms, and obstacle avoidance for autonomous mobile robots",
+  "source": "@site/docs/module-3-applications/chapter-2-navigation.mdx",
+  "sourceDirName": "module-3-applications",
+  "slug": "/module-3-applications/chapter-2-navigation",
+  "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-2-navigation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/sajid-khan-afridi/hackathon1_repeat/tree/main/docs/docs/module-3-applications/chapter-2-navigation.mdx",
+  "tags": [
+    {
+      "inline": true,
+      "label": "navigation",
+      "permalink": "/hackathon1_repeat/docs/tags/navigation"
+    },
+    {
+      "inline": true,
+      "label": "path-planning",
+      "permalink": "/hackathon1_repeat/docs/tags/path-planning"
+    },
+    {
+      "inline": true,
+      "label": "mobile-robots",
+      "permalink": "/hackathon1_repeat/docs/tags/mobile-robots"
+    },
+    {
+      "inline": true,
+      "label": "autonomy",
+      "permalink": "/hackathon1_repeat/docs/tags/autonomy"
+    }
+  ],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "title": "Chapter 2: Navigation & Path Planning",
+    "sidebar_position": 2,
+    "description": "Learn navigation stacks, path planning algorithms, and obstacle avoidance for autonomous mobile robots",
+    "keywords": [
+      "navigation",
+      "path planning",
+      "SLAM",
+      "A* algorithm",
+      "Dijkstra",
+      "RRT",
+      "obstacle avoidance",
+      "costmap",
+      "localization"
+    ],
+    "tags": [
+      "navigation",
+      "path-planning",
+      "mobile-robots",
+      "autonomy"
+    ],
+    "learning_objectives": [
+      "Understand global and local path planning algorithms",
+      "Implement obstacle avoidance strategies",
+      "Configure ROS 2 Navigation2 stack",
+      "Create custom navigation behaviors"
+    ],
+    "difficulty_level": "intermediate",
+    "ros_version": "humble",
+    "prerequisites": [
+      "Chapter 2: ROS 2 Topics & Services",
+      "Chapter 1: Robot Kinematics",
+      "Grid-based maps concepts"
+    ],
+    "estimated_time": 120,
+    "personalization_variants": {
+      "experience_level": true,
+      "ros_familiarity": true,
+      "hardware_access": true
+    }
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Chapter 1: Robot Kinematics",
+    "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-1-kinematics"
+  },
+  "next": {
+    "title": "Chapter 3: Perception & Sensor Fusion",
+    "permalink": "/hackathon1_repeat/docs/module-3-applications/chapter-3-perception"
+  }
+}

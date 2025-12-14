@@ -99,4 +99,4 @@ temp/
 
 # Cypress
 cypress/videos/
-cypress/screenshots/
+cypress/screenshots/.docusaurus/

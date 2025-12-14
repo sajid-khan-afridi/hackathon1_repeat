@@ -2,9 +2,13 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '\\.(css|less|scss|sass|md)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@site/(.*)$': '<rootDir>/$1',
+    '^@docusaurus/useIsBrowser$': '<rootDir>/tests/__mocks__/useIsBrowser.js',
+    '^@docusaurus/theme-common$': '<rootDir>/tests/__mocks__/theme-common.js',
+    '^@docusaurus/theme-common/internal$': '<rootDir>/tests/__mocks__/theme-common-internal.js',
   },
   testMatch: [
     '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',
@@ -16,7 +20,21 @@ module.exports = {
     '!src/**/*.stories.{js,jsx,ts,tsx}',
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+        resolveJsonModule: true,
+        baseUrl: '.',
+        paths: {
+          '@site/*': ['./*'],
+          '@docusaurus/theme-common/internal': ['./tests/__mocks__/theme-common-internal'],
+        },
+      },
+    }],
   },
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: 'coverage',

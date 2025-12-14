@@ -1,0 +1,49 @@
+# Validation Scripts Configuration
+# This file centralizes all hardcoded values for the validation pipeline
+
+validation:
+  # Python code example validation
+  python_timeout: 10  # seconds
+  cpp_timeout: 5  # seconds
+  output_truncation: 500  # max characters in output
+
+  # Readability validation
+  readability_range:
+    min: 12.0
+    max: 14.0
+
+qdrant:
+  host: localhost
+  port: 6333
+  collection: robotics_textbook_chapters
+
+embedding:
+  model: sentence-transformers/all-MiniLM-L6-v2
+  vector_size: 384
+  batch_size: 100
+
+search:
+  ndcg_threshold: 0.8
+  top_k: 10
+
+paths:
+  code_examples_dir: tests/code-examples
+  code_validation_results: tests/code-validation-results.json
+  readability_results: tests/readability-results.json
+  ndcg_results: tests/ndcg-measurement-results.json
+  search_queries: tests/search-queries.json
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+# Code extraction settings
+extraction:
+  test_marker: "# test: true"
+  supported_languages:
+    - python
+    - py
+    - cpp
+    - cc
+    - cxx

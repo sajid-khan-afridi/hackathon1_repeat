@@ -109,7 +109,7 @@ During peak usage (exam periods), many students use the chatbot simultaneously. 
 - **Network timeout**: External service (embedding API, LLM) times out - system returns friendly error with retry suggestion
 - **Database unavailable**: Chat history database unreachable - system operates in stateless mode without history persistence
 - **Vector store unavailable**: Qdrant is unreachable - system falls back to static FAQ responses
-- **Concurrent session conflict**: User opens multiple tabs - sessions are merged or isolated based on session ID
+- **Concurrent session conflict**: User opens multiple tabs - tabs share synchronized session context using the same session ID
 - **Expired session**: User returns after 30 days - old history is purged, new session starts fresh
 
 ## Requirements *(mandatory)*
@@ -149,7 +149,7 @@ During peak usage (exam periods), many students use the chatbot simultaneously. 
 
 **Error Handling**
 - **FR-022**: System MUST return 503 with retry message when LLM service times out
-- **FR-023**: System MUST fall back to static FAQ when vector store is unavailable
+- **FR-023**: System MUST fall back to static FAQ (curated JSON file in codebase) when vector store is unavailable
 - **FR-024**: System MUST log all errors with correlation IDs for debugging
 - **FR-025**: System MUST sanitize all user inputs to prevent injection attacks
 
@@ -159,6 +159,9 @@ During peak usage (exam periods), many students use the chatbot simultaneously. 
 - **FR-028**: System MUST show loading states during query processing
 - **FR-029**: System MUST display source citations with links to original chapters
 - **FR-030**: System MUST support keyboard navigation and screen readers (WCAG 2.1 AA)
+- **FR-031**: System MUST display token usage (input/output tokens) for each response in the UI for educational transparency
+- **FR-032**: System MUST display a prominent warning banner with rephrase suggestion when confidence score is between 0.2-0.3
+- **FR-033**: System MUST preserve partial response on stream interruption, appending an error indicator with retry button
 
 ### Key Entities
 
@@ -202,6 +205,20 @@ During peak usage (exam periods), many students use the chatbot simultaneously. 
 - **SC-013**: Vector index size remains under 1GB (Qdrant Cloud free tier limit)
 - **SC-014**: Chat history storage remains under 0.5GB with 30-day auto-purge (Neon free tier limit)
 - **SC-015**: Token usage per query averages under 2000 tokens total (retrieval + generation)
+
+## Clarifications
+
+### Session 2025-12-14
+
+- Q: LLM Provider Architecture - How should we integrate with OpenAI for response generation? → A: OpenAI Agents SDK with structured tools (provides built-in tool calling, error handling, and extensibility)
+- Q: Chat Session Isolation Strategy - How should we handle multiple browser tabs? → A: Single shared session across all tabs (immediate sync)
+- Q: Token Usage Visibility - Should token usage be shown to users? → A: Show in UI for all users (educational transparency)
+- Q: Static FAQ Fallback Source - Where does fallback FAQ content come from? → A: Curated JSON file shipped with the codebase (version-controlled)
+- Q: Low Confidence Response Behavior - What to show when confidence is 0.2-0.3? → A: Show answer with prominent warning banner + suggestion to rephrase
+- Q: Streaming Response Interruption - What to show if stream is interrupted? → A: Keep partial response visible, append error indicator + retry button
+- Q: LLM Model Selection - Which OpenAI model should we use for response generation? → A: GPT-4o-mini for cost efficiency with acceptable quality for educational content
+- Q: Module Filtering Behavior - How should the system handle queries when a module filter is active but the answer requires information from other modules? → A: Confidence-based adaptive filtering (0.7+ = filter strict, 0.4-0.7 = suggest, <0.4 = no filter)
+- Q: Source Citation Storage - How should we store source citations in chat messages to optimize storage and enable click-to-navigate functionality? → A: Store references in separate table with IDs (normalized, recommended)
 
 ## Assumptions
 

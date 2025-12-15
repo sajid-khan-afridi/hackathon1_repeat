@@ -1,0 +1,255 @@
+{
+  "general": [
+    {
+      "question": "What is robotics?",
+      "answer": "Robotics is an interdisciplinary field involving the design, construction, operation, and use of robots. It combines elements of mechanical engineering, electrical engineering, computer science, and artificial intelligence.",
+      "chapter": 1,
+      "section": "Introduction",
+      "module": 1
+    },
+    {
+      "question": "What are the main components of a robot?",
+      "answer": "A robot typically consists of: 1) Mechanical structure (body, links, joints), 2) Actuators (motors, hydraulic/pneumatic systems), 3) Sensors (vision, touch, proximity), 4) Controller (computer/processor), and 5) Power supply.",
+      "chapter": 1,
+      "section": "Robot Components",
+      "module": 1
+    },
+    {
+      "question": "What's the difference between a robot and an automated machine?",
+      "answer": "While both can perform tasks automatically, robots are typically programmable, can adapt to different tasks, and often incorporate sensors for decision-making. Automated machines usually perform a single, fixed operation.",
+      "chapter": 1,
+      "section": "Robot Classification",
+      "module": 1
+    }
+  ],
+  "chapter_1": [
+    {
+      "question": "What are the types of robot joints?",
+      "answer": "Robot joints (also called axes) can be: 1) Revolute (rotational, like a hinge), 2) Prismatic (linear, sliding motion), 3) Cylindrical (combination of rotation and translation), or 4) Spherical (ball-and-socket).",
+      "chapter": 1,
+      "section": "Robot Anatomy",
+      "module": 1
+    },
+    {
+      "question": "What is degrees of freedom (DOF) in robotics?",
+      "answer": "Degrees of freedom refers to the number of independent movements a robot can perform. A typical 6-DOF robot has 6 joints allowing movement in 3D space (3 for position, 3 for orientation).",
+      "chapter": 1,
+      "section": "Robot Anatomy",
+      "module": 1
+    },
+    {
+      "question": "What is a robot workspace?",
+      "answer": "The workspace of a robot is the total volume of space that the robot's end-effector can reach. It's determined by the robot's geometry, joint limits, and link lengths.",
+      "chapter": 1,
+      "section": "Robot Workspace",
+      "module": 1
+    }
+  ],
+  "chapter_2": [
+    {
+      "question": "What is forward kinematics?",
+      "answer": "Forward kinematics is the calculation of the end-effector position and orientation given the joint angles or positions. It answers: 'Where is the robot's hand if all joints are at these positions?'",
+      "chapter": 2,
+      "section": "Forward Kinematics",
+      "module": 1
+    },
+    {
+      "question": "What is inverse kinematics?",
+      "answer": "Inverse kinematics is the calculation of required joint angles or positions to achieve a desired end-effector position and orientation. It answers: 'What joint positions will put the robot's hand at this location?'",
+      "chapter": 2,
+      "section": "Inverse Kinematics",
+      "module": 2
+    },
+    {
+      "question": "What is the Jacobian matrix in robotics?",
+      "answer": "The Jacobian matrix relates joint velocities to end-effector velocities. It's a crucial tool for velocity analysis, singularity detection, and force control in robotics.",
+      "chapter": 2,
+      "section": "Velocity Kinematics",
+      "module": 2
+    }
+  ],
+  "chapter_3": [
+    {
+      "question": "What is dynamic analysis in robotics?",
+      "answer": "Dynamic analysis studies the forces and torques required to produce robot motion. It considers mass, inertia, gravity, friction, and external forces to understand how robots move.",
+      "chapter": 3,
+      "section": "Introduction to Dynamics",
+      "module": 2
+    },
+    {
+      "question": "What is the difference between dynamics and kinematics?",
+      "answer": "Kinematics studies motion without considering forces (position, velocity, acceleration), while dynamics studies motion including the forces that cause it (torque, force, inertia).",
+      "chapter": 3,
+      "section": "Dynamics vs Kinematics",
+      "module": 2
+    },
+    {
+      "question": "What is Lagrangian formulation in robotics?",
+      "answer": "Lagrangian formulation is a method for deriving equations of motion using energy (kinetic and potential) rather than forces. It provides a systematic way to model robot dynamics.",
+      "chapter": 3,
+      "section": "Lagrangian Dynamics",
+      "module": 2
+    }
+  ],
+  "chapter_4": [
+    {
+      "question": "What is trajectory planning?",
+      "answer": "Trajectory planning is the process of determining a path for a robot to follow from start to goal, including time information. It specifies positions, velocities, and accelerations over time.",
+      "chapter": 4,
+      "section": "Trajectory Planning",
+      "module": 3
+    },
+    {
+      "question": "What's the difference between path planning and trajectory planning?",
+      "answer": "Path planning determines the geometric path without time considerations, while trajectory planning adds timing information (velocities and accelerations) to specify how the path should be followed.",
+      "chapter": 4,
+      "section": "Path vs Trajectory",
+      "module": 3
+    },
+    {
+      "question": "What are joint space and Cartesian space trajectories?",
+      "answer": "Joint space trajectories specify positions/velocities for each joint over time. Cartesian space trajectories describe the end-effector's position/orientation in 3D space, which must be converted to joint positions.",
+      "chapter": 4,
+      "section": "Trajectory Spaces",
+      "module": 3
+    }
+  ],
+  "chapter_5": [
+    {
+      "question": "What are PID controllers in robotics?",
+      "answer": "PID (Proportional-Integral-Derivative) controllers are feedback control mechanisms used to achieve precise position or force control. P responds to current error, I accumulates past errors, and D predicts future errors.",
+      "chapter": 5,
+      "section": "PID Control",
+      "module": 3
+    },
+    {
+      "question": "What is servo control?",
+      "answer": "Servo control is a feedback control system that continuously compares actual position/velocity with desired values and adjusts motor control to minimize error. It's essential for accurate robot motion.",
+      "chapter": 5,
+      "section": "Servo Systems",
+      "module": 3
+    },
+    {
+      "question": "What is feedforward control?",
+      "answer": "Feedforward control anticipates the control effort needed based on the desired trajectory and system dynamics, complementing feedback control to improve tracking performance.",
+      "chapter": 5,
+      "section": "Feedforward Control",
+      "module": 3
+    }
+  ],
+  "chapter_6": [
+    {
+      "question": "What are robot sensors?",
+      "answer": "Robot sensors are devices that provide information about the robot's internal state (proprioceptive) or external environment (exteroceptive). Examples include encoders, cameras, LIDAR, force/torque sensors.",
+      "chapter": 6,
+      "section": "Sensor Types",
+      "module": 4
+    },
+    {
+      "question": "What is computer vision in robotics?",
+      "answer": "Computer vision enables robots to 'see' and interpret visual information from cameras. It's used for object recognition, navigation, inspection, and human-robot interaction.",
+      "chapter": 6,
+      "section": "Vision Systems",
+      "module": 4
+    },
+    {
+      "question": "What is sensor fusion?",
+      "answer": "Sensor fusion combines data from multiple sensors to produce more accurate, complete, and reliable information than any single sensor could provide alone.",
+      "chapter": 6,
+      "section": "Sensor Fusion",
+      "module": 4
+    }
+  ],
+  "chapter_7": [
+    {
+      "question": "What is robot programming?",
+      "answer": "Robot programming involves creating instructions for robots to perform specific tasks. Methods include: 1) Lead-through programming, 2) Textual programming languages, 3) Visual programming, and 4) Offline programming.",
+      "chapter": 7,
+      "section": "Programming Methods",
+      "module": 5
+    },
+    {
+      "question": "What is ROS (Robot Operating System)?",
+      "answer": "ROS is a flexible framework for writing robot software. It provides tools, libraries, and conventions for complex robot systems, enabling modular development and code reuse.",
+      "chapter": 7,
+      "section": "Robot Operating System",
+      "module": 5
+    },
+    {
+      "question": "What are teach pendants?",
+      "answer": "A teach pendant is a handheld device used to manually program and control robots. It allows operators to move the robot and record positions for later playback.",
+      "chapter": 7,
+      "section": "Teach Pendants",
+      "module": 5
+    }
+  ],
+  "chapter_8": [
+    {
+      "question": "What is machine learning in robotics?",
+      "answer": "Machine learning in robotics enables robots to improve their performance through experience. Applications include perception, grasping, locomotion, and decision-making.",
+      "chapter": 8,
+      "section": "ML Applications",
+      "module": 6
+    },
+    {
+      "question": "What is reinforcement learning for robots?",
+      "answer": "Reinforcement learning is a learning approach where robots learn through trial and error, receiving rewards for desired behaviors. It's particularly useful for complex tasks that are difficult to program explicitly.",
+      "chapter": 8,
+      "section": "Reinforcement Learning",
+      "module": 6
+    },
+    {
+      "question": "What is deep learning in robotics?",
+      "answer": "Deep learning uses neural networks with multiple layers to learn hierarchical representations from data. In robotics, it's widely used for perception, control, and decision-making tasks.",
+      "chapter": 8,
+      "section": "Deep Learning",
+      "module": 6
+    }
+  ],
+  "chapter_9": [
+    {
+      "question": "What is human-robot collaboration?",
+      "answer": "Human-robot collaboration involves robots and humans working together in the same space, with robots designed to be safe and responsive to human presence and actions.",
+      "chapter": 9,
+      "section": "Collaborative Robots",
+      "module": 7
+    },
+    {
+      "question": "What safety features do collaborative robots have?",
+      "answer": "Collaborative robots (cobots) include safety features like: force/torque limiting, speed monitoring, safe stop mechanisms, and proximity sensors to prevent harm to humans working nearby.",
+      "chapter": 9,
+      "section": "Safety Systems",
+      "module": 7
+    },
+    {
+      "question": "What is human-robot interaction (HRI)?",
+      "answer": "HRI studies how humans and robots communicate and work together. It involves interface design, gesture recognition, natural language processing, and understanding human intent.",
+      "chapter": 9,
+      "section": "Human-Robot Interaction",
+      "module": 7
+    }
+  ],
+  "chapter_10": [
+    {
+      "question": "What are the applications of robotics in manufacturing?",
+      "answer": "In manufacturing, robots are used for: welding, painting, assembly, material handling, machine tending, inspection, and packaging. They improve precision, speed, and consistency.",
+      "chapter": 10,
+      "section": "Manufacturing Applications",
+      "module": 8
+    },
+    {
+      "question": "How are robots used in healthcare?",
+      "answer": "Robots in healthcare assist with: surgery (da Vinci system), rehabilitation, patient care, drug dispensing, laboratory automation, and disinfection. They enhance precision and reduce human error.",
+      "chapter": 10,
+      "section": "Healthcare Robotics",
+      "module": 8
+    },
+    {
+      "question": "What are service robots?",
+      "answer": "Service robots assist humans in non-manufacturing tasks. Examples include: cleaning robots (Roomba), delivery robots, inspection drones, agricultural robots, and domestic assistants.",
+      "chapter": 10,
+      "section": "Service Applications",
+      "module": 8
+    }
+  ]
+}

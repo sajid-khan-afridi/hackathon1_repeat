@@ -310,6 +310,91 @@ paths:
                   llmService: healthy
                 timestamp: "2025-12-14T10:30:00Z"
 
+  /metrics:
+    get:
+      operationId: getMetrics
+      tags:
+        - Health
+      summary: Get application performance metrics
+      description: Returns response time percentiles (p50, p95, p99) and request statistics.
+      responses:
+        '200':
+          description: Metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+              example:
+                total_requests: 1000
+                error_count: 5
+                error_rate: 0.005
+                percentiles:
+                  p50: 150.5
+                  p95: 450.2
+                  p99: 850.0
+                mean_ms: 175.3
+                min_ms: 50.0
+                max_ms: 1200.0
+
+  /metrics/percentiles:
+    get:
+      operationId: getMetricsPercentiles
+      tags:
+        - Health
+      summary: Get response time percentiles only
+      description: Returns p50, p95, p99 response time values in milliseconds.
+      responses:
+        '200':
+          description: Percentiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  p50:
+                    type: number
+                    format: float
+                  p95:
+                    type: number
+                    format: float
+                  p99:
+                    type: number
+                    format: float
+
+  /metrics/endpoint/{path}:
+    get:
+      operationId: getEndpointMetrics
+      tags:
+        - Health
+      summary: Get metrics for a specific endpoint
+      description: Returns performance metrics for a specific API endpoint.
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The endpoint path (e.g., "api/v1/query")
+      responses:
+        '200':
+          description: Endpoint metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  mean_ms:
+                    type: number
+                    format: float
+                  p50:
+                    type: number
+                    format: float
+                  p95:
+                    type: number
+                    format: float
+
 components:
   securitySchemes:
     BearerAuth:
@@ -608,3 +693,53 @@ components:
         timestamp:
           type: string
           format: date-time
+
+    MetricsResponse:
+      type: object
+      required:
+        - total_requests
+        - error_count
+        - error_rate
+        - percentiles
+      properties:
+        total_requests:
+          type: integer
+          description: Total number of requests processed
+        error_count:
+          type: integer
+          description: Number of requests that resulted in errors
+        error_rate:
+          type: number
+          format: float
+          description: Percentage of requests that failed
+        percentiles:
+          type: object
+          properties:
+            p50:
+              type: number
+              format: float
+              description: 50th percentile response time in milliseconds
+            p95:
+              type: number
+              format: float
+              description: 95th percentile response time in milliseconds
+            p99:
+              type: number
+              format: float
+              description: 99th percentile response time in milliseconds
+        mean_ms:
+          type: number
+          format: float
+          description: Average response time in milliseconds
+        min_ms:
+          type: number
+          format: float
+          description: Minimum response time in milliseconds
+        max_ms:
+          type: number
+          format: float
+          description: Maximum response time in milliseconds
+        stddev_ms:
+          type: number
+          format: float
+          description: Standard deviation of response times

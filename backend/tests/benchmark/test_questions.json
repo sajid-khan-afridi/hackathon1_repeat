@@ -1,0 +1,443 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Benchmark test set for RAG chatbot evaluation",
+    "total_questions": 50,
+    "chapters_covered": 10,
+    "created_date": "2025-01-01"
+  },
+  "questions": [
+    {
+      "id": "Q001",
+      "chapter": 1,
+      "topic": "Introduction to Robotics",
+      "question": "What is robotics and what are its main components?",
+      "expected_concepts": ["robotics definition", "sensors", "actuators", "control systems"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q002",
+      "chapter": 1,
+      "topic": "Introduction to Robotics",
+      "question": "What are the three laws of robotics proposed by Isaac Asimov?",
+      "expected_concepts": ["first law", "second law", "third law", "safety"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q003",
+      "chapter": 1,
+      "topic": "Introduction to Robotics",
+      "question": "What is the difference between industrial robots and service robots?",
+      "expected_concepts": ["industrial robots", "service robots", "applications", "environments"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q004",
+      "chapter": 1,
+      "topic": "Introduction to Robotics",
+      "question": "What are degrees of freedom in robotics?",
+      "expected_concepts": ["DOF", "joints", "movement", "workspace"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q005",
+      "chapter": 1,
+      "topic": "Introduction to Robotics",
+      "question": "How has robotics evolved from ancient automata to modern robots?",
+      "expected_concepts": ["history", "automata", "industrial revolution", "modern era"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q006",
+      "chapter": 2,
+      "topic": "Robot Kinematics",
+      "question": "What is forward kinematics in robotics?",
+      "expected_concepts": ["forward kinematics", "joint angles", "end effector position", "transformation"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q007",
+      "chapter": 2,
+      "topic": "Robot Kinematics",
+      "question": "What is inverse kinematics and why is it important?",
+      "expected_concepts": ["inverse kinematics", "end effector", "joint configuration", "path planning"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q008",
+      "chapter": 2,
+      "topic": "Robot Kinematics",
+      "question": "Explain the Denavit-Hartenberg convention for robot kinematics.",
+      "expected_concepts": ["DH parameters", "link length", "link twist", "joint offset", "joint angle"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q009",
+      "chapter": 2,
+      "topic": "Robot Kinematics",
+      "question": "What is the workspace of a robot manipulator?",
+      "expected_concepts": ["workspace", "reachable workspace", "dexterous workspace", "singularities"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q010",
+      "chapter": 2,
+      "topic": "Robot Kinematics",
+      "question": "How do homogeneous transformation matrices work in robotics?",
+      "expected_concepts": ["transformation matrix", "rotation", "translation", "4x4 matrix"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q011",
+      "chapter": 3,
+      "topic": "Robot Dynamics",
+      "question": "What is the difference between kinematics and dynamics in robotics?",
+      "expected_concepts": ["kinematics", "dynamics", "motion", "forces", "torques"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q012",
+      "chapter": 3,
+      "topic": "Robot Dynamics",
+      "question": "Explain the Lagrangian formulation for robot dynamics.",
+      "expected_concepts": ["Lagrangian", "kinetic energy", "potential energy", "equations of motion"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q013",
+      "chapter": 3,
+      "topic": "Robot Dynamics",
+      "question": "What is the Newton-Euler method for computing robot dynamics?",
+      "expected_concepts": ["Newton-Euler", "recursive algorithm", "forces", "torques", "efficiency"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q014",
+      "chapter": 3,
+      "topic": "Robot Dynamics",
+      "question": "What are inertia, Coriolis, and gravity terms in robot dynamics?",
+      "expected_concepts": ["inertia matrix", "Coriolis forces", "gravity vector", "dynamic equation"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q015",
+      "chapter": 3,
+      "topic": "Robot Dynamics",
+      "question": "How do you compute the torque required for a robot joint?",
+      "expected_concepts": ["torque calculation", "dynamic model", "payload", "acceleration"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q016",
+      "chapter": 4,
+      "topic": "Motion Planning",
+      "question": "What is motion planning in robotics?",
+      "expected_concepts": ["motion planning", "path planning", "trajectory", "obstacles"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q017",
+      "chapter": 4,
+      "topic": "Motion Planning",
+      "question": "Explain the A* algorithm for path planning.",
+      "expected_concepts": ["A*", "heuristic", "optimal path", "graph search", "cost function"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q018",
+      "chapter": 4,
+      "topic": "Motion Planning",
+      "question": "What is the Rapidly-exploring Random Tree (RRT) algorithm?",
+      "expected_concepts": ["RRT", "sampling-based", "tree expansion", "high-dimensional spaces"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q019",
+      "chapter": 4,
+      "topic": "Motion Planning",
+      "question": "How does potential field method work for obstacle avoidance?",
+      "expected_concepts": ["potential field", "attractive force", "repulsive force", "local minima"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q020",
+      "chapter": 4,
+      "topic": "Motion Planning",
+      "question": "What is the difference between configuration space and workspace?",
+      "expected_concepts": ["configuration space", "C-space", "workspace", "obstacles", "dimensions"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q021",
+      "chapter": 5,
+      "topic": "Robot Control",
+      "question": "What is PID control and how is it used in robotics?",
+      "expected_concepts": ["PID", "proportional", "integral", "derivative", "feedback control"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q022",
+      "chapter": 5,
+      "topic": "Robot Control",
+      "question": "Explain computed torque control for robot manipulators.",
+      "expected_concepts": ["computed torque", "inverse dynamics", "feedback linearization", "tracking"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q023",
+      "chapter": 5,
+      "topic": "Robot Control",
+      "question": "What is impedance control in robotics?",
+      "expected_concepts": ["impedance control", "force control", "compliance", "interaction"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q024",
+      "chapter": 5,
+      "topic": "Robot Control",
+      "question": "How do you tune PID controller gains for a robot?",
+      "expected_concepts": ["tuning", "Ziegler-Nichols", "stability", "response time", "overshoot"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q025",
+      "chapter": 5,
+      "topic": "Robot Control",
+      "question": "What is the difference between position control and force control?",
+      "expected_concepts": ["position control", "force control", "hybrid control", "contact tasks"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q026",
+      "chapter": 6,
+      "topic": "Sensors and Perception",
+      "question": "What types of sensors are commonly used in robots?",
+      "expected_concepts": ["sensors", "proprioceptive", "exteroceptive", "encoders", "cameras"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q027",
+      "chapter": 6,
+      "topic": "Sensors and Perception",
+      "question": "How does a LiDAR sensor work?",
+      "expected_concepts": ["LiDAR", "laser", "time of flight", "point cloud", "3D mapping"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q028",
+      "chapter": 6,
+      "topic": "Sensors and Perception",
+      "question": "What is sensor fusion and why is it important?",
+      "expected_concepts": ["sensor fusion", "Kalman filter", "multiple sensors", "accuracy", "reliability"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q029",
+      "chapter": 6,
+      "topic": "Sensors and Perception",
+      "question": "How do encoders measure robot joint positions?",
+      "expected_concepts": ["encoders", "incremental", "absolute", "resolution", "joint angle"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q030",
+      "chapter": 6,
+      "topic": "Sensors and Perception",
+      "question": "What is computer vision and how is it used in robotics?",
+      "expected_concepts": ["computer vision", "image processing", "object detection", "recognition"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q031",
+      "chapter": 7,
+      "topic": "Robot Vision",
+      "question": "How does stereo vision work for depth perception?",
+      "expected_concepts": ["stereo vision", "disparity", "depth map", "triangulation", "baseline"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q032",
+      "chapter": 7,
+      "topic": "Robot Vision",
+      "question": "What is camera calibration and why is it necessary?",
+      "expected_concepts": ["calibration", "intrinsic parameters", "extrinsic parameters", "distortion"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q033",
+      "chapter": 7,
+      "topic": "Robot Vision",
+      "question": "Explain feature detection and matching in computer vision.",
+      "expected_concepts": ["features", "SIFT", "SURF", "ORB", "matching", "descriptors"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q034",
+      "chapter": 7,
+      "topic": "Robot Vision",
+      "question": "What is visual servoing in robotics?",
+      "expected_concepts": ["visual servoing", "image-based", "position-based", "feedback", "tracking"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q035",
+      "chapter": 7,
+      "topic": "Robot Vision",
+      "question": "How do convolutional neural networks improve robot vision?",
+      "expected_concepts": ["CNN", "deep learning", "object detection", "classification", "segmentation"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q036",
+      "chapter": 8,
+      "topic": "Mobile Robots",
+      "question": "What are the different types of mobile robot locomotion?",
+      "expected_concepts": ["wheeled", "legged", "tracked", "flying", "swimming"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q037",
+      "chapter": 8,
+      "topic": "Mobile Robots",
+      "question": "Explain odometry and its limitations for mobile robots.",
+      "expected_concepts": ["odometry", "wheel encoders", "dead reckoning", "drift", "error accumulation"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q038",
+      "chapter": 8,
+      "topic": "Mobile Robots",
+      "question": "What is SLAM and how does it work?",
+      "expected_concepts": ["SLAM", "simultaneous localization", "mapping", "loop closure", "landmarks"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q039",
+      "chapter": 8,
+      "topic": "Mobile Robots",
+      "question": "How do differential drive robots steer?",
+      "expected_concepts": ["differential drive", "wheel velocities", "turning radius", "ICC"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q040",
+      "chapter": 8,
+      "topic": "Mobile Robots",
+      "question": "What is localization in mobile robotics?",
+      "expected_concepts": ["localization", "particle filter", "map", "sensor data", "position estimation"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q041",
+      "chapter": 9,
+      "topic": "Robot Programming",
+      "question": "What is ROS (Robot Operating System)?",
+      "expected_concepts": ["ROS", "middleware", "nodes", "topics", "services", "messages"],
+      "difficulty": "beginner"
+    },
+    {
+      "id": "Q042",
+      "chapter": 9,
+      "topic": "Robot Programming",
+      "question": "How do ROS topics and messages work?",
+      "expected_concepts": ["topics", "publishers", "subscribers", "messages", "communication"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q043",
+      "chapter": 9,
+      "topic": "Robot Programming",
+      "question": "What is the difference between ROS services and actions?",
+      "expected_concepts": ["services", "actions", "request-response", "goal", "feedback", "result"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q044",
+      "chapter": 9,
+      "topic": "Robot Programming",
+      "question": "How do you create a ROS publisher node?",
+      "expected_concepts": ["publisher", "node", "topic", "message type", "rate", "rospy"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q045",
+      "chapter": 9,
+      "topic": "Robot Programming",
+      "question": "What is a ROS launch file and how is it used?",
+      "expected_concepts": ["launch file", "nodes", "parameters", "namespaces", "arguments"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q046",
+      "chapter": 10,
+      "topic": "Advanced Topics",
+      "question": "What is reinforcement learning in robotics?",
+      "expected_concepts": ["reinforcement learning", "reward", "policy", "agent", "environment"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q047",
+      "chapter": 10,
+      "topic": "Advanced Topics",
+      "question": "How is machine learning used for robot manipulation?",
+      "expected_concepts": ["machine learning", "manipulation", "grasping", "learning from demonstration"],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "Q048",
+      "chapter": 10,
+      "topic": "Advanced Topics",
+      "question": "What are the safety considerations for human-robot collaboration?",
+      "expected_concepts": ["safety", "collaboration", "cobot", "ISO standards", "force limiting"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q049",
+      "chapter": 10,
+      "topic": "Advanced Topics",
+      "question": "What is swarm robotics?",
+      "expected_concepts": ["swarm", "collective behavior", "distributed", "coordination", "emergence"],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "Q050",
+      "chapter": 10,
+      "topic": "Advanced Topics",
+      "question": "What are the ethical considerations in robotics and AI?",
+      "expected_concepts": ["ethics", "autonomy", "accountability", "privacy", "job displacement"],
+      "difficulty": "intermediate"
+    }
+  ],
+  "off_topic_questions": [
+    {
+      "id": "OT001",
+      "question": "What is the weather like today?",
+      "expected_behavior": "decline",
+      "reason": "Not related to robotics textbook content"
+    },
+    {
+      "id": "OT002",
+      "question": "Can you help me write a poem?",
+      "expected_behavior": "decline",
+      "reason": "Creative writing, not robotics"
+    },
+    {
+      "id": "OT003",
+      "question": "What is the capital of France?",
+      "expected_behavior": "decline",
+      "reason": "General knowledge, not robotics"
+    },
+    {
+      "id": "OT004",
+      "question": "How do I cook pasta?",
+      "expected_behavior": "decline",
+      "reason": "Cooking, not robotics"
+    },
+    {
+      "id": "OT005",
+      "question": "Tell me a joke about robots.",
+      "expected_behavior": "decline",
+      "reason": "Entertainment, not educational content"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# FastAPI and server
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+
+# Pydantic for validation and settings
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# OpenAI SDK
+openai==1.57.2
+
+# Qdrant vector database client
+qdrant-client==1.12.1
+
+# PostgreSQL async driver
+asyncpg==0.30.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# CORS
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+httpx==0.28.1
+
+# Code quality
+black==24.10.0
+flake8==7.1.1
+mypy==1.13.0
+
+# Type stubs
+types-python-dotenv==1.0.0.20240514

@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: rag-chatbot-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: QDRANT_URL
+        sync: false  # Set manually in Render dashboard
+      - key: QDRANT_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: QDRANT_COLLECTION
+        value: robotics_textbook
+      - key: DATABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: CORS_ORIGINS
+        value: https://sajid-khan-afridi.github.io
+      - key: RATE_LIMIT_ANONYMOUS
+        value: 10
+      - key: RATE_LIMIT_AUTHENTICATED
+        value: 50
+      - key: CONFIDENCE_THRESHOLD
+        value: 0.2
+      - key: TOP_K_CHUNKS
+        value: 5
+      - key: MAX_CONVERSATION_HISTORY
+        value: 5
+      - key: SESSION_RETENTION_DAYS
+        value: 30
+    healthCheckPath: /api/v1/health

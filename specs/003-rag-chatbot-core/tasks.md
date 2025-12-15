@@ -25,11 +25,11 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend directory structure: backend/app/{models,routers,services,middleware,migrations}
-- [ ] T002 Initialize Python project in backend/ with requirements.txt from quickstart.md
-- [ ] T003 [P] Create .env.example file in repository root with all required environment variables from quickstart.md
-- [ ] T004 [P] Configure pytest in backend/ with conftest.py and test directory structure
-- [ ] T005 [P] Setup black, flake8, mypy configuration in backend/pyproject.toml
+- [X] T001 Create backend directory structure: backend/app/{models,routers,services,middleware,migrations}
+- [X] T002 Initialize Python project in backend/ with requirements.txt from quickstart.md
+- [X] T003 [P] Create .env.example file in repository root with all required environment variables from quickstart.md
+- [X] T004 [P] Configure pytest in backend/ with conftest.py and test directory structure
+- [X] T005 [P] Setup black, flake8, mypy configuration in backend/pyproject.toml
 
 ---
 
@@ -39,20 +39,20 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create backend/app/config.py with pydantic-settings for environment configuration
-- [ ] T007 Implement backend/app/models/query.py with QueryRequest and QueryResponse Pydantic models
-- [ ] T008 [P] Implement backend/app/models/chat.py with ChatSession and ChatMessage models
-- [ ] T009 [P] Implement backend/app/models/citations.py with SourceCitation model
-- [ ] T010 Create database migration backend/app/migrations/001_create_chat_tables.sql from data-model.md
-- [ ] T011 Create database migration backend/app/migrations/002_add_auto_purge.sql from data-model.md
-- [ ] T012 [P] Implement backend/app/main.py with FastAPI app initialization, CORS, and middleware
-- [ ] T013 [P] Implement backend/app/middleware/logging.py with correlation ID tracking
-- [ ] T014 [P] Implement backend/app/middleware/cors.py with CORS configuration
-- [ ] T015 Implement backend/app/routers/health.py with /health endpoint checking database, Qdrant, OpenAI connectivity
-- [ ] T016 Create static/data/faq-fallback.json with curated FAQ content per research.md
-- [ ] T017 Implement backend/app/services/vector_service.py with Qdrant client initialization and search_context method
-- [ ] T018 Implement backend/app/services/llm_service.py with OpenAI client initialization and GPT-4o-mini integration
-- [ ] T019 Implement backend/app/services/chat_service.py with asyncpg connection pool and session/message CRUD
+- [X] T006 Create backend/app/config.py with pydantic-settings for environment configuration
+- [X] T007 Implement backend/app/models/query.py with QueryRequest and QueryResponse Pydantic models
+- [X] T008 [P] Implement backend/app/models/chat.py with ChatSession and ChatMessage models
+- [X] T009 [P] Implement backend/app/models/citations.py with SourceCitation model
+- [X] T010 Create database migration backend/app/migrations/001_create_chat_tables.sql from data-model.md
+- [X] T011 Create database migration backend/app/migrations/002_add_auto_purge.sql from data-model.md
+- [X] T012 [P] Implement backend/app/main.py with FastAPI app initialization, CORS, and middleware
+- [X] T013 [P] Implement backend/app/middleware/logging.py with correlation ID tracking
+- [X] T014 [P] Implement backend/app/middleware/cors.py with CORS configuration
+- [X] T015 Implement backend/app/routers/health.py with /health endpoint checking database, Qdrant, OpenAI connectivity
+- [X] T016 Create static/data/faq-fallback.json with curated FAQ content per research.md
+- [X] T017 Implement backend/app/services/vector_service.py with Qdrant client initialization and search_context method
+- [X] T018 Implement backend/app/services/llm_service.py with OpenAI client initialization and GPT-4o-mini integration
+- [X] T019 Implement backend/app/services/chat_service.py with asyncpg connection pool and session/message CRUD
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -66,32 +66,32 @@
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement confidence score calculation in backend/app/services/rag_service.py using weighted average from research.md
-- [ ] T021 [US1] Implement query embedding in backend/app/services/rag_service.py using OpenAI text-embedding-3-small
-- [ ] T022 [US1] Implement vector search with score thresholding (0.2 minimum) in backend/app/services/rag_service.py
-- [ ] T023 [US1] Implement context ranking and top-k selection in backend/app/services/rag_service.py
-- [ ] T024 [US1] Implement LLM response generation with strict grounding prompt in backend/app/services/rag_service.py
-- [ ] T025 [US1] Implement source citation formatting in backend/app/services/rag_service.py
-- [ ] T026 [US1] Implement off-topic detection (confidence < 0.2) with decline response in backend/app/services/rag_service.py
-- [ ] T027 [US1] Implement low confidence warning (0.2-0.3) with rephrase suggestion in backend/app/services/rag_service.py
-- [ ] T028 [US1] Create /api/v1/query POST endpoint in backend/app/routers/query.py calling rag_service
-- [ ] T029 [US1] Add input sanitization for XSS/injection prevention in backend/app/routers/query.py
-- [ ] T030 [US1] Add request validation using QueryRequest model in backend/app/routers/query.py
-- [ ] T031 [US1] Implement error handling for LLM timeout (503 response) in backend/app/routers/query.py
-- [ ] T032 [US1] Implement error handling for vector store unavailable (503 with FAQ fallback) in backend/app/routers/query.py
-- [ ] T033 [P] [US1] Create src/components/ChatbotWidget/types.ts with TypeScript interfaces from contracts/schemas.ts
-- [ ] T034 [P] [US1] Create src/components/ChatbotWidget/ChatInput.tsx with input field and submit button
-- [ ] T035 [P] [US1] Create src/components/ChatbotWidget/MessageList.tsx with message display and scrolling
-- [ ] T036 [P] [US1] Create src/components/ChatbotWidget/SourceCitations.tsx with clickable chapter links
-- [ ] T037 [P] [US1] Create src/components/ChatbotWidget/ConfidenceIndicator.tsx with color-coded confidence display
-- [ ] T038 [US1] Create src/components/ChatbotWidget/index.tsx integrating all sub-components with state management
-- [ ] T039 [US1] Implement query submission with fetch POST to /api/v1/query in src/components/ChatbotWidget/index.tsx
-- [ ] T040 [US1] Implement response rendering with answer, sources, and confidence in src/components/ChatbotWidget/index.tsx
-- [ ] T041 [US1] Implement low confidence warning banner (0.2-0.3) in src/components/ChatbotWidget/index.tsx
-- [ ] T042 [US1] Add error handling for network failures with retry suggestion in src/components/ChatbotWidget/index.tsx
-- [ ] T043 [US1] Add WCAG 2.1 AA accessibility: keyboard navigation, ARIA labels, focus management in src/components/ChatbotWidget/index.tsx
-- [ ] T044 [US1] Create src/components/ChatbotWidget/ChatbotWidget.module.css with responsive styles and 44x44px touch targets
-- [ ] T045 [US1] Add token usage display (input/output/total) in src/components/ChatbotWidget/index.tsx for educational transparency
+- [X] T020 [US1] Implement confidence score calculation in backend/app/services/rag_service.py using weighted average from research.md
+- [X] T021 [US1] Implement query embedding in backend/app/services/rag_service.py using OpenAI text-embedding-3-small
+- [X] T022 [US1] Implement vector search with score thresholding (0.2 minimum) in backend/app/services/rag_service.py
+- [X] T023 [US1] Implement context ranking and top-k selection in backend/app/services/rag_service.py
+- [X] T024 [US1] Implement LLM response generation with strict grounding prompt in backend/app/services/rag_service.py
+- [X] T025 [US1] Implement source citation formatting in backend/app/services/rag_service.py
+- [X] T026 [US1] Implement off-topic detection (confidence < 0.2) with decline response in backend/app/services/rag_service.py
+- [X] T027 [US1] Implement low confidence warning (0.2-0.3) with rephrase suggestion in backend/app/services/rag_service.py
+- [X] T028 [US1] Create /api/v1/query POST endpoint in backend/app/routers/query.py calling rag_service
+- [X] T029 [US1] Add input sanitization for XSS/injection prevention in backend/app/routers/query.py
+- [X] T030 [US1] Add request validation using QueryRequest model in backend/app/routers/query.py
+- [X] T031 [US1] Implement error handling for LLM timeout (503 response) in backend/app/routers/query.py
+- [X] T032 [US1] Implement error handling for vector store unavailable (503 with FAQ fallback) in backend/app/routers/query.py
+- [X] T033 [P] [US1] Create src/components/ChatbotWidget/types.ts with TypeScript interfaces from contracts/schemas.ts
+- [X] T034 [P] [US1] Create src/components/ChatbotWidget/ChatInput.tsx with input field and submit button
+- [X] T035 [P] [US1] Create src/components/ChatbotWidget/MessageList.tsx with message display and scrolling
+- [X] T036 [P] [US1] Create src/components/ChatbotWidget/SourceCitations.tsx with clickable chapter links
+- [X] T037 [P] [US1] Create src/components/ChatbotWidget/ConfidenceIndicator.tsx with color-coded confidence display
+- [X] T038 [US1] Create src/components/ChatbotWidget/index.tsx integrating all sub-components with state management
+- [X] T039 [US1] Implement query submission with fetch POST to /api/v1/query in src/components/ChatbotWidget/index.tsx
+- [X] T040 [US1] Implement response rendering with answer, sources, and confidence in src/components/ChatbotWidget/index.tsx
+- [X] T041 [US1] Implement low confidence warning banner (0.2-0.3) in src/components/ChatbotWidget/index.tsx
+- [X] T042 [US1] Add error handling for network failures with retry suggestion in src/components/ChatbotWidget/index.tsx
+- [X] T043 [US1] Add WCAG 2.1 AA accessibility: keyboard navigation, ARIA labels, focus management in src/components/ChatbotWidget/index.tsx
+- [X] T044 [US1] Create src/components/ChatbotWidget/ChatbotWidget.module.css with responsive styles and 44x44px touch targets
+- [X] T045 [US1] Add token usage display (input/output/total) in src/components/ChatbotWidget/index.tsx for educational transparency
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - students can ask questions and receive answers with citations
 
@@ -105,21 +105,21 @@
 
 ### Implementation for User Story 2
 
-- [ ] T046 [US2] Implement session creation with session_token generation in backend/app/services/chat_service.py
-- [ ] T047 [US2] Implement session retrieval by session_id or session_token in backend/app/services/chat_service.py
-- [ ] T048 [US2] Implement message persistence (user and assistant messages) in backend/app/services/chat_service.py
-- [ ] T049 [US2] Implement source citation persistence in separate table in backend/app/services/chat_service.py
-- [ ] T050 [US2] Implement last_activity_at update on each message in backend/app/services/chat_service.py
-- [ ] T051 [US2] Implement conversation context retrieval (last 5 exchanges) in backend/app/services/rag_service.py
-- [ ] T052 [US2] Integrate conversation history into LLM prompt for follow-up questions in backend/app/services/rag_service.py
-- [ ] T053 [US2] Modify /api/v1/query to accept optional sessionId and return/create session in backend/app/routers/query.py
-- [ ] T054 [US2] Create GET /api/v1/chat/sessions/{sessionId} endpoint in backend/app/routers/query.py for history retrieval
-- [ ] T055 [US2] Create DELETE /api/v1/chat/sessions/{sessionId} endpoint in backend/app/routers/query.py
-- [ ] T056 [US2] Implement session state management in src/components/ChatbotWidget/index.tsx using React useReducer
-- [ ] T057 [US2] Persist sessionId in browser localStorage for cross-tab synchronization in src/components/ChatbotWidget/index.tsx
-- [ ] T058 [US2] Load previous conversation history on widget mount in src/components/ChatbotWidget/index.tsx
-- [ ] T059 [US2] Display full conversation history in MessageList component in src/components/ChatbotWidget/MessageList.tsx
-- [ ] T060 [US2] Add "Clear History" button with DELETE /chat/sessions/{sessionId} call in src/components/ChatbotWidget/index.tsx
+- [X] T046 [US2] Implement session creation with session_token generation in backend/app/services/chat_service.py
+- [X] T047 [US2] Implement session retrieval by session_id or session_token in backend/app/services/chat_service.py
+- [X] T048 [US2] Implement message persistence (user and assistant messages) in backend/app/services/chat_service.py
+- [X] T049 [US2] Implement source citation persistence in separate table in backend/app/services/chat_service.py
+- [X] T050 [US2] Implement last_activity_at update on each message in backend/app/services/chat_service.py
+- [X] T051 [US2] Implement conversation context retrieval (last 5 exchanges) in backend/app/services/rag_service.py
+- [X] T052 [US2] Integrate conversation history into LLM prompt for follow-up questions in backend/app/services/rag_service.py
+- [X] T053 [US2] Modify /api/v1/query to accept optional sessionId and return/create session in backend/app/routers/query.py
+- [X] T054 [US2] Create GET /api/v1/chat/sessions/{sessionId} endpoint in backend/app/routers/query.py for history retrieval
+- [X] T055 [US2] Create DELETE /api/v1/chat/sessions/{sessionId} endpoint in backend/app/routers/query.py
+- [X] T056 [US2] Implement session state management in src/components/ChatbotWidget/index.tsx using React useReducer
+- [X] T057 [US2] Persist sessionId in browser localStorage for cross-tab synchronization in src/components/ChatbotWidget/index.tsx
+- [X] T058 [US2] Load previous conversation history on widget mount in src/components/ChatbotWidget/index.tsx
+- [X] T059 [US2] Display full conversation history in MessageList component in src/components/ChatbotWidget/MessageList.tsx
+- [X] T060 [US2] Add "Clear History" button with DELETE /chat/sessions/{sessionId} call in src/components/ChatbotWidget/index.tsx
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - students can ask questions and continue conversations with context
 

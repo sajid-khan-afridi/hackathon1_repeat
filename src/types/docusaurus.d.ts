@@ -264,8 +264,6 @@ declare module '@site/src/components/HomepageFeatures' {
   export default HomepageFeatures;
 }
 
-
-
 // Import React for JSX namespace
 import 'react';
 

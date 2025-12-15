@@ -22,7 +22,10 @@ interface TermData {
  * <TechnicalTerm term="ROS 2" explanation="Robot Operating System 2" />
  * <TechnicalTerm term="publisher" />
  */
-export default function TechnicalTerm({ term, explanation }: TechnicalTermProps): React.ReactElement {
+export default function TechnicalTerm({
+  term,
+  explanation,
+}: TechnicalTermProps): React.ReactElement {
   const { language } = useLanguageContext();
 
   // Generate a stable ID for accessibility linking

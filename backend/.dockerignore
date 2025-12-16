@@ -58,7 +58,7 @@ docs/
 # Development scripts
 test_*.py
 check_*.py
-run_migrations.py
+# NOTE: run_migrations.py is needed for production startup
 
 # Logs
 *.log

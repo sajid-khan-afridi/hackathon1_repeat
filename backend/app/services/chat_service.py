@@ -6,6 +6,7 @@ from uuid import UUID
 import asyncpg
 from datetime import datetime
 import secrets
+import json
 from app.config import settings
 from app.models.query import SourceCitation
 import logging
@@ -178,17 +179,20 @@ class ChatService:
 
             async with self.pool.acquire() as conn:
                 # Insert message
+                # Convert tokens_dict to JSON string for JSONB column
+                tokens_json = json.dumps(tokens_dict)
+
                 message_id = await conn.fetchval(
                     """
                     INSERT INTO chat_messages (session_id, role, content, confidence, tokens_used, created_at)
-                    VALUES ($1, $2, $3, $4, $5, NOW())
+                    VALUES ($1, $2, $3, $4, $5::jsonb, NOW())
                     RETURNING id
                     """,
                     session_id,
                     role,
                     content,
                     confidence,
-                    tokens_dict,
+                    tokens_json,
                 )
 
                 # Update session last_activity_at

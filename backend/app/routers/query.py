@@ -192,28 +192,8 @@ async def query_endpoint(request: QueryRequest) -> QueryResponse:
         )
 
 
-@router.middleware("http")
-async def add_rate_limit_headers(request: Request, call_next):
-    """
-    Add rate limit headers to responses (placeholder for future implementation).
-
-    Headers added:
-    - X-RateLimit-Limit: Maximum requests allowed per window
-    - X-RateLimit-Remaining: Requests remaining in current window
-    - X-RateLimit-Reset: Unix timestamp when the limit resets
-
-    Note: Actual rate limiting logic is not implemented yet.
-    This is a placeholder that returns static values.
-    """
-    response = await call_next(request)
-
-    # Placeholder rate limit headers
-    # TODO: Implement actual rate limiting with Redis or in-memory cache
-    response.headers["X-RateLimit-Limit"] = str(settings.rate_limit_anonymous)
-    response.headers["X-RateLimit-Remaining"] = str(settings.rate_limit_anonymous)
-    response.headers["X-RateLimit-Reset"] = "0"
-
-    return response
+# TODO: Implement rate limiting middleware
+# Note: Middleware must be added to the FastAPI app in main.py, not to APIRouter
 
 
 @router.get("/query/health")

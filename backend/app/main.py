@@ -57,6 +57,16 @@ async def root() -> JSONResponse:
     )
 
 
+@app.get("/health")
+async def simple_health() -> JSONResponse:
+    """
+    Simple health check endpoint that always returns 200 OK.
+    Used by Railway for startup health checks.
+    For detailed health status, use /api/v1/health
+    """
+    return JSONResponse(content={"status": "ok"})
+
+
 # Import and include routers
 from app.routers import health, query, sessions
 

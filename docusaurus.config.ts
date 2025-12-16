@@ -85,6 +85,11 @@ markdown: {
           position: 'left',
         },
         {
+          to: '/chatbot',
+          label: '🤖 AI Assistant',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/sajid-khan-afridi/hackathon1_repeat',
           position: 'right',
           className: 'header-github-link',
@@ -147,6 +152,11 @@ markdown: {
       additionalLanguages: ['python', 'cpp', 'yaml', 'bash', 'json', 'docker'],
     },
   } satisfies Preset.ThemeConfig,
+
+  // Client modules for browser-side configuration
+  clientModules: [
+    require.resolve('./src/clientModules/chatbotConfig.ts'),
+  ],
 };
 
 export default config;

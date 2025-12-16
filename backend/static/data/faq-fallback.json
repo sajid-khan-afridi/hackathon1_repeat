@@ -1,0 +1,39 @@
+{
+  "fallback_responses": [
+    {
+      "question": "What topics does this textbook cover?",
+      "answer": "This robotics textbook covers ROS 2 fundamentals, Isaac Sim simulation, kinematics, navigation, path planning, perception, sensor fusion, and humanoid robot control. You can ask me questions about any of these topics."
+    },
+    {
+      "question": "How do I get started with ROS 2?",
+      "answer": "Start with Module 1 which covers ROS 2 fundamentals including nodes, topics, services, parameters, and launch files. The chapters include practical code examples in both Python and C++."
+    },
+    {
+      "question": "What is inverse kinematics?",
+      "answer": "Inverse kinematics (IK) is covered in Module 3, Chapter 1. IK is the process of determining joint angles needed to position a robot's end effector at a desired location. The chapter includes mathematical formulations and practical examples."
+    },
+    {
+      "question": "How do I use Isaac Sim?",
+      "answer": "Module 2 covers Isaac Sim in detail, including environment setup, robot models, URDF files, sensors, and physics simulation. Start with Chapter 1 for a comprehensive introduction."
+    },
+    {
+      "question": "What sensors are used in robotics?",
+      "answer": "Module 2, Chapter 3 and Module 3, Chapter 3 cover various sensors including LiDAR, cameras, IMUs, and depth sensors. You'll learn about sensor fusion techniques for combining data from multiple sensors."
+    }
+  ],
+  "suggested_topics": [
+    "ROS 2 nodes and lifecycle",
+    "ROS 2 topics and services",
+    "Isaac Sim environment setup",
+    "Inverse kinematics",
+    "Forward kinematics",
+    "Navigation and path planning",
+    "SLAM (Simultaneous Localization and Mapping)",
+    "Sensor fusion",
+    "Humanoid robot control",
+    "Robot perception",
+    "URDF and robot models",
+    "ROS 2 launch files"
+  ],
+  "off_topic_message": "I can only answer questions about the robotics textbook. Try asking about topics like ROS 2, kinematics, navigation, or Isaac Sim."
+}

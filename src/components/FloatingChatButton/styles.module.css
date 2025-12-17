@@ -13,10 +13,12 @@
 /* ==================== CSS Variables ==================== */
 
 .floatingButton {
-  --fab-color-primary: #1a73e8;
-  --fab-color-primary-dark: #1557b0;
-  --fab-color-shadow: rgba(0, 0, 0, 0.2);
-  --fab-color-shadow-hover: rgba(0, 0, 0, 0.3);
+  /* Match project's robotics theme colors */
+  --fab-color-primary: #2563eb;
+  --fab-color-primary-dark: #1d4ed8;
+  --fab-color-accent: #10b981;
+  --fab-color-shadow: rgba(37, 99, 235, 0.25);
+  --fab-color-shadow-hover: rgba(37, 99, 235, 0.4);
   --fab-size-mobile: 56px;
   --fab-size-desktop: 64px;
   --fab-spacing-mobile: 16px;
@@ -28,8 +30,10 @@
 
 /* Dark theme overrides */
 [data-theme='dark'] .floatingButton {
-  --fab-color-shadow: rgba(0, 0, 0, 0.4);
-  --fab-color-shadow-hover: rgba(0, 0, 0, 0.6);
+  --fab-color-primary: #3b82f6;
+  --fab-color-primary-dark: #2563eb;
+  --fab-color-shadow: rgba(59, 130, 246, 0.3);
+  --fab-color-shadow-hover: rgba(59, 130, 246, 0.5);
 }
 
 /* ==================== Floating Button ==================== */
@@ -131,13 +135,31 @@
     box-shadow:
       0 4px 8px var(--fab-color-shadow),
       0 2px 4px rgba(0, 0, 0, 0.1),
-      0 0 0 0 rgba(26, 115, 232, 0.4);
+      0 0 0 0 rgba(37, 99, 235, 0.4);
   }
   50% {
     box-shadow:
       0 4px 8px var(--fab-color-shadow),
       0 2px 4px rgba(0, 0, 0, 0.1),
-      0 0 0 8px rgba(26, 115, 232, 0);
+      0 0 0 8px rgba(37, 99, 235, 0);
+  }
+}
+
+/* Dark mode pulse uses lighter blue */
+@media (prefers-color-scheme: dark) {
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow:
+        0 4px 8px var(--fab-color-shadow),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    50% {
+      box-shadow:
+        0 4px 8px var(--fab-color-shadow),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        0 0 0 8px rgba(59, 130, 246, 0);
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 ---
 name: ui-ux-polisher
 description: >
-  UI/UX polish and enhancement skill. Use when user requests: menu alignment, navbar/side menu polish, responsiveness fixes, mobile layout issues, typography improvements, visual hierarchy, submenu animations, professional UI look, design consistency, or accessibility improvements. Guides systematic UI auditing, diagnosis, and implementation of tasteful enhancements with animations.
+  Systematically audit, analyze, and enhance UI/UX quality with visual analysis, interactive suggestions, and user-approved improvements. Use when user mentions: UI polish, menu alignment, responsiveness, animations, professional look, accessibility fixes, design improvements.
 allowed-tools:
   - Read
   - Grep
@@ -9,260 +9,236 @@ allowed-tools:
   - Edit
   - Write
   - Bash
+  - AskUserQuestion
+  - WebFetch
 ---
 
 # UI/UX Polisher Skill
 
-**Purpose:** Systematically audit, diagnose, and enhance UI/UX quality with professional polish, consistent design patterns, smooth animations, and accessibility compliance.
+You are now a UI/UX expert. Execute this skill by following the phases below systematically.
 
-## When to Use This Skill
+## PHASE 1: Discovery & Analysis (REQUIRED FIRST STEP)
 
-Invoke this skill when the user mentions:
-- "UI/UX enhance", "professional look", "polish the UI"
-- "menu alignment", "navbar polish", "side menu issues"
-- "responsiveness", "mobile layout", "breakpoint issues"
-- "add animation", "smooth transitions", "menu animations"
-- "submenu expand/collapse", "dropdown animations"
-- "typography", "visual hierarchy", "spacing issues"
-- "accessibility", "keyboard navigation", "focus management"
+### Step 1.1: Identify the Project Type
 
-## Quick Start Workflow
-
-When invoked, Claude should:
-
-1. **Audit Phase** (5 min)
-   - Locate UI components: `components/`, `app/`, `pages/`, `layouts/`
-   - Find navigation: navbar, side menu, drawer components
-   - Identify styling approach (Tailwind, CSS Modules, SCSS, styled-components)
-   - Check for animation library (Framer Motion, React Spring, CSS-only)
-   - Read existing design tokens/theme files
-
-2. **Diagnosis Phase** (5 min)
-   - Run the project locally (if not running) to inspect UI
-   - Document issues found:
-     - Alignment problems (menu items, buttons, icons)
-     - Spacing inconsistencies (padding, margins, gaps)
-     - Typography issues (font scale, line-height, hierarchy)
-     - Responsive breakpoints (overflow, mobile menu)
-     - Animation gaps (abrupt state changes)
-     - Accessibility issues (focus rings, keyboard nav, ARIA)
-
-3. **Planning Phase** (2 min)
-   - Group related fixes into clusters:
-     - Cluster 1: Menu alignment + spacing
-     - Cluster 2: Responsive layout
-     - Cluster 3: Animations (menu, submenu)
-     - Cluster 4: Accessibility fixes
-   - Propose implementation order (smallest safe changes first)
-
-4. **Implementation Phase** (iterative)
-   - Make **one cluster of changes at a time**
-   - Prefer minimal diffs (edit existing code, don't rewrite)
-   - Follow existing patterns in codebase
-   - Add animations with `prefers-reduced-motion` support
-   - Preserve all functionality and routing
-
-5. **Verification Phase** (per cluster)
-   - Run lint/typecheck: `npm run lint`, `npm run type-check`
-   - Build check: `npm run build`
-   - Manual tests: responsive views, keyboard navigation
-   - Verify reduced-motion fallback works
-
-## Core UI/UX Principles
-
-### Menu & Submenu Animation
-
-**Goal:** Smooth, premium feel without jarring motion.
-
-- **Duration:** 150–250ms (fast enough to feel instant, slow enough to perceive)
-- **Easing:** `cubic-bezier(0.4, 0, 0.2, 1)` or `ease-out` (no bounce unless brand requires it)
-- **Properties to animate:**
-  - `height` or `max-height` (for expand/collapse)
-  - `opacity` (for fade in/out)
-  - `transform: translateY()` (for slide effects)
-- **Reduced motion:** Always include `@media (prefers-reduced-motion: reduce)` with instant transitions
-
-**Example patterns:**
-- Framer Motion: `initial`, `animate`, `exit` with `AnimatePresence`
-- CSS: `transition: all 200ms ease-out` with conditional classes
-- Submenu: parent sets `aria-expanded`, children animate based on state
-
-### Responsive & Layout
-
-**Breakpoints** (Tailwind defaults, adjust if different):
-- Mobile: `< 640px` (sm)
-- Tablet: `640px – 1024px` (md/lg)
-- Desktop: `≥ 1024px` (xl)
-
-**Common fixes:**
-- **Horizontal overflow:** Add `overflow-x-hidden` to containers, ensure content respects viewport
-- **Menu on mobile:** Hamburger menu → slide-in drawer or dropdown
-- **Touch targets:** Minimum 44×44px (iOS), prefer 48×48px (Material)
-- **Spacing system:** Use consistent scale (4px, 8px, 16px, 24px, 32px...)
-- **Flexbox/Grid:** Prefer modern layouts over floats/absolute positioning
-
-### Typography & Visual Hierarchy
-
-**Font Scale** (adjust to project):
-- Hero/H1: 2.5rem – 4rem
-- H2: 2rem – 3rem
-- H3: 1.5rem – 2rem
-- Body: 1rem (16px base)
-- Small: 0.875rem
-
-**Line Height:**
-- Headings: 1.2 – 1.3
-- Body: 1.5 – 1.7
-- Avoid line-height < 1.2 or > 2
-
-**Contrast:**
-- Text on background: ≥ 4.5:1 (WCAG AA)
-- Large text (≥ 18pt): ≥ 3:1
-- Use tools: WebAIM Contrast Checker
-
-**Hierarchy:**
-- Use size + weight + spacing to create visual layers
-- Avoid more than 3 font weights in one view
-- Consistent heading scale throughout app
-
-### Accessibility (A11y)
-
-**Keyboard Navigation:**
-- All interactive elements focusable (buttons, links, inputs)
-- Logical tab order (follows visual layout)
-- Visible focus indicator (outline or custom ring)
-- Escape key closes modals/menus
-- Enter/Space activates buttons/links
-
-**ARIA for Menus:**
-```html
-<button aria-expanded="false" aria-controls="submenu-id">
-  Menu Item
-</button>
-<div id="submenu-id" role="region" aria-labelledby="button-id">
-  <!-- Submenu content -->
-</div>
+```bash
+# Check for package.json to understand the project
 ```
 
-**Focus Management:**
-- When opening menu/modal: move focus to first item or close button
-- When closing: return focus to trigger element
-- Trap focus inside modals (no Tab escaping)
+Read `package.json` to determine:
+- Framework: React, Next.js, Docusaurus, Vue, etc.
+- Styling: Tailwind, CSS Modules, styled-components, SCSS
+- Animation library: Framer Motion, React Spring, or CSS-only
 
-**Screen Readers:**
-- Use semantic HTML (`<nav>`, `<button>`, `<ul>`, `<li>`)
-- Avoid `<div>` with `onClick` (use `<button>` instead)
-- Provide `aria-label` for icon-only buttons
+### Step 1.2: Locate UI Files
 
-## Implementation Guidelines
+Use Glob to find UI-related files:
+- `**/components/**/*.{tsx,jsx,css,scss}`
+- `**/src/css/**/*.css`
+- `**/styles/**/*.{css,scss}`
+- `**/src/theme/**/*`
 
-### DO:
-- ✅ Start with smallest safe changes (alignment/spacing first)
-- ✅ Follow existing code patterns and naming conventions
-- ✅ Use project's existing spacing/color tokens if available
-- ✅ Add animations gradually (menu first, then submenu, then micro-interactions)
-- ✅ Test on multiple viewports (mobile 375px, tablet 768px, desktop 1440px)
-- ✅ Preserve all existing functionality and routes
-- ✅ Include `prefers-reduced-motion` for all animations
-- ✅ Use semantic HTML and proper ARIA attributes
+### Step 1.3: Identify Current Issues
 
-### DON'T:
-- ❌ Change brand colors/fonts without explicit user request
-- ❌ Rewrite entire components (prefer targeted edits)
-- ❌ Add heavy animation libraries unless project already uses them
-- ❌ Use fixed pixel widths that break responsiveness
-- ❌ Remove existing accessibility features
-- ❌ Add flashy/distracting animations (no bounce, no spin, no excessive motion)
-- ❌ Break existing routes or navigation behavior
+Read the main CSS files and key components. Look for:
+1. **Alignment issues**: Inconsistent flexbox/grid usage
+2. **Spacing problems**: Arbitrary values (13px, 27px) vs system (4, 8, 16, 24, 32)
+3. **Animation gaps**: Missing transitions, abrupt state changes
+4. **Responsive issues**: Fixed widths, missing breakpoints
+5. **Accessibility gaps**: Missing focus states, contrast issues
 
-## Output Format
+## PHASE 2: Present Findings (ASK USER)
 
-After each implementation cluster, report:
+After analysis, use AskUserQuestion to present exactly 4 improvement suggestions:
 
+```
+Based on my analysis, I found these improvement opportunities:
+
+**1. [Issue Name]** (Priority: High/Medium/Low)
+- Problem: [Specific issue found]
+- Impact: [Why it matters]
+- Fix: [Proposed solution]
+
+**2. [Issue Name]** ...
+**3. [Issue Name]** ...
+**4. [Issue Name]** ...
+
+Which improvements would you like me to apply?
+A) All of them
+B) Let me choose individually
+C) Customize specific ones
+D) Skip and explain more
+```
+
+Use this AskUserQuestion format:
+- Question: "Which UI/UX improvements would you like to apply?"
+- Header: "Improvements"
+- Options:
+  - "Apply all 4 improvements" - Apply all identified fixes
+  - "Choose individually" - I'll ask about each one separately
+  - "Customize" - Modify the proposed solutions
+  - "Explain more" - Get more details before deciding
+
+## PHASE 3: User Selection Loop
+
+If user chose "Choose individually", loop through each improvement:
+
+For each improvement, ask:
+- Question: "[Improvement name]: [Brief description]. Apply this fix?"
+- Header: "Fix #N"
+- Options:
+  - "Yes" - Apply as proposed
+  - "Customize" - Modify the approach
+  - "Skip" - Don't apply this fix
+
+## PHASE 4: Implementation (Approved Changes Only)
+
+### Implementation Rules
+
+1. **Minimal diffs only**: Edit specific lines, don't rewrite files
+2. **Follow existing patterns**: Use the project's naming conventions
+3. **Preserve functionality**: Never break existing routes or features
+4. **One cluster at a time**: Group related changes, verify after each
+
+### CSS Changes Standard
+
+When editing CSS:
+```css
+/* Animation tokens - standardize on these */
+--animation-fast: 150ms;
+--animation-base: 250ms;
+--animation-slow: 350ms;
+--animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* Always include reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Component Changes Standard
+
+When editing components:
+- Add `aria-*` attributes for accessibility
+- Use semantic HTML (`<button>`, `<nav>`, not `<div onClick>`)
+- Ensure focus indicators are visible
+- Touch targets minimum 44x44px
+
+## PHASE 5: Verification (REQUIRED)
+
+After implementing changes:
+
+### Step 5.1: Build Check
+```bash
+npm run build
+```
+
+If build fails, fix issues before proceeding.
+
+### Step 5.2: Report Changes
+
+Output this summary:
 ```markdown
-### ✅ [Cluster Name] Complete
+### UI/UX Polish Complete
 
-**Files Changed:**
-- `components/Navbar.tsx` (lines 45-67: menu alignment + spacing)
-- `components/Sidebar.tsx` (lines 23-45: submenu animation)
+**Applied Improvements:**
+1. [Improvement 1] - Files: `path/file.css` (lines X-Y)
+2. [Improvement 2] - Files: `path/component.tsx` (lines X-Y)
+...
 
 **Changes Made:**
-1. Fixed menu item alignment using flexbox with consistent gap
-2. Added smooth 200ms expand/collapse animation for submenu
-3. Included reduced-motion fallback (instant transition)
-4. Improved focus ring visibility (2px outline, brand color)
+- [Specific change 1]
+- [Specific change 2]
+...
 
 **Verification:**
-- ✅ `npm run lint` passed
-- ✅ `npm run build` successful
-- ✅ Tested on mobile (375px), tablet (768px), desktop (1440px)
-- ✅ Keyboard navigation works (Tab, Enter, Escape)
-- ✅ Reduced motion respected in browser settings
+- Build: [PASS/FAIL]
+- [Any other checks performed]
 
-**Next Steps:**
-- Continue with Cluster 2: Responsive layout fixes
+**Skipped:** (if any)
+- [Reason for skipping]
 ```
 
-## Progressive Enhancement Strategy
+## QUICK REFERENCE: Common Fixes
 
-1. **Foundation First:** Fix layout, spacing, alignment (no animations yet)
-2. **Responsive Second:** Ensure mobile/tablet/desktop all work correctly
-3. **Animation Third:** Add tasteful transitions to enhance UX
-4. **Accessibility Last:** Audit and fix keyboard nav, ARIA, focus management
+### Fix: Navbar Alignment
+```css
+.navbar__items--right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-This order ensures the UI is functional and correct before adding polish.
+.navbar__items--right > * {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+```
 
-## Troubleshooting Common Issues
+### Fix: Button Hover Animation
+```css
+.button {
+  transition: transform var(--animation-fast) var(--animation-easing),
+              box-shadow var(--animation-fast) var(--animation-easing);
+}
 
-### Menu Alignment Issues
-- **Problem:** Menu items not vertically centered
-- **Fix:** Use `flexbox` with `align-items: center` or `grid` with `align-content: center`
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
-### Submenu Not Animating
-- **Problem:** Submenu appears/disappears instantly
-- **Fix:** Animate `max-height` (0 → auto trick) or use `scaleY` transform
+.button:active {
+  transform: translateY(0);
+}
+```
 
-### Overflow on Mobile
-- **Problem:** Content exceeds viewport width
-- **Fix:** Add `overflow-x-hidden` to body/container, ensure `max-width: 100%` on wide elements
+### Fix: Focus Visibility
+```css
+*:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+```
 
-### Focus Ring Missing
-- **Problem:** No visible focus indicator
-- **Fix:** Add `focus:outline-2 focus:outline-brand-color` or custom `focus-visible` styles
+### Fix: Responsive Mobile Menu
+```css
+@media (max-width: 996px) {
+  .navbar__items {
+    display: none;
+  }
 
-### Animation Too Slow/Fast
-- **Problem:** Transition feels laggy or abrupt
-- **Fix:** Adjust duration (150–250ms sweet spot), check easing function
+  .navbar__toggle {
+    display: flex;
+  }
+}
+```
 
-## Integration with Existing Design System
+### Fix: Smooth Submenu Expand
+```css
+.menu__list {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height var(--animation-base) var(--animation-easing),
+              opacity var(--animation-base) var(--animation-easing);
+}
 
-If the project has a design system or theme file:
+.menu__list--expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+```
 
-1. **Read tokens first:** Look for `theme.ts`, `tokens.json`, `variables.scss`
-2. **Use existing values:** Colors, spacing, typography, shadows, radii
-3. **Extend carefully:** Only add new tokens if truly needed
-4. **Propose tokens:** If spacing is inconsistent, suggest creating a scale
+## CONSTRAINTS
 
-If no design system exists, propose creating one:
-- `colors.ts`: Brand colors, grays, semantic colors (success, error, warning)
-- `spacing.ts`: Consistent scale (4, 8, 12, 16, 24, 32, 48, 64...)
-- `typography.ts`: Font families, sizes, weights, line-heights
-
-## Advanced: Micro-Interactions
-
-Once core polish is complete, consider adding subtle micro-interactions:
-
-- **Button hover:** Slight scale (1.02) or color shift
-- **Link hover:** Underline animation (left-to-right)
-- **Card hover:** Lift effect (shadow + translateY)
-- **Input focus:** Border color transition
-- **Icon transitions:** Rotate chevron when menu expands
-
-**Rule:** Keep it subtle. Good micro-interactions are barely noticeable but make the UI feel "premium."
-
-## Resources
-
-For deeper guidance, refer to:
-- `CHECKLIST.md` – Complete UI/UX audit checklist
-- `RECIPES.md` – Copy-paste friendly code patterns
-- `TESTING.md` – Verification steps and manual tests
+- Never change brand colors without explicit user approval
+- Never remove existing accessibility features
+- Never add heavy animation libraries if project uses CSS-only
+- Never use fixed pixel widths that break responsiveness
+- Never skip the user approval phase
+- Maximum 4 improvements per session to avoid overwhelm
+- Always verify build passes after changes

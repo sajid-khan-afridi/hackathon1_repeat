@@ -185,7 +185,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background-color: var(--popup-color-header-bg);
+  background: linear-gradient(135deg, var(--popup-color-header-bg) 0%, var(--popup-color-bg) 100%);
   border-bottom: 1px solid var(--popup-color-border);
   flex-shrink: 0;
 }
@@ -195,6 +195,25 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--popup-color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Add AI icon before title */
+.title::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='16' height='16'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
 }
 
 .headerButtons {

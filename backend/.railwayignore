@@ -1,0 +1,21 @@
+# Railway ignore file - exclude files from deployment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.env.local
+.venv/
+venv/
+ENV/
+tests/
+*.log
+.DS_Store
+docker-compose.yml
+Dockerfile
+TEST_REPORT.md

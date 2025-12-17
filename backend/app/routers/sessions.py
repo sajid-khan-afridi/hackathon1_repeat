@@ -1,6 +1,7 @@
 """
 Session management endpoints for chat history.
 """
+
 import logging
 from fastapi import APIRouter, HTTPException, status, Path
 from uuid import UUID

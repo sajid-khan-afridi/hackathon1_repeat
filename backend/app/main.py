@@ -1,12 +1,14 @@
 """
 FastAPI application entry point for RAG Chatbot Core.
 """
+
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.config import settings
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.cors import configure_cors
+from app.middleware.rate_limit import UserIdentificationMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -26,6 +28,9 @@ app = FastAPI(
 
 # Configure CORS
 configure_cors(app, settings.cors_origins_list)
+
+# Add user identification middleware
+app.add_middleware(UserIdentificationMiddleware)
 
 # Add logging middleware
 app.add_middleware(LoggingMiddleware)

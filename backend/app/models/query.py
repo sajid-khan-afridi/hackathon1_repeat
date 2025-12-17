@@ -1,6 +1,7 @@
 """
 Pydantic models for query requests and responses.
 """
+
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any, List
 from uuid import UUID
@@ -11,7 +12,9 @@ class QueryFilters(BaseModel):
 
     module: Optional[int] = Field(None, ge=1, le=10, description="Module number (1-10)")
     difficulty: Optional[str] = Field(
-        None, pattern="^(beginner|intermediate|advanced)$", description="Difficulty level"
+        None,
+        pattern="^(beginner|intermediate|advanced)$",
+        description="Difficulty level",
     )
     tags: Optional[List[str]] = Field(None, description="Content tags to filter by")
 

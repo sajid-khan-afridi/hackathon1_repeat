@@ -1,0 +1,140 @@
+# Docker Compose for RAG Chatbot Core - Local Development
+#
+# This configuration sets up the complete development environment including:
+# - FastAPI backend
+# - Docusaurus frontend (optional, can be run separately)
+#
+# External services (Qdrant, OpenAI, Neon PostgreSQL) are accessed via cloud APIs
+# using credentials from .env file
+#
+# Usage:
+#   docker-compose up -d          # Start services in background
+#   docker-compose logs -f backend # Follow backend logs
+#   docker-compose down           # Stop services
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # Backend API Service
+  # ==========================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-chatbot-backend
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      # OpenAI Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+      # Qdrant Vector Database
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-robotics_textbook}
+
+      # Neon PostgreSQL Database
+      - DATABASE_URL=${DATABASE_URL}
+
+      # API Configuration
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:8000}
+
+      # Rate Limiting
+      - RATE_LIMIT_ANONYMOUS=${RATE_LIMIT_ANONYMOUS:-10}
+      - RATE_LIMIT_AUTHENTICATED=${RATE_LIMIT_AUTHENTICATED:-50}
+
+      # RAG Configuration
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.2}
+      - TOP_K_CHUNKS=${TOP_K_CHUNKS:-5}
+      - MAX_CONVERSATION_HISTORY=${MAX_CONVERSATION_HISTORY:-5}
+      - SESSION_RETENTION_DAYS=${SESSION_RETENTION_DAYS:-30}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+    volumes:
+      # Mount source code for hot-reload during development
+      - ./app:/app/app:ro
+      - ./tests:/app/tests:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rag-chatbot-network
+
+  # ==========================================================================
+  # Frontend Service (Optional - can be run separately with npm run start)
+  # ==========================================================================
+  # Uncomment if you want to run frontend in Docker as well
+  #
+  # frontend:
+  #   build:
+  #     context: ..
+  #     dockerfile: Dockerfile.frontend
+  #   container_name: rag-chatbot-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - REACT_APP_API_URL=http://localhost:8000
+  #   volumes:
+  #     - ../src:/app/src:ro
+  #     - ../docs:/app/docs:ro
+  #     - ../node_modules:/app/node_modules
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - rag-chatbot-network
+
+networks:
+  rag-chatbot-network:
+    driver: bridge
+
+# =============================================================================
+# Development Notes:
+# =============================================================================
+# 1. External Services:
+#    - Qdrant Cloud (vector database) - accessed via QDRANT_URL + API key
+#    - OpenAI API (embeddings & LLM) - accessed via OPENAI_API_KEY
+#    - Neon PostgreSQL (chat history) - accessed via DATABASE_URL
+#
+# 2. Environment Variables:
+#    - Copy .env.example to .env in project root
+#    - Fill in API keys and connection strings
+#    - Ensure .env is in .gitignore
+#
+# 3. Hot Reload:
+#    - Source code is mounted as read-only volumes
+#    - FastAPI will auto-reload on file changes
+#    - For production, remove volume mounts
+#
+# 4. Networking:
+#    - Backend accessible at http://localhost:8000
+#    - Frontend (if enabled) at http://localhost:3000
+#    - Services communicate via rag-chatbot-network bridge
+#
+# 5. Health Checks:
+#    - Backend health endpoint: /api/v1/health
+#    - Checks database, Qdrant, and OpenAI connectivity
+#
+# =============================================================================
+# Production Deployment:
+# =============================================================================
+# For production, consider:
+# 1. Remove volume mounts (bake code into image)
+# 2. Set ENVIRONMENT=production
+# 3. Use secrets management (Docker Swarm secrets, Kubernetes secrets)
+# 4. Enable HTTPS with reverse proxy (nginx, Traefik, Caddy)
+# 5. Add monitoring (Prometheus, Grafana)
+# 6. Configure log aggregation (ELK, Loki, CloudWatch)
+# 7. Use managed services for databases (avoid running PostgreSQL in Docker)
+# =============================================================================

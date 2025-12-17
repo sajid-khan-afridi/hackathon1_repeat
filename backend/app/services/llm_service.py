@@ -1,10 +1,12 @@
 """
 LLM service for generating embeddings and responses using OpenAI API.
 """
-from typing import List, Dict, Any, Optional
+
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from openai import AsyncOpenAI
 from app.config import settings
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +58,7 @@ When answering:
             # Truncate text if too long (rough estimate: 1 token ≈ 4 chars)
             max_chars = 32000  # ~8000 tokens
             if len(text) > max_chars:
-                logger.warning(
-                    f"Truncating text for embedding: {len(text)} -> {max_chars} chars"
-                )
+                logger.warning(f"Truncating text for embedding: {len(text)} -> {max_chars} chars")
                 text = text[:max_chars]
 
             response = await self.client.embeddings.create(
@@ -154,6 +154,72 @@ Please answer based on the context above."""
             logger.error(f"Failed to generate response: {str(e)}", exc_info=True)
             raise Exception(f"OpenAI response generation failed: {str(e)}")
 
+    async def generate_response_stream(
+        self,
+        prompt: str,
+        context: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Generate streaming response using OpenAI Chat Completions with retrieved context.
+
+        Args:
+            prompt: User's question
+            context: Retrieved context from vector search (concatenated chunks)
+            conversation_history: List of previous messages [{"role": "user|assistant", "content": "..."}]
+
+        Yields:
+            Text chunks as they arrive from the LLM
+
+        Raises:
+            Exception: If OpenAI API call fails
+        """
+        try:
+            # Build messages array (same as non-streaming)
+            messages = [{"role": "system", "content": self.SYSTEM_PROMPT}]
+
+            # Add conversation history (last N exchanges)
+            if conversation_history:
+                messages.extend(conversation_history)
+
+            # Add current query with context
+            user_message = f"""Context from textbook:
+---
+{context}
+---
+
+Student question: {prompt}
+
+Please answer based on the context above."""
+
+            messages.append({"role": "user", "content": user_message})
+
+            # Call OpenAI Chat Completions with stream=True
+            stream = await self.client.chat.completions.create(
+                model=self.CHAT_MODEL,
+                messages=messages,
+                temperature=0.3,  # Low temperature for factual responses
+                max_tokens=500,  # Limit response length
+                top_p=0.9,
+                frequency_penalty=0.0,
+                presence_penalty=0.0,
+                stream=True,  # Enable streaming
+            )
+
+            logger.info("Started streaming response from OpenAI")
+
+            # Yield chunks as they arrive
+            async for chunk in stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    yield content
+
+            logger.info("Completed streaming response from OpenAI")
+
+        except Exception as e:
+            logger.error(f"Failed to generate streaming response: {str(e)}", exc_info=True)
+            raise Exception(f"OpenAI streaming response generation failed: {str(e)}")
+
     async def calculate_confidence(
         self, question: str, answer: str, sources: List[Dict[str, Any]]
     ) -> float:
@@ -175,9 +241,7 @@ Please answer based on the context above."""
         """
         # Base confidence from average relevance score
         if sources:
-            avg_relevance = sum(s.get("relevance_score", 0.0) for s in sources) / len(
-                sources
-            )
+            avg_relevance = sum(s.get("relevance_score", 0.0) for s in sources) / len(sources)
         else:
             avg_relevance = 0.0
 

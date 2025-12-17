@@ -1,0 +1,432 @@
+{
+  "benchmark_version": "1.0.0",
+  "created_date": "2025-12-17",
+  "description": "Comprehensive benchmark test set covering all 10 modules of the robotics textbook",
+  "total_questions": 50,
+  "questions": [
+    {
+      "id": "Q001",
+      "module": 1,
+      "question": "What is ROS and why is it important for robotics development?",
+      "expected_topics": ["ROS", "Robot Operating System", "middleware", "framework"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q002",
+      "module": 1,
+      "question": "Explain the difference between ROS 1 and ROS 2",
+      "expected_topics": ["ROS 1", "ROS 2", "differences", "improvements"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q003",
+      "module": 1,
+      "question": "What are ROS nodes and how do they communicate?",
+      "expected_topics": ["nodes", "topics", "services", "communication"],
+      "difficulty": "beginner",
+      "type": "concept"
+    },
+    {
+      "id": "Q004",
+      "module": 1,
+      "question": "How do you create a publisher in ROS 2 using Python?",
+      "expected_topics": ["publisher", "ROS 2", "Python", "rclpy"],
+      "difficulty": "intermediate",
+      "type": "practical"
+    },
+    {
+      "id": "Q005",
+      "module": 1,
+      "question": "What is the purpose of launch files in ROS?",
+      "expected_topics": ["launch files", "automation", "node management"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q006",
+      "module": 2,
+      "question": "What is inverse kinematics and why is it important in robotics?",
+      "expected_topics": ["inverse kinematics", "IK", "robot arm", "end effector"],
+      "difficulty": "intermediate",
+      "type": "definition"
+    },
+    {
+      "id": "Q007",
+      "module": 2,
+      "question": "Explain the difference between forward and inverse kinematics",
+      "expected_topics": ["forward kinematics", "inverse kinematics", "joint angles", "position"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q008",
+      "module": 2,
+      "question": "What is the Denavit-Hartenberg (DH) convention?",
+      "expected_topics": ["DH parameters", "coordinate frames", "robot kinematics"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q009",
+      "module": 2,
+      "question": "How do you solve the inverse kinematics problem for a 6-DOF robot arm?",
+      "expected_topics": ["6-DOF", "inverse kinematics", "solutions", "methods"],
+      "difficulty": "advanced",
+      "type": "practical"
+    },
+    {
+      "id": "Q010",
+      "module": 2,
+      "question": "What is a Jacobian matrix and how is it used in robotics?",
+      "expected_topics": ["Jacobian", "velocity", "differential kinematics"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q011",
+      "module": 3,
+      "question": "What is SLAM and what problem does it solve?",
+      "expected_topics": ["SLAM", "simultaneous localization and mapping", "navigation"],
+      "difficulty": "intermediate",
+      "type": "definition"
+    },
+    {
+      "id": "Q012",
+      "module": 3,
+      "question": "Explain the difference between visual SLAM and LiDAR SLAM",
+      "expected_topics": ["visual SLAM", "LiDAR SLAM", "sensors", "comparison"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q013",
+      "module": 3,
+      "question": "What is the particle filter algorithm used in SLAM?",
+      "expected_topics": ["particle filter", "probabilistic", "localization"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q014",
+      "module": 3,
+      "question": "How does the EKF SLAM algorithm work?",
+      "expected_topics": ["EKF", "Extended Kalman Filter", "SLAM", "estimation"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q015",
+      "module": 3,
+      "question": "What are loop closures in SLAM and why are they important?",
+      "expected_topics": ["loop closure", "drift", "map correction"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q016",
+      "module": 4,
+      "question": "What is path planning in robotics?",
+      "expected_topics": ["path planning", "trajectory", "obstacles", "navigation"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q017",
+      "module": 4,
+      "question": "Explain the A* algorithm for path planning",
+      "expected_topics": ["A*", "heuristic", "graph search", "optimal path"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q018",
+      "module": 4,
+      "question": "What is the difference between global and local path planning?",
+      "expected_topics": ["global planning", "local planning", "navigation stack"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q019",
+      "module": 4,
+      "question": "How does the RRT algorithm work for path planning?",
+      "expected_topics": ["RRT", "Rapidly-exploring Random Tree", "sampling"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q020",
+      "module": 4,
+      "question": "What is the Dynamic Window Approach (DWA) for obstacle avoidance?",
+      "expected_topics": ["DWA", "obstacle avoidance", "local planning", "velocity"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q021",
+      "module": 5,
+      "question": "What is computer vision in robotics?",
+      "expected_topics": ["computer vision", "image processing", "perception"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q022",
+      "module": 5,
+      "question": "Explain how object detection works in robotics applications",
+      "expected_topics": ["object detection", "neural networks", "YOLO", "detection algorithms"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q023",
+      "module": 5,
+      "question": "What is the difference between 2D and 3D vision in robotics?",
+      "expected_topics": ["2D vision", "3D vision", "depth", "stereo"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q024",
+      "module": 5,
+      "question": "How does a depth camera work?",
+      "expected_topics": ["depth camera", "RGB-D", "point cloud", "3D sensing"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q025",
+      "module": 5,
+      "question": "What is semantic segmentation and its applications in robotics?",
+      "expected_topics": ["semantic segmentation", "pixel classification", "scene understanding"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q026",
+      "module": 6,
+      "question": "What is a PID controller and how does it work?",
+      "expected_topics": ["PID", "proportional", "integral", "derivative", "control"],
+      "difficulty": "intermediate",
+      "type": "definition"
+    },
+    {
+      "id": "Q027",
+      "module": 6,
+      "question": "Explain the role of each component in a PID controller",
+      "expected_topics": ["P term", "I term", "D term", "error", "tuning"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q028",
+      "module": 6,
+      "question": "What is the difference between open-loop and closed-loop control?",
+      "expected_topics": ["open-loop", "closed-loop", "feedback", "control systems"],
+      "difficulty": "beginner",
+      "type": "comparison"
+    },
+    {
+      "id": "Q029",
+      "module": 6,
+      "question": "How do you tune PID controller gains?",
+      "expected_topics": ["PID tuning", "Kp", "Ki", "Kd", "methods"],
+      "difficulty": "advanced",
+      "type": "practical"
+    },
+    {
+      "id": "Q030",
+      "module": 6,
+      "question": "What is model predictive control (MPC)?",
+      "expected_topics": ["MPC", "predictive control", "optimization", "constraints"],
+      "difficulty": "advanced",
+      "type": "definition"
+    },
+    {
+      "id": "Q031",
+      "module": 7,
+      "question": "What are actuators in robotics?",
+      "expected_topics": ["actuators", "motors", "movement", "control"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q032",
+      "module": 7,
+      "question": "Explain the difference between DC motors and servo motors",
+      "expected_topics": ["DC motor", "servo motor", "position control", "feedback"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q033",
+      "module": 7,
+      "question": "What are stepper motors and when should you use them?",
+      "expected_topics": ["stepper motor", "precision", "position", "applications"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q034",
+      "module": 7,
+      "question": "How do encoders work in robotics?",
+      "expected_topics": ["encoder", "position sensor", "feedback", "measurement"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q035",
+      "module": 7,
+      "question": "What is the difference between absolute and incremental encoders?",
+      "expected_topics": ["absolute encoder", "incremental encoder", "position tracking"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q036",
+      "module": 8,
+      "question": "What are common sensors used in mobile robots?",
+      "expected_topics": ["sensors", "LiDAR", "ultrasonic", "IMU", "camera"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q037",
+      "module": 8,
+      "question": "How does a LiDAR sensor work?",
+      "expected_topics": ["LiDAR", "laser", "distance", "point cloud"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q038",
+      "module": 8,
+      "question": "What is an IMU and what does it measure?",
+      "expected_topics": ["IMU", "Inertial Measurement Unit", "accelerometer", "gyroscope"],
+      "difficulty": "intermediate",
+      "type": "definition"
+    },
+    {
+      "id": "Q039",
+      "module": 8,
+      "question": "Explain sensor fusion and why it's important",
+      "expected_topics": ["sensor fusion", "multiple sensors", "accuracy", "reliability"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q040",
+      "module": 8,
+      "question": "What is the difference between active and passive sensors?",
+      "expected_topics": ["active sensors", "passive sensors", "LiDAR", "camera"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q041",
+      "module": 9,
+      "question": "What is machine learning in robotics?",
+      "expected_topics": ["machine learning", "AI", "learning", "adaptation"],
+      "difficulty": "beginner",
+      "type": "definition"
+    },
+    {
+      "id": "Q042",
+      "module": 9,
+      "question": "Explain reinforcement learning for robot control",
+      "expected_topics": ["reinforcement learning", "reward", "policy", "training"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q043",
+      "module": 9,
+      "question": "What are neural networks and how are they used in robotics?",
+      "expected_topics": ["neural networks", "deep learning", "applications"],
+      "difficulty": "intermediate",
+      "type": "concept"
+    },
+    {
+      "id": "Q044",
+      "module": 9,
+      "question": "How can robots learn from demonstration?",
+      "expected_topics": ["learning from demonstration", "imitation learning", "human teaching"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q045",
+      "module": 9,
+      "question": "What is transfer learning and why is it useful in robotics?",
+      "expected_topics": ["transfer learning", "pre-trained models", "efficiency"],
+      "difficulty": "advanced",
+      "type": "concept"
+    },
+    {
+      "id": "Q046",
+      "module": 10,
+      "question": "What are some real-world applications of robotics?",
+      "expected_topics": ["applications", "industrial", "service", "medical"],
+      "difficulty": "beginner",
+      "type": "application"
+    },
+    {
+      "id": "Q047",
+      "module": 10,
+      "question": "Explain how autonomous vehicles use robotics technologies",
+      "expected_topics": ["autonomous vehicles", "self-driving", "sensors", "AI"],
+      "difficulty": "intermediate",
+      "type": "application"
+    },
+    {
+      "id": "Q048",
+      "module": 10,
+      "question": "What are collaborative robots (cobots) and how do they differ from traditional industrial robots?",
+      "expected_topics": ["cobots", "collaborative robots", "safety", "human-robot interaction"],
+      "difficulty": "intermediate",
+      "type": "comparison"
+    },
+    {
+      "id": "Q049",
+      "module": 10,
+      "question": "How are drones used in commercial applications?",
+      "expected_topics": ["drones", "UAV", "delivery", "surveillance", "agriculture"],
+      "difficulty": "intermediate",
+      "type": "application"
+    },
+    {
+      "id": "Q050",
+      "module": 10,
+      "question": "What are the ethical considerations in deploying autonomous robots?",
+      "expected_topics": ["ethics", "safety", "responsibility", "regulations"],
+      "difficulty": "advanced",
+      "type": "concept"
+    }
+  ],
+  "module_distribution": {
+    "module_1": 5,
+    "module_2": 5,
+    "module_3": 5,
+    "module_4": 5,
+    "module_5": 5,
+    "module_6": 5,
+    "module_7": 5,
+    "module_8": 5,
+    "module_9": 5,
+    "module_10": 5
+  },
+  "difficulty_distribution": {
+    "beginner": 8,
+    "intermediate": 24,
+    "advanced": 18
+  },
+  "question_types": {
+    "definition": 9,
+    "concept": 21,
+    "comparison": 10,
+    "practical": 3,
+    "application": 7
+  }
+}

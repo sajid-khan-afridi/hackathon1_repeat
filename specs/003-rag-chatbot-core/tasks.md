@@ -133,16 +133,16 @@
 
 ### Implementation for User Story 3
 
-- [ ] T061 [P] [US3] Implement metadata filtering in Qdrant search in backend/app/services/vector_service.py
-- [ ] T062 [US3] Implement confidence-based adaptive filtering logic from research.md in backend/app/services/rag_service.py
-- [ ] T063 [US3] Add filter_message generation for adaptive filtering behavior in backend/app/services/rag_service.py
-- [ ] T064 [US3] Extend /api/v1/query to accept optional filters parameter in backend/app/routers/query.py
-- [ ] T065 [US3] Validate module filter (1-10), difficulty filter, tags filter in backend/app/routers/query.py
-- [ ] T066 [P] [US3] Create src/components/ChatbotWidget/ModuleFilter.tsx with dropdown for module selection (1-10)
-- [ ] T067 [US3] Integrate ModuleFilter component into ChatbotWidget index in src/components/ChatbotWidget/index.tsx
-- [ ] T068 [US3] Pass filters object in query request when module is selected in src/components/ChatbotWidget/index.tsx
-- [ ] T069 [US3] Display filter_message when adaptive filtering occurs in src/components/ChatbotWidget/index.tsx
-- [ ] T070 [US3] Add "Clear Filter" button to reset module filter in src/components/ChatbotWidget/index.tsx
+- [X] T061 [P] [US3] Implement metadata filtering in Qdrant search in backend/app/services/vector_service.py
+- [X] T062 [US3] Implement confidence-based adaptive filtering logic from research.md in backend/app/services/rag_service.py
+- [X] T063 [US3] Add filter_message generation for adaptive filtering behavior in backend/app/services/rag_service.py
+- [X] T064 [US3] Extend /api/v1/query to accept optional filters parameter in backend/app/routers/query.py
+- [X] T065 [US3] Validate module filter (1-10), difficulty filter, tags filter in backend/app/routers/query.py
+- [X] T066 [P] [US3] Create src/components/ChatbotWidget/ModuleFilter.tsx with dropdown for module selection (1-10)
+- [X] T067 [US3] Integrate ModuleFilter component into ChatbotWidget index in src/components/ChatbotWidget/index.tsx
+- [X] T068 [US3] Pass filters object in query request when module is selected in src/components/ChatbotWidget/index.tsx
+- [X] T069 [US3] Display filter_message when adaptive filtering occurs in src/components/ChatbotWidget/index.tsx
+- [X] T070 [US3] Add "Clear Filter" button to reset module filter in src/components/ChatbotWidget/index.tsx
 
 **Checkpoint**: All user stories 1, 2, and 3 should now be independently functional - students can filter searches by module
 
@@ -156,11 +156,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T071 [US4] Implement suggested search terms generation from indexed content in backend/app/services/rag_service.py
-- [ ] T072 [US4] Enhance off-topic response (confidence < 0.2) to include 3-5 suggested terms in backend/app/services/rag_service.py
-- [ ] T073 [US4] Add topic guidance message ("I can only answer questions about...") in backend/app/services/rag_service.py
-- [ ] T074 [US4] Display suggested search terms as clickable chips in src/components/ChatbotWidget/index.tsx
-- [ ] T075 [US4] Implement click handler for suggested terms to auto-populate query input in src/components/ChatbotWidget/index.tsx
+- [X] T071 [US4] Implement suggested search terms generation from indexed content in backend/app/services/rag_service.py
+- [X] T072 [US4] Enhance off-topic response (confidence < 0.2) to include 3-5 suggested terms in backend/app/services/rag_service.py
+- [X] T073 [US4] Add topic guidance message ("I can only answer questions about...") in backend/app/services/rag_service.py
+- [X] T074 [US4] Display suggested search terms as clickable chips in src/components/ChatbotWidget/index.tsx
+- [X] T075 [US4] Implement click handler for suggested terms to auto-populate query input in src/components/ChatbotWidget/index.tsx
 
 **Checkpoint**: Off-topic handling is functional - system clearly communicates boundaries and guides users
 
@@ -174,15 +174,15 @@
 
 ### Implementation for User Story 5
 
-- [ ] T076 [US5] Implement rate limiter using SlowAPI with token bucket algorithm in backend/app/services/rate_limiter.py
-- [ ] T077 [US5] Configure anonymous user rate limit (10 queries/hour) in backend/app/services/rate_limiter.py
-- [ ] T078 [US5] Configure authenticated user rate limit (50 queries/hour) in backend/app/services/rate_limiter.py
-- [ ] T079 [US5] Implement user identifier extraction (user_id or IP) in backend/app/middleware/rate_limit.py
-- [ ] T080 [US5] Apply rate limiter to /api/v1/query endpoint in backend/app/routers/query.py
-- [ ] T081 [US5] Implement 429 error response with Retry-After header in backend/app/routers/query.py
-- [ ] T082 [US5] Add rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to all responses
-- [ ] T083 [US5] Display rate limit error message with time until reset in src/components/ChatbotWidget/index.tsx
-- [ ] T084 [US5] Add countdown timer for rate limit reset in src/components/ChatbotWidget/index.tsx
+- [X] T076 [US5] Implement rate limiter using SlowAPI with token bucket algorithm in backend/app/services/rate_limiter.py
+- [X] T077 [US5] Configure anonymous user rate limit (10 queries/hour) in backend/app/services/rate_limiter.py
+- [X] T078 [US5] Configure authenticated user rate limit (50 queries/hour) in backend/app/services/rate_limiter.py
+- [X] T079 [US5] Implement user identifier extraction (user_id or IP) in backend/app/middleware/rate_limit.py
+- [X] T080 [US5] Apply rate limiter to /api/v1/query endpoint in backend/app/routers/query.py
+- [X] T081 [US5] Implement 429 error response with Retry-After header in backend/app/main.py
+- [X] T082 [US5] Add rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) to all responses
+- [X] T083 [US5] Display rate limit error message with time until reset in src/components/ChatbotWidget/index.tsx
+- [X] T084 [US5] Add countdown timer for rate limit reset in src/components/ChatbotWidget/index.tsx
 
 **Checkpoint**: All user stories are now complete - rate limiting ensures fair access during high load
 
@@ -192,14 +192,14 @@
 
 **Purpose**: Implement response streaming for improved perceived performance (p95 < 3s, first token < 1s)
 
-- [ ] T085 Implement Server-Sent Events (SSE) response streaming in backend/app/services/llm_service.py
-- [ ] T086 Modify /api/v1/query to return StreamingResponse when Accept: text/event-stream in backend/app/routers/query.py
-- [ ] T087 Implement StreamChunk model with chunk, done, sources, confidence fields in backend/app/models/query.py
-- [ ] T088 [P] Create src/components/ChatbotWidget/LoadingState.tsx with streaming/loading indicators
-- [ ] T089 Implement EventSource client for SSE in src/components/ChatbotWidget/index.tsx
-- [ ] T090 Implement progressive answer rendering as chunks arrive in src/components/ChatbotWidget/index.tsx
-- [ ] T091 Implement stream interruption handling with partial response preservation in src/components/ChatbotWidget/index.tsx
-- [ ] T092 Add retry button for interrupted streams in src/components/ChatbotWidget/index.tsx
+- [X] T085 Implement Server-Sent Events (SSE) response streaming in backend/app/services/llm_service.py
+- [X] T086 Modify /api/v1/query to return StreamingResponse when Accept: text/event-stream in backend/app/routers/query.py
+- [X] T087 Implement StreamChunk model with chunk, done, sources, confidence fields in backend/app/models/query.py
+- [X] T088 [P] Create src/components/ChatbotWidget/LoadingState.tsx with streaming/loading indicators
+- [X] T089 Implement EventSource client for SSE in src/components/ChatbotWidget/index.tsx
+- [X] T090 Implement progressive answer rendering as chunks arrive in src/components/ChatbotWidget/index.tsx
+- [X] T091 Implement stream interruption handling with partial response preservation in src/components/ChatbotWidget/index.tsx
+- [X] T092 Add retry button for interrupted streams in src/components/ChatbotWidget/index.tsx
 
 **Checkpoint**: Streaming responses improve perceived performance with first token appearing in < 1s
 
@@ -209,18 +209,18 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T093 [P] Create benchmark test set of 50 questions in backend/tests/benchmark/test_questions.json covering all 10 chapters
-- [ ] T094 [P] Implement NDCG@10 calculation in backend/tests/benchmark/test_relevance.py
-- [ ] T095 [P] Implement faithfulness testing (zero hallucinations) in backend/tests/benchmark/test_faithfulness.py
+- [X] T093 [P] Create benchmark test set of 50 questions in backend/tests/benchmark/test_questions.json covering all 10 chapters
+- [X] T094 [P] Implement NDCG@10 calculation in backend/tests/benchmark/test_relevance.py
+- [X] T095 [P] Implement faithfulness testing (zero hallucinations) in backend/tests/benchmark/test_faithfulness.py
 - [ ] T096 Run benchmark tests and verify NDCG@10 > 0.8 and zero hallucinations
-- [ ] T097 [P] Add structured JSON logging with correlation IDs in backend/app/middleware/logging.py
-- [ ] T098 [P] Implement metrics tracking (p50/p95/p99 response times) in backend/app/middleware/logging.py
-- [ ] T099 [P] Create backend/Dockerfile for containerized deployment
-- [ ] T100 [P] Create backend/docker-compose.yml for local development per quickstart.md
-- [ ] T101 Validate all environment variables are documented in .env.example
-- [ ] T102 Run linters: black, flake8, mypy on backend code
-- [ ] T103 Run frontend linters: npm run lint, npm run typecheck
-- [ ] T104 Validate quickstart.md instructions work end-to-end
+- [X] T097 [P] Add structured JSON logging with correlation IDs in backend/app/middleware/logging.py
+- [X] T098 [P] Implement metrics tracking (p50/p95/p99 response times) in backend/app/middleware/logging.py
+- [X] T099 [P] Create backend/Dockerfile for containerized deployment
+- [X] T100 [P] Create backend/docker-compose.yml for local development per quickstart.md
+- [X] T101 Validate all environment variables are documented in .env.example
+- [X] T102 Run linters: black, flake8, mypy on backend code
+- [X] T103 Run frontend linters: npm run lint, npm run typecheck
+- [X] T104 Validate quickstart.md instructions work end-to-end
 - [ ] T105 Update OpenAPI spec contracts/openapi.yaml if any endpoints changed
 - [ ] T106 Create PHR (Prompt History Record) documenting RAG implementation per CLAUDE.md
 - [ ] T107 Create ADR for RAG architecture decisions per plan.md recommendations

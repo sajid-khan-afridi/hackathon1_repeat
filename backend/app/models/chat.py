@@ -1,6 +1,7 @@
 """
 Pydantic models for chat sessions and messages.
 """
+
 from pydantic import BaseModel, Field, UUID4
 from typing import Optional, Dict, Any, List
 from datetime import datetime

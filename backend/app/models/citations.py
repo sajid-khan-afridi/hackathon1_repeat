@@ -1,6 +1,7 @@
 """
 Pydantic models for source citations.
 """
+
 from pydantic import BaseModel, Field, UUID4
 from typing import List
 

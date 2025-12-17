@@ -56,6 +56,19 @@ export interface QueryResponse {
 }
 
 /**
+ * Streaming response chunk from SSE
+ * Corresponds to backend StreamChunk model
+ */
+export interface StreamChunk {
+  chunk: string; // Text chunk (empty string if done)
+  done: boolean; // Whether streaming is complete
+  sources?: SourceCitation[]; // Only present when done=true
+  confidence?: number; // Only present when done=true
+  session_id?: string; // Only present when done=true
+  tokens_used?: TokenUsage; // Only present when done=true
+}
+
+/**
  * Message in the chat UI
  * Extended from backend ChatMessage with UI-specific fields
  */
@@ -78,7 +91,13 @@ export interface ChatState {
   messages: Message[];
   sessionId: string | null;
   isLoading: boolean;
+  isStreaming: boolean; // Whether a response is currently streaming
+  streamingContent: string; // Accumulated streaming content
+  streamingMessageId: string | null; // ID of message being streamed
   error: string | null;
+  streamError: string | null; // Separate error for stream interruptions
+  moduleFilter: number | null; // Selected module (1-10) or null for all modules
+  rateLimitState: RateLimitState;
 }
 
 /**
@@ -87,10 +106,17 @@ export interface ChatState {
 export type ChatAction =
   | { type: 'ADD_USER_MESSAGE'; payload: { content: string } }
   | { type: 'ADD_ASSISTANT_MESSAGE'; payload: QueryResponse }
+  | { type: 'START_STREAMING'; payload: { messageId: string } }
+  | { type: 'APPEND_STREAM_CHUNK'; payload: { chunk: string } }
+  | { type: 'COMPLETE_STREAM'; payload: { sources: SourceCitation[]; confidence: number; session_id: string; tokens_used: TokenUsage } }
+  | { type: 'INTERRUPT_STREAM'; payload: { error?: string } }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SESSION_ID'; payload: string }
-  | { type: 'CLEAR_HISTORY' };
+  | { type: 'SET_MODULE_FILTER'; payload: number | null }
+  | { type: 'SET_RATE_LIMIT'; payload: RateLimitState }
+  | { type: 'CLEAR_HISTORY' }
+  | { type: 'RETRY_STREAM' };
 
 /**
  * Error response from backend
@@ -98,4 +124,22 @@ export type ChatAction =
 export interface ErrorResponse {
   detail: string;
   error_code?: string;
+}
+
+/**
+ * Rate limit error response
+ */
+export interface RateLimitError {
+  error: string;
+  message: string;
+  retry_after: number; // seconds
+}
+
+/**
+ * Rate limit state
+ */
+export interface RateLimitState {
+  isRateLimited: boolean;
+  retryAfter: number; // seconds remaining
+  resetTime: Date | null; // when the rate limit resets
 }

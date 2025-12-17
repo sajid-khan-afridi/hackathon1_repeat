@@ -1,6 +1,7 @@
 """
 Application configuration using pydantic-settings.
 """
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 

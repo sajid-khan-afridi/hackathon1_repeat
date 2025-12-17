@@ -1,6 +1,7 @@
 """
 Chat history management service using asyncpg for PostgreSQL operations.
 """
+
 from typing import List, Dict, Optional, Any
 from uuid import UUID
 import asyncpg
@@ -215,9 +216,7 @@ class ChatService:
             logger.error(f"Failed to save message: {str(e)}", exc_info=True)
             raise Exception(f"Message save failed: {str(e)}")
 
-    async def save_citations(
-        self, message_id: UUID, citations: List[SourceCitation]
-    ) -> None:
+    async def save_citations(self, message_id: UUID, citations: List[SourceCitation]) -> None:
         """
         Save source citations for a message.
 
@@ -303,15 +302,11 @@ class ChatService:
             messages = [{"role": row["role"], "content": row["content"]} for row in rows]
             messages.reverse()
 
-            logger.info(
-                f"Retrieved {len(messages)} messages from session {session_id}"
-            )
+            logger.info(f"Retrieved {len(messages)} messages from session {session_id}")
             return messages
 
         except Exception as e:
-            logger.error(
-                f"Failed to get conversation history: {str(e)}", exc_info=True
-            )
+            logger.error(f"Failed to get conversation history: {str(e)}", exc_info=True)
             raise Exception(f"Conversation history retrieval failed: {str(e)}")
 
     async def delete_session(self, session_id: UUID) -> bool:

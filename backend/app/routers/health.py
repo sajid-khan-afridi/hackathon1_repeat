@@ -1,6 +1,7 @@
 """
 Health check router for monitoring service status.
 """
+
 import asyncio
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel

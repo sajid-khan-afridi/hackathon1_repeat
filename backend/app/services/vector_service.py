@@ -1,6 +1,7 @@
 """
 Vector search service using Qdrant for semantic similarity search.
 """
+
 from typing import List, Dict, Optional, Any
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
@@ -38,9 +39,7 @@ class VectorService:
             api_key=settings.qdrant_api_key,
         )
         self.collection_name = settings.qdrant_collection
-        logger.info(
-            f"Initialized VectorService with collection: {self.collection_name}"
-        )
+        logger.info(f"Initialized VectorService with collection: {self.collection_name}")
 
     async def search_context(
         self,
@@ -66,15 +65,15 @@ class VectorService:
             # Build Qdrant filter conditions
             qdrant_filter = self._build_filter(filters) if filters else None
 
-            # Perform vector search
-            search_results = self.client.search(
+            # Perform vector search using query_points API
+            search_results = self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding,
+                query=query_embedding,
                 query_filter=qdrant_filter,
                 limit=top_k,
                 with_payload=True,
                 score_threshold=settings.confidence_threshold,
-            )
+            ).points
 
             # Convert to VectorSearchResult objects
             results = []

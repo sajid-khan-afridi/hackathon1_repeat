@@ -1,14 +1,16 @@
 """
 Query router for RAG chatbot endpoints.
 """
+
 import re
 import logging
 import asyncio
+import json
 from fastapi import APIRouter, HTTPException, status, Request
-from fastapi.responses import JSONResponse
-from typing import Dict, Any
+from fastapi.responses import JSONResponse, StreamingResponse
+from typing import Dict, Any, AsyncGenerator
 
-from app.models.query import QueryRequest, QueryResponse
+from app.models.query import QueryRequest, QueryResponse, StreamChunk
 from app.services.rag_service import rag_service
 from app.config import settings
 
@@ -36,30 +38,67 @@ def sanitize_input(text: str) -> str:
     sanitized = HTML_TAG_PATTERN.sub("", text)
 
     # Remove null bytes and control characters (except newlines and tabs)
-    sanitized = "".join(
-        char for char in sanitized if char.isprintable() or char in "\n\t"
-    )
+    sanitized = "".join(char for char in sanitized if char.isprintable() or char in "\n\t")
 
     return sanitized.strip()
 
 
-@router.post("/query", response_model=QueryResponse, status_code=status.HTTP_200_OK)
-async def query_endpoint(request: QueryRequest) -> QueryResponse:
+async def generate_sse_stream(query_request: QueryRequest) -> AsyncGenerator[str, None]:
+    """
+    Generate Server-Sent Events stream for query response.
+
+    Args:
+        query_request: QueryRequest to process
+
+    Yields:
+        SSE-formatted strings (data: {json}\n\n)
+    """
+    try:
+        async for chunk in rag_service.process_query_stream(query_request):
+            # Convert StreamChunk to JSON and format as SSE
+            chunk_dict = chunk.model_dump(exclude_none=True)
+            sse_data = f"data: {json.dumps(chunk_dict)}\n\n"
+            yield sse_data
+
+            # If streaming is done, close the connection
+            if chunk.done:
+                break
+
+    except Exception as e:
+        logger.error(f"Streaming error: {str(e)}", exc_info=True)
+        # Send error chunk
+        error_chunk = StreamChunk(
+            chunk=f"Error: {str(e)}",
+            done=True,
+            sources=[],
+            confidence=0.0,
+        )
+        yield f"data: {json.dumps(error_chunk.model_dump(exclude_none=True))}\n\n"
+
+
+@router.post("/query", status_code=status.HTTP_200_OK)
+async def query_endpoint(request: Request, query_request: QueryRequest):
     """
     Process a user query through the RAG pipeline.
+
+    This endpoint supports both streaming and non-streaming modes:
+    - Streaming: Include "Accept: text/event-stream" header to receive SSE stream
+    - Non-streaming: Default JSON response with complete answer
 
     This endpoint:
     1. Validates and sanitizes the input query
     2. Retrieves relevant context from the vector database
-    3. Generates an AI-powered answer using the LLM
+    3. Generates an AI-powered answer using the LLM (streaming or non-streaming)
     4. Saves the conversation to chat history
     5. Returns the answer with source citations and confidence score
 
     Args:
-        request: QueryRequest with query, filters, session_id, etc.
+        request: FastAPI Request object
+        query_request: QueryRequest with query, filters, session_id, etc.
 
     Returns:
-        QueryResponse with answer, sources, confidence, session_id, tokens_used
+        - StreamingResponse with SSE events if Accept: text/event-stream
+        - QueryResponse JSON if standard request
 
     Raises:
         HTTPException 400: For validation errors (empty query, invalid filters)
@@ -78,7 +117,16 @@ async def query_endpoint(request: QueryRequest) -> QueryResponse:
     }
     ```
 
-    Example response:
+    Example streaming response (SSE):
+    ```
+    data: {"chunk": "Inverse", "done": false}
+
+    data: {"chunk": " kinematics", "done": false}
+
+    data: {"chunk": "", "done": true, "sources": [...], "confidence": 0.89, "session_id": "..."}
+    ```
+
+    Example non-streaming response (JSON):
     ```json
     {
         "answer": "Inverse kinematics (IK) is the process of determining joint angles...",
@@ -101,23 +149,27 @@ async def query_endpoint(request: QueryRequest) -> QueryResponse:
     }
     ```
     """
-    logger.info(f"Received query request: '{request.query[:50]}...'")
+    logger.info(f"Received query request: '{query_request.query[:50]}...'")
+
+    # Check if client wants streaming response
+    accept_header = request.headers.get("accept", "")
+    wants_streaming = "text/event-stream" in accept_header
 
     # Input sanitization - prevent XSS attacks
     try:
-        original_query = request.query
-        request.query = sanitize_input(request.query)
+        original_query = query_request.query
+        query_request.query = sanitize_input(query_request.query)
 
-        if not request.query:
+        if not query_request.query:
             logger.warning("Query became empty after sanitization")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Query is empty or contains only invalid characters",
             )
 
-        if original_query != request.query:
+        if original_query != query_request.query:
             logger.warning(
-                f"Query was sanitized: '{original_query[:30]}...' -> '{request.query[:30]}...'"
+                f"Query was sanitized: '{original_query[:30]}...' -> '{query_request.query[:30]}...'"
             )
 
     except HTTPException:
@@ -129,11 +181,22 @@ async def query_endpoint(request: QueryRequest) -> QueryResponse:
             detail=f"Invalid input: {str(e)}",
         )
 
-    # Process query with timeout (30 seconds for LLM operations)
-    try:
-        response = await asyncio.wait_for(
-            rag_service.process_query(request), timeout=30.0
+    # Return streaming response if requested
+    if wants_streaming:
+        logger.info("Returning streaming response (SSE)")
+        return StreamingResponse(
+            generate_sse_stream(query_request),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # Disable nginx buffering
+            },
         )
+
+    # Process query with timeout (30 seconds for LLM operations) - non-streaming
+    try:
+        response = await asyncio.wait_for(rag_service.process_query(query_request), timeout=30.0)
 
         logger.info(
             f"Query processed successfully (confidence={response.confidence}, "
@@ -192,10 +255,6 @@ async def query_endpoint(request: QueryRequest) -> QueryResponse:
         )
 
 
-# TODO: Implement rate limiting middleware
-# Note: Middleware must be added to the FastAPI app in main.py, not to APIRouter
-
-
 @router.get("/query/health")
 async def query_health() -> Dict[str, Any]:
     """
@@ -220,9 +279,7 @@ async def query_health() -> Dict[str, Any]:
     # Check vector service
     try:
         vector_healthy = await vector_service.health_check()
-        health_status["components"]["vector_search"] = (
-            "healthy" if vector_healthy else "unhealthy"
-        )
+        health_status["components"]["vector_search"] = "healthy" if vector_healthy else "unhealthy"
     except Exception as e:
         logger.error(f"Vector service health check failed: {str(e)}")
         health_status["components"]["vector_search"] = "unhealthy"
@@ -238,17 +295,13 @@ async def query_health() -> Dict[str, Any]:
     # Check chat service
     try:
         chat_healthy = await chat_service.health_check()
-        health_status["components"]["database"] = (
-            "healthy" if chat_healthy else "unhealthy"
-        )
+        health_status["components"]["database"] = "healthy" if chat_healthy else "unhealthy"
     except Exception as e:
         logger.error(f"Chat service health check failed: {str(e)}")
         health_status["components"]["database"] = "unhealthy"
 
     # Determine overall status
-    all_healthy = all(
-        status == "healthy" for status in health_status["components"].values()
-    )
+    all_healthy = all(status == "healthy" for status in health_status["components"].values())
     health_status["status"] = "healthy" if all_healthy else "degraded"
 
     return health_status

@@ -1,6 +1,7 @@
 """
 CORS middleware configuration.
 """
+
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
@@ -24,5 +25,9 @@ def configure_cors(app, allowed_origins: List[str]) -> None:
             "X-Correlation-ID",
             "X-Session-Token",
         ],
-        expose_headers=["X-Correlation-ID", "X-RateLimit-Limit", "X-RateLimit-Remaining"],
+        expose_headers=[
+            "X-Correlation-ID",
+            "X-RateLimit-Limit",
+            "X-RateLimit-Remaining",
+        ],
     )

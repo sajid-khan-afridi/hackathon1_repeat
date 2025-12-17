@@ -1,0 +1,204 @@
+/**
+ * FloatingChatButton Styles
+ *
+ * Mobile-first design with:
+ * - Fixed positioning at bottom-right
+ * - Responsive sizing (56x56px mobile, 64x64px desktop)
+ * - Smooth animations (scale, shadow, ripple)
+ * - Dark mode support
+ * - Reduced motion support
+ * - High z-index for visibility
+ */
+
+/* ==================== CSS Variables ==================== */
+
+.floatingButton {
+  --fab-color-primary: #1a73e8;
+  --fab-color-primary-dark: #1557b0;
+  --fab-color-shadow: rgba(0, 0, 0, 0.2);
+  --fab-color-shadow-hover: rgba(0, 0, 0, 0.3);
+  --fab-size-mobile: 56px;
+  --fab-size-desktop: 64px;
+  --fab-spacing-mobile: 16px;
+  --fab-spacing-desktop: 24px;
+  --fab-transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --fab-transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark theme overrides */
+[data-theme='dark'] .floatingButton {
+  --fab-color-shadow: rgba(0, 0, 0, 0.4);
+  --fab-color-shadow-hover: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== Floating Button ==================== */
+
+.floatingButton {
+  /* Positioning */
+  position: fixed;
+  bottom: var(--fab-spacing-mobile);
+  right: var(--fab-spacing-mobile);
+  z-index: 9999;
+
+  /* Size & Shape */
+  width: var(--fab-size-mobile);
+  height: var(--fab-size-mobile);
+  border-radius: 50%;
+  padding: 0;
+
+  /* Styling */
+  background-color: var(--fab-color-primary);
+  border: none;
+  box-shadow:
+    0 4px 8px var(--fab-color-shadow),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  color: white;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+
+  /* Interaction */
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform var(--fab-transition-fast),
+    box-shadow var(--fab-transition-fast),
+    background-color var(--fab-transition-fast);
+}
+
+/* Desktop sizing & spacing */
+@media (min-width: 1024px) {
+  .floatingButton {
+    bottom: var(--fab-spacing-desktop);
+    right: var(--fab-spacing-desktop);
+    width: auto;
+    height: var(--fab-size-desktop);
+    border-radius: 32px;
+    padding: 0 20px;
+    min-width: var(--fab-size-desktop);
+  }
+}
+
+/* Tablet sizing */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .floatingButton {
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* ==================== Hover & Focus States ==================== */
+
+.floatingButton:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 8px 16px var(--fab-color-shadow-hover),
+    0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: var(--fab-color-primary-dark);
+}
+
+.floatingButton:active {
+  transform: scale(0.95);
+}
+
+.floatingButton:focus-visible {
+  outline: 3px solid rgba(26, 115, 232, 0.5);
+  outline-offset: 4px;
+}
+
+/* ==================== Icon ==================== */
+
+.buttonIcon {
+  flex-shrink: 0;
+  transition: transform var(--fab-transition-fast);
+}
+
+.floatingButton:hover .buttonIcon {
+  transform: rotate(-10deg) scale(1.1);
+}
+
+/* ==================== Label ==================== */
+
+.buttonLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: none;
+}
+
+/* Show label on desktop */
+@media (min-width: 1024px) {
+  .buttonLabel {
+    display: inline;
+  }
+}
+
+/* ==================== Ripple Effect ==================== */
+
+.ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floatingButton:active .ripple {
+  animation: rippleAnimation 0.6s ease-out;
+}
+
+@keyframes rippleAnimation {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* ==================== Reduced Motion ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .floatingButton,
+  .buttonIcon,
+  .ripple {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .floatingButton:hover {
+    transform: none;
+  }
+
+  .floatingButton:hover .buttonIcon {
+    transform: none;
+  }
+}
+
+/* ==================== High Contrast Mode ==================== */
+
+@media (prefers-contrast: high) {
+  .floatingButton {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+
+  .floatingButton:focus-visible {
+    outline-width: 4px;
+  }
+}

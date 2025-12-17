@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { UserProvider } from '@site/src/context/UserContext';
 import { LanguageProvider } from '@site/src/context/LanguageContext';
+import GlobalFloatingChat from '@site/src/components/GlobalFloatingChat';
 
 interface RootProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface RootProps {
  * Root wrapper component for Docusaurus.
  * Docusaurus auto-discovers this file and uses it to wrap the entire app.
  * This enables global context providers for user profiles and language selection.
+ * Also includes the GlobalFloatingChat widget available on all pages.
  */
 export default function Root({ children }: RootProps): JSX.Element {
   return (
@@ -52,6 +54,9 @@ export default function Root({ children }: RootProps): JSX.Element {
           Skip to main content
         </a>
         {children}
+
+        {/* Global floating chat widget - appears on all pages */}
+        <GlobalFloatingChat />
       </LanguageProvider>
     </UserProvider>
   );

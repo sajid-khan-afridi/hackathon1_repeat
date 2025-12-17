@@ -1,0 +1,39 @@
+{
+  "ALTERNATIVE_1_FULL_PATH": {
+    "comment": "Use full path to npx.cmd",
+    "mcpServers": {
+      "playwright": {
+        "type": "stdio",
+        "command": "C:\\Program Files\\nodejs\\npx.cmd",
+        "args": ["-y", "@playwright/mcp@latest"],
+        "env": {}
+      }
+    }
+  },
+
+  "ALTERNATIVE_2_NODE_DIRECT": {
+    "comment": "Run with node directly (requires installation first)",
+    "mcpServers": {
+      "playwright": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+          "C:\\Users\\uetia\\AppData\\Roaming\\npm\\node_modules\\@playwright\\mcp\\dist\\index.js"
+        ],
+        "env": {}
+      }
+    }
+  },
+
+  "ALTERNATIVE_3_BATCH_WRAPPER": {
+    "comment": "Use a batch file wrapper (create playwright-mcp.bat first)",
+    "mcpServers": {
+      "playwright": {
+        "type": "stdio",
+        "command": "D:\\GitHub Connected\\hackathon1_repeat\\playwright-mcp.bat",
+        "args": [],
+        "env": {}
+      }
+    }
+  }
+}

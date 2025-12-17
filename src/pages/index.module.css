@@ -45,6 +45,8 @@
   width: fit-content;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   animation: fadeInUp 0.8s ease-out;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .heroTitle {
@@ -57,6 +59,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: fadeInUp 0.8s ease-out 0.1s backwards;
+  backface-visibility: hidden;
 }
 
 [data-theme='dark'] .heroTitle {
@@ -93,6 +96,8 @@
     transform var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
     box-shadow var(--animation-duration-base, 250ms) var(--animation-easing-standard, ease);
   will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .primaryButton:hover {
@@ -115,6 +120,8 @@
     transform var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
     border-color var(--animation-duration-base, 250ms) var(--animation-easing-standard, ease);
   will-change: transform, background-color;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .secondaryButton:hover {
@@ -149,6 +156,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  transition: transform var(--animation-duration-base, 250ms) var(--animation-easing-decelerate, ease);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.stat:hover {
+  transform: scale(1.1);
 }
 
 .statNumber {
@@ -158,6 +172,11 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  transition: transform var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease);
+}
+
+.stat:hover .statNumber {
+  transform: scale(1.05);
 }
 
 .statLabel {
@@ -181,16 +200,37 @@
   border-radius: 1rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transform: perspective(1000px) rotateY(-5deg);
+  transform: perspective(1000px) rotateY(-5deg) translateZ(0);
   transition:
     transform var(--animation-duration-slow, 350ms) var(--animation-easing-decelerate, ease),
     box-shadow var(--animation-duration-base, 250ms) var(--animation-easing-standard, ease);
   will-change: transform;
+  position: relative;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Subtle glow effect on hover */
+.visualCard::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--animation-duration-base, 250ms) var(--animation-easing-standard, ease);
+  pointer-events: none;
 }
 
 .visualCard:hover {
-  transform: perspective(1000px) rotateY(0deg) translateY(-4px);
+  transform: perspective(1000px) rotateY(0deg) translateY(-4px) scale(1.02);
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.15);
+}
+
+.visualCard:hover::after {
+  opacity: 1;
 }
 
 [data-theme='dark'] .visualCard {
@@ -198,8 +238,14 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
+[data-theme='dark'] .visualCard::after {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.2) 0%, transparent 70%);
+}
+
 .codePreview {
   font-family: 'Fira Code', 'Courier New', monospace;
+  position: relative;
+  z-index: 1;
 }
 
 .codeHeader {
@@ -221,6 +267,9 @@
   height: 12px;
   border-radius: 50%;
   background: #cbd5e1;
+  transition:
+    transform var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    box-shadow var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease);
 }
 
 .codeDot:nth-child(1) {
@@ -233,6 +282,23 @@
 
 .codeDot:nth-child(3) {
   background: #10b981;
+}
+
+.visualCard:hover .codeDot:nth-child(1) {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.visualCard:hover .codeDot:nth-child(2) {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  transition-delay: 0.05s;
+}
+
+.visualCard:hover .codeDot:nth-child(3) {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  transition-delay: 0.1s;
 }
 
 .codeTitle {
@@ -296,7 +362,10 @@
 
   .primaryButton,
   .secondaryButton,
-  .visualCard {
+  .visualCard,
+  .codeDot,
+  .stat,
+  .statNumber {
     transition: none !important;
   }
 
@@ -304,6 +373,17 @@
   .secondaryButton:hover,
   .visualCard:hover {
     transform: none !important;
+  }
+
+  .visualCard::after {
+    display: none !important;
+  }
+
+  .visualCard:hover .codeDot,
+  .stat:hover,
+  .stat:hover .statNumber {
+    transform: none !important;
+    box-shadow: none !important;
   }
 }
 
@@ -334,6 +414,11 @@
 
   .visualCard {
     transform: none;
+  }
+
+  /* Disable 3D effects on mobile for performance */
+  .visualCard:hover {
+    transform: translateY(-4px) scale(1.02);
   }
 }
 

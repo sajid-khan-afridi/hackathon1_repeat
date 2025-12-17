@@ -14,7 +14,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import FloatingChatButton from '../FloatingChatButton';
-import FloatingChatPopup from '../FloatingChatPopup';
+import EnhancedFloatingChatPopup from '../FloatingChatPopup/EnhancedFloatingChatPopup';
 import styles from './styles.module.css';
 
 type AnimationState = 'opening' | 'open' | 'closing' | 'closed';
@@ -105,6 +105,20 @@ export default function GlobalFloatingChat(): JSX.Element | null {
   }, []);
 
   /**
+   * Listen for custom open event (from navbar or other sources)
+   */
+  useEffect(() => {
+    const handleOpenChat = () => {
+      openChat();
+    };
+
+    window.addEventListener('open-floating-chat', handleOpenChat);
+    return () => {
+      window.removeEventListener('open-floating-chat', handleOpenChat);
+    };
+  }, [openChat]);
+
+  /**
    * Listen for custom close event from ChatbotWidget
    */
   useEffect(() => {
@@ -136,7 +150,7 @@ export default function GlobalFloatingChat(): JSX.Element | null {
 
       {/* Popup (shown when open or animating) */}
       {(isOpen || animationState === 'closing') && (
-        <FloatingChatPopup
+        <EnhancedFloatingChatPopup
           isOpen={isOpen}
           onClose={closeChat}
           animationState={animationState}

@@ -17,7 +17,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import ChatbotWidget from '../ChatbotWidget';
 import QuickActionChips from '../ChatbotWidget/QuickActionChips';
-import styles from './styles.module.css';
+import styles from './enhanced-styles.module.css';
 
 interface EnhancedFloatingChatPopupProps {
   /** Whether popup is visible */

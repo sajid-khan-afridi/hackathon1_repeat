@@ -116,13 +116,24 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    border-color var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    color var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    transform var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease);
+  will-change: transform;
 }
 
 .clearButton:hover {
   background-color: var(--color-bg-primary);
   border-color: var(--color-primary);
   color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clearButton:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .clearButton:focus-visible {

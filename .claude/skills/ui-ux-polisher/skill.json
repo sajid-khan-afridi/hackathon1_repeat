@@ -1,0 +1,200 @@
+{
+  "name": "ui-ux-polisher",
+  "version": "2.0.0",
+  "description": "Systematically audit, diagnose, and enhance UI/UX quality using Playwright MCP analysis with interactive user feedback",
+  "category": "frontend",
+  "tags": ["ui", "ux", "design", "accessibility", "animations", "responsive", "playwright"],
+  "author": "Claude Code",
+  "license": "MIT",
+
+  "dependencies": {
+    "required": [],
+    "optional": ["@modelcontextprotocol/server-playwright"]
+  },
+
+  "capabilities": {
+    "analysis": {
+      "playwright_integration": true,
+      "screenshot_capture": true,
+      "accessibility_scan": true,
+      "responsive_testing": true,
+      "visual_regression": true
+    },
+    "improvements": {
+      "navbar_alignment": true,
+      "brand_consistency": true,
+      "animation_polish": true,
+      "chatbot_styling": true,
+      "micro_interactions": true,
+      "typography_refinement": true
+    },
+    "workflow": {
+      "automated_analysis": true,
+      "interactive_suggestions": true,
+      "user_approval": true,
+      "targeted_fixes": true,
+      "post_verification": true
+    }
+  },
+
+  "parameters": {
+    "dev_server_port": {
+      "type": "number",
+      "default": 3000,
+      "description": "Port for local development server"
+    },
+    "analysis_output_dir": {
+      "type": "string",
+      "default": "analysis",
+      "description": "Directory to save Playwright screenshots and reports"
+    },
+    "animation_duration_fast": {
+      "type": "number",
+      "default": 150,
+      "description": "Fast animation duration in milliseconds"
+    },
+    "animation_duration_base": {
+      "type": "number",
+      "default": 250,
+      "description": "Base animation duration in milliseconds"
+    },
+    "animation_duration_slow": {
+      "type": "number",
+      "default": 350,
+      "description": "Slow animation duration in milliseconds"
+    },
+    "min_touch_target_size": {
+      "type": "number",
+      "default": 44,
+      "description": "Minimum touch target size in pixels (WCAG 2.1 AA)"
+    },
+    "min_contrast_ratio": {
+      "type": "number",
+      "default": 4.5,
+      "description": "Minimum color contrast ratio (WCAG 2.1 AA)"
+    }
+  },
+
+  "outputs": {
+    "analysis_report": {
+      "type": "markdown",
+      "description": "Detailed analysis report with screenshots and issue descriptions"
+    },
+    "improvement_suggestions": {
+      "type": "array",
+      "description": "List of 4 suggested improvements with priority ratings"
+    },
+    "before_after_screenshots": {
+      "type": "object",
+      "description": "Screenshots showing visual improvements"
+    },
+    "updated_files": {
+      "type": "array",
+      "description": "List of modified CSS/component files"
+    },
+    "verification_results": {
+      "type": "object",
+      "description": "Build status, Lighthouse scores, accessibility results"
+    }
+  },
+
+  "integrations": {
+    "playwright_mcp": {
+      "enabled": true,
+      "required": false,
+      "fallback": "manual_audit"
+    },
+    "lighthouse": {
+      "enabled": true,
+      "metrics": ["performance", "accessibility", "best-practices", "seo"]
+    },
+    "docusaurus": {
+      "enabled": true,
+      "build_command": "npm run build",
+      "dev_command": "npm run start"
+    }
+  },
+
+  "workflow_phases": [
+    {
+      "phase": 1,
+      "name": "Automated Analysis",
+      "steps": [
+        "Launch dev server",
+        "Playwright MCP navigation",
+        "Screenshot capture",
+        "Issue detection",
+        "Generate report"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Interactive Suggestions",
+      "steps": [
+        "Present 4 improvements",
+        "Show priority ratings",
+        "Explain impact",
+        "Offer customization"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "User Feedback",
+      "steps": [
+        "Collect approvals",
+        "Handle customizations",
+        "Confirm scope"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Targeted Implementation",
+      "steps": [
+        "Apply approved fixes",
+        "Minimal code changes",
+        "Preserve functionality",
+        "Follow patterns"
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Verification",
+      "steps": [
+        "Run build",
+        "Lighthouse audit",
+        "Visual regression",
+        "User confirmation"
+      ]
+    }
+  ],
+
+  "best_practices": {
+    "animations": {
+      "durations": [150, 250, 350],
+      "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "reduced_motion": "required"
+    },
+    "typography": {
+      "heading_line_height": [1.2, 1.3],
+      "body_line_height": [1.6, 1.7],
+      "letter_spacing": {
+        "h1": "-0.025em",
+        "h2": "-0.015em"
+      }
+    },
+    "accessibility": {
+      "wcag_level": "AA",
+      "contrast_ratio": 4.5,
+      "touch_target": 44,
+      "keyboard_nav": "required",
+      "aria": "required"
+    },
+    "responsive": {
+      "breakpoints": {
+        "mobile": 640,
+        "tablet": 1024,
+        "desktop": 1440
+      }
+    }
+  }
+}

@@ -1,0 +1,155 @@
+/**
+ * NavbarChatLink Styles
+ *
+ * Integrates with Docusaurus navbar styling.
+ * Features:
+ * - Matches Docusaurus navbar item appearance
+ * - Dark mode support
+ * - Hover/focus states
+ * - Responsive (link on desktop, icon on mobile)
+ */
+
+/* ==================== CSS Variables ==================== */
+
+.navbarChatLink {
+  --navbar-link-color: var(--ifm-navbar-link-color, #1a1a1a);
+  --navbar-link-hover-color: var(--ifm-navbar-link-hover-color, #2563eb);
+  --navbar-link-active-color: var(--ifm-navbar-link-active-color, #1d4ed8);
+}
+
+[data-theme='dark'] .navbarChatLink {
+  --navbar-link-color: var(--ifm-navbar-link-color, #e8eaed);
+  --navbar-link-hover-color: var(--ifm-navbar-link-hover-color, #3b82f6);
+}
+
+/* ==================== Base Link Styles ==================== */
+
+.navbarChatLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  color: var(--navbar-link-color);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hover state */
+.navbarChatLink:hover {
+  color: var(--navbar-link-hover-color);
+  background-color: rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+}
+
+[data-theme='dark'] .navbarChatLink:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Focus state */
+.navbarChatLink:focus-visible {
+  outline: 2px solid var(--navbar-link-hover-color);
+  outline-offset: 2px;
+}
+
+/* Active/pressed state */
+.navbarChatLink:active {
+  color: var(--navbar-link-active-color);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .navbarChatLink:active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ==================== Icon ==================== */
+
+.icon {
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.navbarChatLink:hover .icon {
+  transform: scale(1.1);
+}
+
+/* ==================== Label ==================== */
+
+.label {
+  white-space: nowrap;
+}
+
+/* ==================== Icon Mode ==================== */
+
+.navbarChatLinkIcon {
+  padding: 8px;
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.navbarChatLinkIcon .icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* ==================== Accessibility ==================== */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==================== Responsive ==================== */
+
+/* Mobile: Show as icon in mobile menu */
+@media (max-width: 996px) {
+  .navbarChatLink {
+    padding: 12px;
+    justify-content: flex-start;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .icon {
+    margin-right: 8px;
+  }
+}
+
+/* ==================== Reduced Motion ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .navbarChatLink,
+  .icon {
+    transition: none;
+  }
+
+  .navbarChatLink:hover .icon {
+    transform: none;
+  }
+}
+
+/* ==================== High Contrast Mode ==================== */
+
+@media (prefers-contrast: high) {
+  .navbarChatLink {
+    border: 1px solid var(--navbar-link-color);
+  }
+
+  .navbarChatLink:focus-visible {
+    outline-width: 3px;
+  }
+}

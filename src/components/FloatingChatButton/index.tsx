@@ -19,17 +19,25 @@ interface FloatingChatButtonProps {
   onClick: () => void;
   /** Whether button is currently expanded (for ARIA state) */
   isExpanded: boolean;
+  /** Unread message count (optional, shows badge if > 0) */
+  unreadCount?: number;
 }
 
 export default function FloatingChatButton({
   onClick,
-  isExpanded
+  isExpanded,
+  unreadCount = 0
 }: FloatingChatButtonProps): JSX.Element {
+  const hasUnread = unreadCount > 0;
+  const ariaLabel = hasUnread
+    ? `Open AI Assistant chat, ${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`
+    : 'Open AI Assistant chat';
+
   return (
     <button
       onClick={onClick}
       className={styles.floatingButton}
-      aria-label="Open AI Assistant chat"
+      aria-label={ariaLabel}
       aria-expanded={isExpanded}
       aria-haspopup="dialog"
       type="button"
@@ -48,6 +56,13 @@ export default function FloatingChatButton({
 
       {/* Label (visible on desktop) */}
       <span className={styles.buttonLabel}>AI Assistant</span>
+
+      {/* Unread Badge */}
+      {hasUnread && (
+        <span className={styles.badge} aria-hidden="true">
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
+      )}
 
       {/* Ripple effect container */}
       <span className={styles.ripple} aria-hidden="true"></span>

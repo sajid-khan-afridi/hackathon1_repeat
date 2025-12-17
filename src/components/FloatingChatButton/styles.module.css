@@ -190,6 +190,40 @@
   }
 }
 
+/* ==================== Unread Badge ==================== */
+
+.badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 10px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Dark mode badge border */
+[data-theme='dark'] .badge {
+  border-color: #1e293b;
+}
+
+/* Desktop badge positioning (for extended button) */
+@media (min-width: 1024px) {
+  .badge {
+    top: -4px;
+    right: -4px;
+  }
+}
+
 /* ==================== Ripple Effect ==================== */
 
 .ripple {

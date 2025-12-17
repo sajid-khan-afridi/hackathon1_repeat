@@ -13,7 +13,9 @@ This skill guides Claude through a structured workflow to:
 
 ## Usage
 
-Invoke this skill when users mention:
+### How to Invoke
+
+This skill is automatically triggered when users mention:
 - "UI/UX polish" / "polish the UI"
 - "improve design" / "professional look"
 - "menu alignment" / "navbar issues"
@@ -21,19 +23,70 @@ Invoke this skill when users mention:
 - "add animations" / "smooth transitions"
 - "accessibility improvements"
 
-### Example Invocation
+Or invoke explicitly with:
+```
+User: "Use the ui-ux-polisher skill"
+```
+
+### What Happens When You Invoke It
+
+**Phase 1: Discovery (Automatic)**
+- Claude reads your `package.json` to identify framework and dependencies
+- Searches for CSS files using Glob (`custom.css`, `globals.css`, `*.module.css`)
+- Finds React/Vue components that contain styling
+- Analyzes 3-5 key UI files for issues
+
+**Phase 2: Analysis & Presentation (Interactive)**
+- Claude presents **exactly 4 improvement suggestions**
+- Each suggestion includes:
+  - **Problem:** Specific issue with file:line references
+  - **Impact:** Why it matters (UX/accessibility/visual)
+  - **Proposed Fix:** Concrete solution
+- You'll be asked: "Apply all 4, choose individually, customize, or explain more?"
+
+**Phase 3: User Approval (If Needed)**
+- If you chose "individually," Claude asks about each fix one by one
+- You can approve, customize, or skip each improvement
+
+**Phase 4: Implementation (Automatic)**
+- Claude uses the Edit tool to make minimal, surgical changes
+- Only approved improvements are implemented
+- Changes are made one file at a time
+- Follows your existing code style
+
+**Phase 5: Verification (Automatic)**
+- Claude runs `npm run build` to ensure nothing broke
+- If build fails, Claude fixes the issue automatically
+- Provides a comprehensive summary with all changes listed
+
+### Example Session
 
 ```
-User: "Use the UI/UX polish skill on this project"
-```
+User: "Polish the UI on this Docusaurus site"
 
-Claude will then:
-1. Read `package.json` to identify the framework
-2. Search for CSS and component files
-3. Identify issues and present 4 suggestions
-4. Ask user which improvements to apply
-5. Implement approved changes
-6. Verify build passes
+Claude:
+1. Reads package.json ✓
+2. Finds custom.css, navbar components ✓
+3. Analyzes CSS for issues ✓
+4. Presents 4 improvements:
+   - Navbar alignment (High priority)
+   - Menu animation (Medium priority)
+   - Focus states (High priority)
+   - Responsive spacing (Medium priority)
+5. Asks: "Apply all 4 improvements?"
+
+User: "Yes, apply all"
+
+Claude:
+6. Edits custom.css (navbar alignment)
+7. Edits custom.css (menu animation)
+8. Edits custom.css (focus states)
+9. Edits custom.css (responsive spacing)
+10. Runs `npm run build` ✓
+11. Reports summary with all changes
+
+Done! ✅
+```
 
 ## Workflow Phases
 

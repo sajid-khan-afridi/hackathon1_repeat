@@ -1,0 +1,566 @@
+/**
+ * Enhanced FloatingChatPopup Styles
+ *
+ * Complete floating chatbot widget styles with all 10 requirements:
+ * - Branded gradient header
+ * - Drag-to-move functionality (desktop)
+ * - Minimize/maximize states
+ * - Bot identity message
+ * - Menu dropdown
+ * - Responsive design (mobile: full-screen, desktop: 380-420px)
+ * - Dark mode support
+ * - Accessibility features
+ */
+
+/* ==================== CSS Variables ==================== */
+
+.popup {
+  --popup-color-bg: #ffffff;
+  --popup-color-text: #202124;
+  --popup-color-border: #dadce0;
+  --popup-color-shadow: rgba(0, 0, 0, 0.15);
+  --popup-color-backdrop: rgba(0, 0, 0, 0.4);
+
+  /* Branded gradient colors */
+  --popup-gradient-start: #2563eb;
+  --popup-gradient-end: #1d4ed8;
+  --popup-header-text: #ffffff;
+
+  --popup-width-desktop: 400px;
+  --popup-height-desktop: 70vh;
+  --popup-max-height-desktop: 650px;
+  --popup-border-radius: 16px;
+
+  --popup-spacing-mobile: 0;
+  --popup-spacing-desktop: 24px;
+
+  --popup-duration-open: 350ms;
+  --popup-duration-close: 250ms;
+  --popup-easing: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Dark theme overrides */
+[data-theme='dark'] .popup {
+  --popup-color-bg: #1a1a2e;
+  --popup-color-text: #e8eaed;
+  --popup-color-border: #3c4043;
+  --popup-color-shadow: rgba(0, 0, 0, 0.4);
+  --popup-color-backdrop: rgba(0, 0, 0, 0.6);
+  --popup-gradient-start: #3b82f6;
+  --popup-gradient-end: #2563eb;
+}
+
+/* ==================== Backdrop ==================== */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background-color: var(--popup-color-backdrop);
+  transition: opacity var(--popup-duration-open) var(--popup-easing);
+}
+
+.backdrop-opening,
+.backdrop-open {
+  opacity: 1;
+}
+
+.backdrop-closing,
+.backdrop-closed {
+  opacity: 0;
+}
+
+/* Hide backdrop on desktop */
+@media (min-width: 1024px) {
+  .backdrop {
+    background-color: transparent;
+    pointer-events: none;
+  }
+}
+
+/* ==================== Popup Container ==================== */
+
+.popup {
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--popup-color-bg);
+  color: var(--popup-color-text);
+  box-shadow: 0 12px 40px var(--popup-color-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile: Full-screen bottom sheet */
+@media (max-width: 767px) {
+  .popup {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 90vh;
+    max-height: calc(100vh - env(safe-area-inset-top));
+    border-radius: var(--popup-border-radius) var(--popup-border-radius) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    transition:
+      transform var(--popup-duration-open) var(--popup-easing),
+      opacity var(--popup-duration-open) var(--popup-easing);
+  }
+
+  .popup-opening {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  .popup-open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .popup-closing {
+    transform: translateY(100%);
+    opacity: 0;
+    transition-duration: var(--popup-duration-close);
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .popup {
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    height: 65vh;
+    max-height: 600px;
+    border-radius: var(--popup-border-radius);
+    transition:
+      transform var(--popup-duration-open) var(--popup-easing),
+      opacity var(--popup-duration-open) var(--popup-easing);
+  }
+
+  .popup-opening {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+  }
+
+  .popup-open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  .popup-closing {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition-duration: var(--popup-duration-close);
+  }
+}
+
+/* Desktop: Fixed bottom-right, draggable */
+@media (min-width: 1024px) {
+  .popup {
+    bottom: var(--popup-spacing-desktop);
+    right: var(--popup-spacing-desktop);
+    width: var(--popup-width-desktop);
+    height: var(--popup-height-desktop);
+    max-height: var(--popup-max-height-desktop);
+    border-radius: var(--popup-border-radius);
+    transition:
+      transform var(--popup-duration-open) var(--popup-easing),
+      opacity var(--popup-duration-open) var(--popup-easing);
+    cursor: default;
+  }
+
+  .popup-opening {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+  }
+
+  .popup-open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  .popup-closing {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition-duration: var(--popup-duration-close);
+  }
+
+  /* Dragging state */
+  .popupDragging {
+    cursor: grabbing;
+    user-select: none;
+    transition: none; /* Disable transitions during drag */
+  }
+}
+
+/* Minimized state (desktop only) */
+@media (min-width: 1024px) {
+  .popupMinimized {
+    height: auto;
+  }
+}
+
+/* ==================== Branded Header ==================== */
+
+.headerBranded {
+  background: linear-gradient(135deg, var(--popup-gradient-start) 0%, var(--popup-gradient-end) 100%);
+  color: var(--popup-header-text);
+  flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+}
+
+.popupDragging .headerBranded {
+  cursor: grabbing;
+}
+
+/* Mobile: no drag cursor */
+@media (max-width: 1023px) {
+  .headerBranded {
+    cursor: default;
+  }
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+/* Bot Avatar */
+.botAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+
+/* Title */
+.titleBranded {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--popup-header-text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Header Controls */
+.headerButtons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--popup-header-text);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+  backdrop-filter: blur(10px);
+}
+
+.iconButton:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.iconButton:active {
+  transform: scale(0.95);
+}
+
+/* Hide minimize on mobile */
+.iconButtonDesktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .iconButtonDesktopOnly {
+    display: flex;
+  }
+}
+
+/* Drag Indicator */
+.dragIndicator {
+  display: none;
+  justify-content: center;
+  padding: 4px 0 8px;
+}
+
+@media (min-width: 1024px) {
+  .dragIndicator {
+    display: flex;
+  }
+}
+
+/* ==================== Menu Dropdown ==================== */
+
+.menuDropdown {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  z-index: 10000;
+  background-color: var(--popup-color-bg);
+  border: 1px solid var(--popup-color-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--popup-color-shadow);
+  min-width: 180px;
+  overflow: hidden;
+  animation: menuSlideIn 200ms ease;
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menuItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--popup-color-text);
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.menuItem:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .menuItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: -2px;
+}
+
+.menuItem svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ==================== Bot Identity Message ==================== */
+
+.botIdentity {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.05) 0%,
+    rgba(29, 78, 216, 0.05) 100%
+  );
+  border-bottom: 1px solid var(--popup-color-border);
+  animation: slideInFromTop 400ms ease;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-theme='dark'] .botIdentity {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(37, 99, 235, 0.1) 100%
+  );
+}
+
+.botIdentityIcon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.botIdentityText {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--popup-color-text);
+}
+
+.botIdentityText strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--popup-gradient-start);
+}
+
+.botIdentityText p {
+  margin: 8px 0 0;
+}
+
+.botIdentityNote {
+  font-size: 0.8125rem;
+  color: var(--popup-color-text);
+  opacity: 0.8;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--popup-color-border);
+}
+
+.botIdentityNote strong {
+  display: inline;
+  font-size: inherit;
+  margin: 0;
+  color: inherit;
+}
+
+/* ==================== Chat Container ==================== */
+
+.chatContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--popup-color-bg);
+}
+
+/* Override ChatbotWidget styles for popup mode */
+.chatContainer :global(.chatbotWidget) {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  height: 100%;
+  max-width: 100%;
+}
+
+/* Hide the header from ChatbotWidget (we have our own) */
+.chatContainer :global(.chatbotHeader) {
+  display: none;
+}
+
+/* ==================== Accessibility ==================== */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==================== Reduced Motion ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .popup,
+  .backdrop,
+  .menuDropdown,
+  .botIdentity {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .popup-opening,
+  .popup-closing {
+    transform: none !important;
+  }
+
+  .popup-opening,
+  .popup-open {
+    opacity: 1;
+  }
+
+  .popup-closing,
+  .popup-closed {
+    opacity: 0;
+  }
+
+  .iconButton {
+    transition: none;
+  }
+
+  .iconButton:hover {
+    transform: none;
+  }
+
+  .iconButton:active {
+    transform: none;
+  }
+}
+
+/* ==================== High Contrast Mode ==================== */
+
+@media (prefers-contrast: high) {
+  .popup {
+    border: 2px solid var(--popup-color-border);
+  }
+
+  .iconButton {
+    border-width: 2px;
+  }
+
+  .iconButton:focus-visible {
+    outline-width: 3px;
+  }
+
+  .menuDropdown {
+    border-width: 2px;
+  }
+
+  .botIdentity {
+    border-width: 2px;
+  }
+}
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+  .popup,
+  .backdrop {
+    display: none;
+  }
+}

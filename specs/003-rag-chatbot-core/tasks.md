@@ -212,7 +212,7 @@
 - [X] T093 [P] Create benchmark test set of 50 questions in backend/tests/benchmark/test_questions.json covering all 10 chapters
 - [X] T094 [P] Implement NDCG@10 calculation in backend/tests/benchmark/test_relevance.py
 - [X] T095 [P] Implement faithfulness testing (zero hallucinations) in backend/tests/benchmark/test_faithfulness.py
-- [ ] T096 Run benchmark tests and verify NDCG@10 > 0.8 and zero hallucinations
+- [X] T096 Run benchmark tests and verify NDCG@10 > 0.8 and zero hallucinations
 - [X] T097 [P] Add structured JSON logging with correlation IDs in backend/app/middleware/logging.py
 - [X] T098 [P] Implement metrics tracking (p50/p95/p99 response times) in backend/app/middleware/logging.py
 - [X] T099 [P] Create backend/Dockerfile for containerized deployment
@@ -221,9 +221,9 @@
 - [X] T102 Run linters: black, flake8, mypy on backend code
 - [X] T103 Run frontend linters: npm run lint, npm run typecheck
 - [X] T104 Validate quickstart.md instructions work end-to-end
-- [ ] T105 Update OpenAPI spec contracts/openapi.yaml if any endpoints changed
-- [ ] T106 Create PHR (Prompt History Record) documenting RAG implementation per CLAUDE.md
-- [ ] T107 Create ADR for RAG architecture decisions per plan.md recommendations
+- [X] T105 Update OpenAPI spec contracts/openapi.yaml if any endpoints changed
+- [X] T106 Create PHR (Prompt History Record) documenting RAG implementation per CLAUDE.md
+- [X] T107 Create ADR for RAG architecture decisions per plan.md recommendations
 
 ---
 

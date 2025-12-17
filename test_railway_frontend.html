@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Deployment Frontend Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+        }
+
+        .result.success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .result.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .result h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .result pre {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .test-card {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .test-card.success {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .test-card.error {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .test-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .test-card .status {
+            font-size: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Railway Deployment Test</h1>
+            <p>Test your Railway backend API from the browser</p>
+        </div>
+
+        <div class="content">
+            <!-- Configuration Section -->
+            <div class="section">
+                <h2>Configuration</h2>
+                <div class="input-group">
+                    <label for="apiUrl">Railway API URL:</label>
+                    <input
+                        type="text"
+                        id="apiUrl"
+                        placeholder="https://your-app.up.railway.app"
+                        value=""
+                    >
+                </div>
+            </div>
+
+            <!-- Quick Tests Section -->
+            <div class="section">
+                <h2>Quick Health Tests</h2>
+                <button onclick="runAllHealthTests()">Run All Health Tests</button>
+                <div id="healthResults" class="test-grid" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Query Test Section -->
+            <div class="section">
+                <h2>Test RAG Query</h2>
+                <div class="input-group">
+                    <label for="queryText">Question:</label>
+                    <textarea
+                        id="queryText"
+                        placeholder="Enter your question here (e.g., What is ROS?)"
+                    >What is ROS?</textarea>
+                </div>
+                <button onclick="testQuery()">Send Query</button>
+                <button onclick="testStreamingQuery()">Send Query (Streaming)</button>
+                <div id="queryResult"></div>
+            </div>
+
+            <!-- CORS Test Section -->
+            <div class="section">
+                <h2>CORS Verification</h2>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    This test verifies that CORS is properly configured for cross-origin requests.
+                </p>
+                <button onclick="testCORS()">Test CORS</button>
+                <div id="corsResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get API URL
+        function getApiUrl() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) {
+                alert('Please enter your Railway API URL');
+                return null;
+            }
+            return url.replace(/\/$/, ''); // Remove trailing slash
+        }
+
+        // Test individual health endpoint
+        async function testHealthEndpoint(name, endpoint) {
+            const apiUrl = getApiUrl();
+            if (!apiUrl) return;
+
+            try {
+                const response = await fetch(`${apiUrl}${endpoint}`);
+                const data = await response.json();
+
+                return {
+                    name,
+                    success: response.ok,
+                    status: response.status,
+                    data
+                };
+            } catch (error) {
+                return {
+                    name,
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Run all health tests
+        async function runAllHealthTests() {
+            const resultsDiv = document.getElementById('healthResults');
+            resultsDiv.innerHTML = '<p>Running tests...</p>';
+
+            const tests = [
+                { name: 'Root', endpoint: '/' },
+                { name: 'Simple Health', endpoint: '/health' },
+                { name: 'Detailed Health', endpoint: '/api/v1/health' },
+                { name: 'Query Health', endpoint: '/api/v1/query/health' }
+            ];
+
+            const results = await Promise.all(
+                tests.map(test => testHealthEndpoint(test.name, test.endpoint))
+            );
+
+            resultsDiv.innerHTML = results.map(result => `
+                <div class="test-card ${result.success ? 'success' : 'error'}">
+                    <h3>${result.name}</h3>
+                    <div class="status">${result.success ? '✓' : '✗'}</div>
+                    <p>${result.status || result.error}</p>
+                </div>
+            `).join('');
+        }
+
+        // Test query endpoint
+        async function testQuery() {
+            const apiUrl = getApiUrl();
+            if (!apiUrl) return;
+
+            const query = document.getElementById('queryText').value;
+            const resultDiv = document.getElementById('queryResult');
+
+            resultDiv.innerHTML = '<div class="result"><p>Sending query...</p></div>';
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        filters: {},
+                        top_k: 3
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✓ Query Successful</h3>
+                            <p><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>Sources:</strong> ${data.sources.length}</p>
+                            <p><strong>Session ID:</strong> ${data.session_id}</p>
+                            <p><strong>Answer:</strong></p>
+                            <pre>${data.answer}</pre>
+                            <p><strong>Tokens Used:</strong> ${data.tokens_used.total_tokens}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>✗ Query Failed</h3>
+                            <p>Status: ${response.status}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>✗ Request Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test streaming query
+        async function testStreamingQuery() {
+            const apiUrl = getApiUrl();
+            if (!apiUrl) return;
+
+            const query = document.getElementById('queryText').value;
+            const resultDiv = document.getElementById('queryResult');
+
+            resultDiv.innerHTML = '<div class="result"><p>Streaming response...</p><div id="streamContent"></div></div>';
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        filters: {},
+                        top_k: 3
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let answer = '';
+                let metadata = null;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = JSON.parse(line.slice(6));
+
+                            if (data.chunk) {
+                                answer += data.chunk;
+                                document.getElementById('streamContent').innerHTML = `
+                                    <p><strong>Streaming answer:</strong></p>
+                                    <pre>${answer}</pre>
+                                `;
+                            }
+
+                            if (data.done) {
+                                metadata = data;
+                            }
+                        }
+                    }
+                }
+
+                if (metadata) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✓ Streaming Query Successful</h3>
+                            <p><strong>Confidence:</strong> ${(metadata.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>Sources:</strong> ${metadata.sources.length}</p>
+                            <p><strong>Session ID:</strong> ${metadata.session_id}</p>
+                            <p><strong>Answer:</strong></p>
+                            <pre>${answer}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>✗ Streaming Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test CORS
+        async function testCORS() {
+            const apiUrl = getApiUrl();
+            if (!apiUrl) return;
+
+            const resultDiv = document.getElementById('corsResult');
+            resultDiv.innerHTML = '<div class="result"><p>Testing CORS...</p></div>';
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/health`);
+
+                // Check CORS headers
+                const corsHeaders = {
+                    'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                    'access-control-allow-credentials': response.headers.get('access-control-allow-credentials'),
+                    'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+                    'access-control-allow-headers': response.headers.get('access-control-allow-headers')
+                };
+
+                const hasCORS = corsHeaders['access-control-allow-origin'] !== null;
+
+                resultDiv.innerHTML = `
+                    <div class="result ${hasCORS ? 'success' : 'error'}">
+                        <h3>${hasCORS ? '✓' : '✗'} CORS ${hasCORS ? 'Enabled' : 'Disabled'}</h3>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>✗ CORS Test Failed</h3>
+                        <p>${error.message}</p>
+                        <p>This might indicate a CORS issue preventing cross-origin requests.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize with saved URL if available
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('railwayApiUrl');
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+            }
+
+            // Save URL on change
+            document.getElementById('apiUrl').addEventListener('change', (e) => {
+                localStorage.setItem('railwayApiUrl', e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>

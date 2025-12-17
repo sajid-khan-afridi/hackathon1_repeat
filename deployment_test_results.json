@@ -1,0 +1,72 @@
+{
+  "base_url": "https://hackathon1repeat-production.up.railway.app",
+  "timestamp": "2025-12-17T16:35:01.783025",
+  "summary": {
+    "total": 10,
+    "passed": 8,
+    "failed": 2,
+    "pass_rate": 80.0
+  },
+  "results": [
+    {
+      "test": "Root Endpoint",
+      "passed": true,
+      "details": "Status: 200, Message: RAG Chatbot API",
+      "timestamp": "2025-12-17T16:34:33.003304"
+    },
+    {
+      "test": "Simple Health Check",
+      "passed": true,
+      "details": "Status: 200, Health: ok",
+      "timestamp": "2025-12-17T16:34:33.422206"
+    },
+    {
+      "test": "Detailed Health Check",
+      "passed": true,
+      "details": "Overall: healthy | DB: healthy | Vector: healthy | LLM: healthy",
+      "timestamp": "2025-12-17T16:34:37.147545"
+    },
+    {
+      "test": "Query Service Health",
+      "passed": true,
+      "details": "Status: healthy | Components: vector_search:healthy, llm:healthy, database:healthy",
+      "timestamp": "2025-12-17T16:34:41.237468"
+    },
+    {
+      "test": "CORS Configuration",
+      "passed": true,
+      "details": "CORS Enabled: True, Credentials: True | Origin: https://sajid-khan-afridi.github.io",
+      "timestamp": "2025-12-17T16:34:41.632330"
+    },
+    {
+      "test": "Query Endpoint (Non-Streaming)",
+      "passed": true,
+      "details": "Confidence: 0.53 | Sources: 3 | Session: 4dcdfe7c-9a89-4a0f-9947-3ef6ee3069d6",
+      "timestamp": "2025-12-17T16:34:50.531215"
+    },
+    {
+      "test": "Query Endpoint (Streaming)",
+      "passed": false,
+      "details": "Chunks received: 0",
+      "timestamp": "2025-12-17T16:34:55.942049"
+    },
+    {
+      "test": "Session Retrieval",
+      "passed": false,
+      "details": "Status: 500",
+      "timestamp": "2025-12-17T16:34:57.882588"
+    },
+    {
+      "test": "Session Deletion",
+      "passed": true,
+      "details": "Status: 204 | Verified deleted",
+      "timestamp": "2025-12-17T16:35:00.455751"
+    },
+    {
+      "test": "Rate Limiting",
+      "passed": true,
+      "details": "No rate limit headers found (may be disabled)",
+      "timestamp": "2025-12-17T16:35:01.779998"
+    }
+  ]
+}

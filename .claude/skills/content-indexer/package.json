@@ -1,0 +1,19 @@
+{
+  "name": "content-indexer",
+  "version": "1.0.0",
+  "description": "Indexes MDX chapter content into Qdrant vector database for semantic search and RAG chatbot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.16.2",
+    "dotenv": "^17.2.3",
+    "gray-matter": "^4.0.3",
+    "openai": "^6.14.0"
+  }
+}

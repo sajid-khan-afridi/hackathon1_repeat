@@ -1,7 +1,7 @@
 """
 Rate limiting middleware for user identification.
 
-Extracts user_id from authentication headers and stores it in request.state
+Extracts user_id from JWT cookies and stores it in request.state
 for use by the rate limiter.
 """
 
@@ -9,6 +9,9 @@ import logging
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable, Optional
+from uuid import UUID
+
+from app.services.jwt_service import jwt_service
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +20,7 @@ class UserIdentificationMiddleware(BaseHTTPMiddleware):
     """
     Middleware to extract user identification for rate limiting.
 
-    Checks for authentication tokens and sets request.state.user_id
+    Checks for JWT authentication cookies and sets request.state.user_id
     if the user is authenticated. Falls back to IP-based identification
     for anonymous users.
     """
@@ -36,16 +39,12 @@ class UserIdentificationMiddleware(BaseHTTPMiddleware):
         # Initialize user_id as None (anonymous user)
         request.state.user_id = None
 
-        # Check for authentication token in headers
-        auth_header = request.headers.get("Authorization", "")
+        # Check for access token in cookies
+        access_token = jwt_service.get_access_token_from_request(request)
 
-        if auth_header.startswith("Bearer "):
-            token = auth_header.replace("Bearer ", "")
-
+        if access_token:
             # Extract user_id from token
-            # Note: In production, this should validate the JWT token
-            # and extract the user_id from the token payload
-            user_id = self._extract_user_id_from_token(token)
+            user_id = self._extract_user_id_from_token(access_token)
 
             if user_id:
                 request.state.user_id = user_id
@@ -56,23 +55,25 @@ class UserIdentificationMiddleware(BaseHTTPMiddleware):
 
         return response
 
-    def _extract_user_id_from_token(self, token: str) -> Optional[str]:
+    def _extract_user_id_from_token(self, token: str) -> Optional[UUID]:
         """
         Extract user_id from JWT token.
 
-        In production, this should:
-        1. Validate token signature
-        2. Check token expiration
-        3. Extract user_id from payload
-
-        For now, returns None (anonymous user) as authentication is not implemented.
+        Validates token signature, checks expiration, and extracts user_id from payload.
 
         Args:
             token: JWT token string
 
         Returns:
-            User ID if token is valid, None otherwise
+            User ID (UUID) if token is valid, None otherwise
         """
-        # TODO: Implement JWT token validation when authentication is added
-        # For now, treat all users as anonymous
+        try:
+            payload = jwt_service.verify_token(token, expected_type="access")
+            if payload:
+                user_id_str = payload.get("sub")
+                if user_id_str:
+                    return UUID(user_id_str)
+        except Exception as e:
+            logger.debug(f"Failed to extract user_id from token: {e}")
+
         return None

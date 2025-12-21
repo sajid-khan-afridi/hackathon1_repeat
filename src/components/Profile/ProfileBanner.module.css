@@ -1,0 +1,138 @@
+/**
+ * Profile Banner styles.
+ * Implements WCAG 2.1 AA accessibility requirements.
+ */
+
+.banner {
+  position: sticky;
+  top: var(--ifm-navbar-height);
+  z-index: 100;
+  background-color: var(--ifm-color-primary-lightest);
+  border-bottom: 1px solid var(--ifm-color-primary-light);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bannerContent {
+  max-width: var(--ifm-container-width);
+  margin: 0 auto;
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--ifm-color-primary);
+}
+
+.bannerText {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.4;
+}
+
+.bannerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bannerButton {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  background-color: var(--ifm-color-primary);
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.bannerButton:hover {
+  background-color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+  color: white;
+}
+
+.bannerButton:focus {
+  outline: 2px solid var(--ifm-color-primary-dark);
+  outline-offset: 2px;
+}
+
+.dismissButton {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--ifm-color-emphasis-600);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  line-height: 1;
+}
+
+.dismissButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dismissButton:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .banner {
+  background-color: rgba(var(--ifm-color-primary-rgb), 0.15);
+  border-bottom-color: rgba(var(--ifm-color-primary-rgb), 0.3);
+}
+
+[data-theme='dark'] .dismissButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bannerContent {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .bannerText {
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .bannerActions {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+
+  .bannerButton {
+    flex: 1;
+  }
+}

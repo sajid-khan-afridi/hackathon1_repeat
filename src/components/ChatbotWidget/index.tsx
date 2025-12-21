@@ -14,6 +14,7 @@
  */
 
 import React, { useReducer, useEffect, useCallback } from 'react';
+import Link from '@docusaurus/Link';
 import styles from './ChatbotWidget.module.css';
 import type {
   ChatState,
@@ -30,6 +31,7 @@ import ChatInput from './ChatInput';
 import MessageList from './MessageList';
 import ModuleFilter from './ModuleFilter';
 import LoadingState from './LoadingState';
+import { useAuthContext } from '@site/src/context/AuthContext';
 
 // Environment configuration
 const API_BASE_URL = typeof window !== 'undefined'
@@ -266,6 +268,7 @@ export default function ChatbotWidget({
   difficultyFilter
 }: ChatbotWidgetProps = {}): JSX.Element {
   const [state, dispatch] = useReducer(chatReducer, null, getInitialState);
+  const { isAuthenticated } = useAuthContext();
 
   /**
    * Persist session ID to localStorage
@@ -675,13 +678,22 @@ export default function ChatbotWidget({
           >
             <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H9v6l5.25 3.15.75-1.23-4.5-2.67z" />
           </svg>
-          <span>
-            Rate limit exceeded. Please try again in{' '}
-            <strong>
-              {Math.floor(state.rateLimitState.retryAfter / 60)}m{' '}
-              {state.rateLimitState.retryAfter % 60}s
-            </strong>
-          </span>
+          <div>
+            <div>
+              <strong>Rate limit exceeded.</strong> Please try again in{' '}
+              <strong>
+                {Math.floor(state.rateLimitState.retryAfter / 60)}m{' '}
+                {state.rateLimitState.retryAfter % 60}s
+              </strong>
+            </div>
+            {!isAuthenticated && (
+              <div style={{ marginTop: '8px', fontSize: '0.9em' }}>
+                💡 <Link to="/signup" style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                  Create a free account
+                </Link> to get 50 queries/hour (5x more than anonymous users)
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -1,0 +1,724 @@
+openapi: 3.1.0
+info:
+  title: User Authentication API
+  description: |
+    Authentication API for the Physical AI & Humanoid Robotics Textbook.
+    Implements email/password and Google OAuth authentication with JWT tokens.
+  version: 1.0.0
+  contact:
+    name: AuthEngineer Agent
+
+servers:
+  - url: https://api.robotics-textbook.railway.app
+    description: Production server (Railway)
+  - url: http://localhost:8000
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: Login, signup, logout, and token management
+  - name: OAuth
+    description: Google OAuth 2.0 integration
+  - name: Profile
+    description: User profile management
+  - name: User
+    description: User account operations
+
+paths:
+  # ============================================
+  # AUTHENTICATION ENDPOINTS
+  # ============================================
+
+  /auth/signup:
+    post:
+      tags: [Authentication]
+      summary: Create a new user account
+      description: |
+        Register a new user with email and password.
+        Creates an empty user profile for the profile wizard.
+        FR-001, FR-002, FR-003, FR-004
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets access_token and refresh_token cookies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error (invalid email format, weak password)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: Email already registered (FR-004)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate with email and password
+      description: |
+        Login with email and password. Returns JWT tokens in httpOnly cookies.
+        Implements rate limiting and account lockout (FR-024).
+        FR-006
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets access_token and refresh_token cookies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '423':
+          description: Account locked (too many failed attempts)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountLockedError'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: End the current session
+      description: |
+        Revokes the refresh token and clears authentication cookies.
+        FR-013
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Clears access_token and refresh_token cookies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: |
+        Exchange a valid refresh token for a new access token.
+        Implements silent token refresh (FR-010).
+        FR-010, FR-011, FR-012
+      operationId: refreshToken
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets new access_token cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token refreshed"
+                  expires_in:
+                    type: integer
+                    description: Seconds until access token expires
+                    example: 86400
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user information
+      description: |
+        Returns the authenticated user's information and profile.
+        Used to check authentication status on page load.
+      operationId: getCurrentUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # OAUTH ENDPOINTS
+  # ============================================
+
+  /auth/google:
+    get:
+      tags: [OAuth]
+      summary: Initiate Google OAuth flow
+      description: |
+        Redirects to Google's OAuth consent screen.
+        FR-007
+      operationId: googleOAuthInit
+      parameters:
+        - name: redirect_uri
+          in: query
+          description: URL to redirect after OAuth completion
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect to Google OAuth
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Google OAuth authorization URL
+
+  /auth/google/callback:
+    get:
+      tags: [OAuth]
+      summary: Google OAuth callback
+      description: |
+        Handles the OAuth callback from Google.
+        Creates or links user account, issues JWT tokens.
+        FR-007, FR-008
+      operationId: googleOAuthCallback
+      parameters:
+        - name: code
+          in: query
+          description: Authorization code from Google
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: CSRF state token
+          required: true
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: Error code if OAuth was denied
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to frontend with tokens set in cookies
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Frontend redirect URL
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets access_token and refresh_token cookies
+        '400':
+          description: OAuth error (denied, invalid code, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # PROFILE ENDPOINTS
+  # ============================================
+
+  /users/profile:
+    get:
+      tags: [Profile]
+      summary: Get user profile
+      description: |
+        Returns the authenticated user's profile.
+        FR-017, FR-018
+      operationId: getProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags: [Profile]
+      summary: Update user profile
+      description: |
+        Update the authenticated user's profile.
+        Can be called with partial data (wizard steps).
+        FR-017, FR-018
+      operationId: updateProfile
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/profile/skip:
+    post:
+      tags: [Profile]
+      summary: Skip profile wizard
+      description: |
+        Mark the profile wizard as skipped.
+        User can complete profile later.
+        FR-016
+      operationId: skipProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Profile skipped
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Profile wizard skipped"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # USER ACCOUNT ENDPOINTS
+  # ============================================
+
+  /users/sessions:
+    get:
+      tags: [User]
+      summary: List active sessions
+      description: |
+        Returns all active sessions for the authenticated user.
+        Supports concurrent sessions (FR-014).
+        FR-014
+      operationId: listSessions
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Sessions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SessionInfo'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/sessions/{sessionId}:
+    delete:
+      tags: [User]
+      summary: Revoke a specific session
+      description: |
+        Revoke a specific session by ID.
+        Allows user to log out other devices.
+      operationId: revokeSession
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Session revoked"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: JWT access token in httpOnly cookie
+
+  schemas:
+    # ============================================
+    # REQUEST SCHEMAS
+    # ============================================
+
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "user@example.com"
+        password:
+          type: string
+          minLength: 8
+          description: |
+            Password must be at least 8 characters,
+            contain 1 uppercase letter and 1 number.
+          example: "SecurePass123"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          example: "SecurePass123"
+
+    ProfileUpdate:
+      type: object
+      properties:
+        experience_level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          nullable: true
+          description: "Programming experience level"
+        ros_familiarity:
+          type: string
+          enum: [none, basic, proficient]
+          nullable: true
+          description: "ROS familiarity level"
+        hardware_access:
+          type: string
+          enum: [simulation_only, jetson_kit, full_robot_lab]
+          nullable: true
+          description: "Available hardware access"
+        learning_goal:
+          type: string
+          enum: [career_transition, academic_research, hobby]
+          nullable: true
+          description: "Primary learning goal"
+        preferred_language:
+          type: string
+          enum: [python, cpp, both]
+          nullable: true
+          description: "Preferred code example language"
+
+    # ============================================
+    # RESPONSE SCHEMAS
+    # ============================================
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        profile:
+          $ref: '#/components/schemas/ProfileResponse'
+          nullable: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-12-17T10:30:00Z"
+        is_active:
+          type: boolean
+          example: true
+        has_google:
+          type: boolean
+          description: Whether Google OAuth is linked
+          example: false
+        profile_complete:
+          type: boolean
+          description: Whether profile wizard is complete
+          example: false
+
+    ProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        experience_level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          nullable: true
+        ros_familiarity:
+          type: string
+          enum: [none, basic, proficient]
+          nullable: true
+        hardware_access:
+          type: string
+          enum: [simulation_only, jetson_kit, full_robot_lab]
+          nullable: true
+        learning_goal:
+          type: string
+          enum: [career_transition, academic_research, hobby]
+          nullable: true
+        preferred_language:
+          type: string
+          enum: [python, cpp, both]
+          nullable: true
+        is_complete:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SessionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        user_agent:
+          type: string
+          nullable: true
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0"
+        ip_address:
+          type: string
+          nullable: true
+          example: "192.168.1.1"
+        is_current:
+          type: boolean
+          description: Whether this is the current session
+
+    # ============================================
+    # ERROR SCHEMAS
+    # ============================================
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INVALID_CREDENTIALS"
+            message:
+              type: string
+              example: "Invalid email or password"
+            correlation_id:
+              type: string
+              format: uuid
+              example: "abc-123-def"
+            timestamp:
+              type: string
+              format: date-time
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Validation failed"
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: "password"
+                  message:
+                    type: string
+                    example: "Password must contain at least one uppercase letter"
+
+    AccountLockedError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "ACCOUNT_LOCKED"
+            message:
+              type: string
+              example: "Account locked due to too many failed attempts"
+            locked_until:
+              type: string
+              format: date-time
+              description: When the account will be unlocked
+            retry_after:
+              type: integer
+              description: Seconds until account is unlocked
+              example: 900
+
+  # ============================================
+  # COMMON HEADERS
+  # ============================================
+
+  headers:
+    X-RateLimit-Limit:
+      description: Maximum requests per hour
+      schema:
+        type: integer
+        example: 50
+    X-RateLimit-Remaining:
+      description: Remaining requests in current window
+      schema:
+        type: integer
+        example: 45
+    X-RateLimit-Reset:
+      description: Unix timestamp when rate limit resets
+      schema:
+        type: integer
+        example: 1702828800
+    X-Correlation-ID:
+      description: Request correlation ID for tracing
+      schema:
+        type: string
+        format: uuid

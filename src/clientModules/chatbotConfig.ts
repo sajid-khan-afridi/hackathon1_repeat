@@ -5,7 +5,7 @@
 
 // Set the chatbot API URL globally
 if (typeof window !== 'undefined') {
-  (window as any).CHATBOT_API_URL = process.env.NODE_ENV === 'production'
+  (window as any).CHATBOT_API_URL = (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production')
     ? 'https://hackathon1repeat-production.up.railway.app'
     : 'http://localhost:8000';
 

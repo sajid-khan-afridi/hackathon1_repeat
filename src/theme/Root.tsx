@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react';
+import { AuthProvider } from '@site/src/context/AuthContext';
 import { UserProvider } from '@site/src/context/UserContext';
 import { LanguageProvider } from '@site/src/context/LanguageContext';
 import GlobalFloatingChat from '@site/src/components/GlobalFloatingChat';
+import { ProfileBannerWrapper } from '@site/src/components/Profile/ProfileBannerWrapper';
 
 interface RootProps {
   children: ReactNode;
@@ -15,8 +17,9 @@ interface RootProps {
  */
 export default function Root({ children }: RootProps): JSX.Element {
   return (
-    <UserProvider>
-      <LanguageProvider>
+    <AuthProvider>
+      <UserProvider>
+        <LanguageProvider>
         {/* Skip-to-content link for accessibility */}
         <a
           href="#__docusaurus"
@@ -53,11 +56,16 @@ export default function Root({ children }: RootProps): JSX.Element {
         >
           Skip to main content
         </a>
+
+        {/* Profile completion banner - shows for authenticated users with incomplete profiles */}
+        <ProfileBannerWrapper />
+
         {children}
 
         {/* Global floating chat widget - appears on all pages */}
         <GlobalFloatingChat />
-      </LanguageProvider>
-    </UserProvider>
+        </LanguageProvider>
+      </UserProvider>
+    </AuthProvider>
   );
 }

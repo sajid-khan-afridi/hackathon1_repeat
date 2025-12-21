@@ -1,0 +1,181 @@
+/**
+ * Profile Settings styles.
+ * Implements WCAG 2.1 AA accessibility requirements.
+ */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.settings {
+  background: var(--ifm-background-surface-color);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ifm-font-color-base);
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ifm-font-color-base);
+  background-color: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+.select:disabled {
+  background-color: var(--ifm-color-emphasis-100);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Success Message */
+.successMessage {
+  padding: 0.875rem 1rem;
+  background-color: rgba(var(--ifm-color-success-rgb), 0.1);
+  border: 1px solid var(--ifm-color-success);
+  border-radius: 6px;
+  color: var(--ifm-color-success-darkest);
+  font-size: 0.95rem;
+}
+
+/* Error Message */
+.errorMessage {
+  padding: 0.875rem 1rem;
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.1);
+  border: 1px solid var(--ifm-color-danger);
+  border-radius: 6px;
+  color: var(--ifm-color-danger-darkest);
+  font-size: 0.95rem;
+}
+
+/* Submit Button */
+.submitButton {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--ifm-color-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--ifm-color-primary-dark);
+}
+
+.submitButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Completion Status */
+.completionStatus {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.completionText {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.completionHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-600);
+  font-style: italic;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .settings {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .successMessage {
+  background-color: rgba(var(--ifm-color-success-rgb), 0.15);
+}
+
+[data-theme='dark'] .errorMessage {
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .settings {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}

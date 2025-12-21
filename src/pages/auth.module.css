@@ -1,0 +1,39 @@
+/**
+ * Authentication page styles.
+ */
+
+.authPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding: 2rem;
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Loading and redirect states */
+.authContainer p {
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* OAuth error message */
+.oauthError {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.1);
+  border: 1px solid var(--ifm-color-danger);
+  border-radius: 6px;
+  color: var(--ifm-color-danger-darkest);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+[data-theme="dark"] .oauthError {
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.15);
+}

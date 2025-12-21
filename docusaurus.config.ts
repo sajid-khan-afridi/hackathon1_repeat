@@ -39,6 +39,13 @@ markdown: {
     locales: ['en'],
   },
 
+  // Custom fields accessible in client-side code (T076)
+  customFields: {
+    // API URL for backend services
+    // Defaults to Railway production URL, can be overridden with API_URL env var
+    apiUrl: process.env.API_URL || 'https://hackathon1repeat-production.up.railway.app',
+  },
+
   presets: [
     [
       'classic',

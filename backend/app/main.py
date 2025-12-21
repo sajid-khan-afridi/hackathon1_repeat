@@ -9,6 +9,7 @@ from app.config import settings
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.cors import configure_cors
 from app.middleware.rate_limit import UserIdentificationMiddleware
+from app.middleware.csrf import configure_csrf_protection
 
 # Configure logging
 logging.basicConfig(
@@ -28,6 +29,12 @@ app = FastAPI(
 
 # Configure CORS
 configure_cors(app, settings.cors_origins_list)
+
+# Configure CSRF protection (FR-027)
+configure_csrf_protection(
+    app,
+    cookie_secure=not settings.is_development,  # Secure cookies in production only
+)
 
 # Add user identification middleware
 app.add_middleware(UserIdentificationMiddleware)
@@ -73,8 +80,11 @@ async def simple_health() -> JSONResponse:
 
 
 # Import and include routers
-from app.routers import health, query, sessions
+from app.routers import health, query, sessions, auth, oauth, users
 
 app.include_router(health.router, prefix="/api/v1", tags=["health"])
 app.include_router(query.router, prefix="/api/v1", tags=["query"])
 app.include_router(sessions.router, prefix="/api/v1/chat", tags=["sessions"])
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+app.include_router(oauth.router, prefix="/auth", tags=["oauth"])
+app.include_router(users.router, prefix="/users", tags=["users"])

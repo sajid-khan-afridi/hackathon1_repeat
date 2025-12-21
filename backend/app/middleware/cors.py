@@ -29,5 +29,6 @@ def configure_cors(app, allowed_origins: List[str]) -> None:
             "X-Correlation-ID",
             "X-RateLimit-Limit",
             "X-RateLimit-Remaining",
+            "X-RateLimit-Reset",
         ],
     )

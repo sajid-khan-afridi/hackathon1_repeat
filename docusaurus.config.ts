@@ -23,13 +23,13 @@ const config: Config = {
   onDuplicateRoutes: 'warn',
   onBrokenAnchors: 'ignore', // TODO: Fix frontmatter in docs files (chatbot-widget-integration.md, contributing/chapter-authoring.md, etc.)
   markdown: {
-  anchors: {
-    maintainCase: false,
+    anchors: {
+      maintainCase: false,
+    },
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
-  hooks: {
-    onBrokenMarkdownLinks: 'warn',
-  },
-},
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you

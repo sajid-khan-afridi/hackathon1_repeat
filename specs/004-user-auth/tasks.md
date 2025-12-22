@@ -203,15 +203,15 @@
 
 **Purpose**: Security hardening, logging, and final validations
 
-- [ ] T071 [P] Implement CSRF protection in backend/app/middleware/csrf.py per FR-027
-- [ ] T072 [P] Add structured logging for auth events in backend/app/services/auth_service.py per FR-028
-- [ ] T073 [P] Add input sanitization to all auth endpoints per FR-026
-- [ ] T074 Verify all auth endpoints respond <500ms p95 per FR-029
-- [ ] T075 Run OWASP Top 10 security checklist per constitution quality gates
-- [ ] T076 [P] Update docusaurus.config.ts with API URL configuration
-- [ ] T077 [P] Create .env.example with all required auth environment variables
-- [ ] T078 Run quickstart.md validation steps to verify setup
-- [ ] T079 [P] Add sessions management endpoints GET /users/sessions and DELETE /users/sessions/{id} to backend/app/routers/users.py per FR-014
+- [X] T071 [P] Implement CSRF protection in backend/app/middleware/csrf.py per FR-027
+- [X] T072 [P] Add structured logging for auth events in backend/app/services/auth_service.py per FR-028
+- [X] T073 [P] Add input sanitization to all auth endpoints per FR-026
+- [X] T074 Verify all auth endpoints respond <500ms p95 per FR-029
+- [X] T075 Run OWASP Top 10 security checklist per constitution quality gates
+- [X] T076 [P] Update docusaurus.config.ts with API URL configuration
+- [X] T077 [P] Create .env.example with all required auth environment variables
+- [X] T078 Run quickstart.md validation steps to verify setup
+- [X] T079 [P] Add sessions management endpoints GET /users/sessions and DELETE /users/sessions/{id} to backend/app/routers/users.py per FR-014
 
 ---
 

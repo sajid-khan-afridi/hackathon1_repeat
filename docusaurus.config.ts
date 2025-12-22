@@ -22,7 +22,7 @@ const config: Config = {
   onBrokenLinks: 'warn',
   onDuplicateRoutes: 'warn',
   onBrokenAnchors: 'ignore', // TODO: Fix frontmatter in docs files (chatbot-widget-integration.md, contributing/chapter-authoring.md, etc.)
-markdown: {
+  markdown: {
   anchors: {
     maintainCase: false,
   },

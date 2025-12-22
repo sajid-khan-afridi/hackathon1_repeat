@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
 
 # Get the .env file from the project root (parent of backend directory)
+# Make it optional for production deployments (Railway, Render, etc.)
 ENV_FILE = Path(__file__).parent.parent.parent / ".env"
 
 
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=str(ENV_FILE),
+        env_file=str(ENV_FILE) if ENV_FILE.exists() else None,
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",

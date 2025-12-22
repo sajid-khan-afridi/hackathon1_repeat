@@ -10,9 +10,12 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from parent directory
+# Load environment variables from parent directory (optional for production)
 env_path = Path(__file__).parent.parent / ".env"
-load_dotenv(env_path)
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    print(f"Note: .env file not found at {env_path}, using environment variables")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 MIGRATIONS_DIR = Path(__file__).parent / "app" / "migrations"

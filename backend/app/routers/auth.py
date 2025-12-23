@@ -251,22 +251,40 @@ async def get_current_user_info(
 
     Used to check authentication status on page load.
     """
-    result = await auth_service.get_current_user(current_user.user_id)
+    try:
+        logger.info(f"GET /auth/me called for user_id: {current_user.user_id}")
+        result = await auth_service.get_current_user(current_user.user_id)
 
-    if not result:
+        if not result:
+            logger.warning(f"User not found for user_id: {current_user.user_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "error": {
+                        "code": "USER_NOT_FOUND",
+                        "message": "User not found",
+                    }
+                },
+            )
+
+        user_response, profile = result
+        logger.info(f"GET /auth/me successful for user: {current_user.email}")
+
+        return {
+            "user": user_response.model_dump(),
+            "profile": profile.model_dump() if profile else None,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in /auth/me for user_id {current_user.user_id}: {type(e).__name__}: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
                 "error": {
-                    "code": "USER_NOT_FOUND",
-                    "message": "User not found",
+                    "code": "INTERNAL_ERROR",
+                    "message": f"An error occurred: {type(e).__name__}",
+                    "debug": str(e),
                 }
             },
         )
-
-    user_response, profile = result
-
-    return {
-        "user": user_response.model_dump(),
-        "profile": profile.model_dump() if profile else None,
-    }

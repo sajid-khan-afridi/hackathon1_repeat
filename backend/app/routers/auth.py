@@ -26,17 +26,32 @@ async def debug_test():
 @router.get("/debug/key-check")
 async def debug_key_check():
     """Debug endpoint to check JWT key configuration."""
+    import jwt as pyjwt
     try:
         # Try to access the keys
         private_key = jwt_service.private_key
         public_key = jwt_service.public_key
 
+        # Test if keys match by signing and verifying a test payload
+        test_payload = {"test": "data"}
+        try:
+            test_token = pyjwt.encode(test_payload, private_key, algorithm="RS256")
+            decoded = pyjwt.decode(test_token, public_key, algorithms=["RS256"])
+            keys_match = decoded == test_payload
+        except Exception as e:
+            keys_match = False
+            key_error = str(e)
+
         return {
             "status": "ok",
             "private_key_configured": len(private_key) > 0,
-            "private_key_starts_with": private_key[:30] if private_key else None,
+            "private_key_starts_with": private_key[:40] if private_key else None,
+            "private_key_line_count": private_key.count("\n") + 1 if private_key else 0,
             "public_key_configured": len(public_key) > 0,
-            "public_key_starts_with": public_key[:30] if public_key else None,
+            "public_key_starts_with": public_key[:40] if public_key else None,
+            "public_key_line_count": public_key.count("\n") + 1 if public_key else 0,
+            "keys_match": keys_match,
+            "key_pair_error": key_error if not keys_match else None,
         }
     except Exception as e:
         return {

@@ -33,10 +33,27 @@ import ModuleFilter from './ModuleFilter';
 import LoadingState from './LoadingState';
 import { useAuthContext } from '@site/src/context/AuthContext';
 
-// Environment configuration
-const API_BASE_URL = typeof window !== 'undefined'
-  ? (window as any).CHATBOT_API_URL || 'http://localhost:8000'
-  : 'http://localhost:8000';
+// Get API URL with proper fallback chain
+const getApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // First check global config set by chatbotConfig.ts
+    if ((window as any).CHATBOT_API_URL) {
+      return (window as any).CHATBOT_API_URL;
+    }
+    // Fallback to Docusaurus config
+    const docusaurusConfig = (window as any).__DOCUSAURUS__;
+    if (docusaurusConfig?.siteConfig?.customFields?.apiUrl) {
+      return docusaurusConfig.siteConfig.customFields.apiUrl;
+    }
+    // Fallback: Check if we're on the production domain
+    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
+      return 'https://hackathon1repeat-production.up.railway.app';
+    }
+  }
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiUrl();
 
 const SESSION_STORAGE_KEY = 'chatbot-session-id';
 

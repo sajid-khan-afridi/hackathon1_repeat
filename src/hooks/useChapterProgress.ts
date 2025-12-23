@@ -12,7 +12,23 @@ import type {
   ChapterProgressToggleBookmark,
 } from '../types/progress';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Get API URL from Docusaurus config or fallback
+const getApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // Check for Docusaurus config (primary source)
+    const docusaurusConfig = (window as any).__DOCUSAURUS__;
+    if (docusaurusConfig?.siteConfig?.customFields?.apiUrl) {
+      return docusaurusConfig.siteConfig.customFields.apiUrl;
+    }
+    // Fallback: Check if we're on the production domain
+    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
+      return 'https://hackathon1repeat-production.up.railway.app';
+    }
+  }
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiUrl();
 
 // Auto-complete threshold: mark chapter as completed after reading for 5 minutes
 const AUTO_COMPLETE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes

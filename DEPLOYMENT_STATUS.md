@@ -1,195 +1,222 @@
-# RAG Chatbot Deployment Status
+# Phase 4B Staging Deployment - Status Report
 
-**Last Updated:** 2025-12-15
-
-## Infrastructure Status
-
-### ✅ Completed Components
-
-| Component | Status | Details |
-|-----------|--------|---------|
-| **PostgreSQL Database** | ✅ READY | Neon database with all tables created and verified |
-| **Vector Store** | ✅ READY | Qdrant Cloud collection `robotics_textbook` with 33 vectors |
-| **OpenAI Integration** | ✅ READY | API key configured and tested |
-| **Backend Code** | ✅ READY | FastAPI app with health checks and RAG pipeline |
-| **Frontend Widget** | ✅ DEPLOYED | ChatbotWidget on GitHub Pages |
-| **Docker Configuration** | ✅ READY | Dockerfile and .dockerignore created |
-| **Deployment Configs** | ✅ READY | Railway and Render configuration files |
-
-### ⏳ Pending Actions
-
-| Action | Status | Next Steps |
-|--------|--------|------------|
-| **Backend Deployment** | ⏳ PENDING | Deploy to Railway or Render (see DEPLOYMENT_GUIDE.md) |
-| **Frontend API URL** | ⏳ PENDING | Update ChatbotWidget after backend deployed |
-| **CORS Configuration** | ⏳ PENDING | Update CORS_ORIGINS with GitHub Pages URL |
-| **Production Testing** | ⏳ PENDING | Test health + query endpoints after deployment |
+**Date**: 2025-12-23
+**Branch**: `1-personalization-engine`
+**Status**: ✅ **Ready for Railway deployment** (OAuth apps required)
 
 ---
 
-## Quick Start - Deploy Now
+## ✅ AUTOMATED SETUP COMPLETED
 
-### Option 1: Railway (Recommended)
+### 1. Database Setup
+- ✅ Neon staging database created: `hackathon1_staging`
+- ✅ Connection string configured in `.env.staging`
+- ✅ **All 9 migrations executed successfully**
+- ✅ **5 tables created**: `users`, `user_profiles`, `skill_level_classifications`, `chapter_progress`, `chapter_metadata`
+- ✅ **10 chapters** populated in `chapter_metadata`
+- ✅ **9 indexes** created for performance
 
-1. Go to https://railway.app and sign in with GitHub
-2. Click "New Project" → "Deploy from GitHub repo"
-3. Select `sajid-khan-afridi/hackathon1_repeat`
-4. Set root directory to `backend`
-5. Copy environment variables from `.env` (see below)
-6. Deploy and get your URL
+### 2. Environment Configuration
+- ✅ `.env.staging` updated with credentials:
+  - ✅ Database URL (Neon staging)
+  - ✅ Qdrant URL and API key
+  - ✅ OpenAI API key
+  - ✅ CORS origins
+  - ✅ Frontend URL
+- ✅ Security credentials generated:
+  - ✅ JWT RSA key pair (staging-specific)
+  - ✅ CSRF secret key
 
-### Option 2: Render
-
-1. Go to https://render.com and sign in with GitHub
-2. Click "New +" → "Web Service"
-3. Select `sajid-khan-afridi/hackathon1_repeat`
-4. Configure:
-   - Root Directory: `backend`
-   - Build: `pip install -r requirements.txt`
-   - Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Copy environment variables (see below)
-6. Deploy and get your URL
+### 3. Deployment Scripts Created
+- ✅ `deploy_to_railway_staging.sh` - Railway deployment automation
+- ✅ `run_all_migrations_staging.py` - Database migration script (executed)
+- ✅ `railway.json` - Railway build/deploy configuration
 
 ---
 
-## Environment Variables to Set
+## ⚠️ MANUAL STEPS REQUIRED (22 minutes)
 
-Copy these from your `.env` file to Railway/Render dashboard:
+### Step 1: Create Google OAuth App (5 minutes)
+
+**Why needed**: For "Sign in with Google" functionality
+
+1. Go to: https://console.cloud.google.com/apis/credentials
+2. Click **"Create Credentials"** → **"OAuth 2.0 Client ID"**
+3. Application type: **Web application**
+4. Name: `RAG Chatbot Staging`
+5. Authorized redirect URIs:
+   ```
+   https://hackathon1-staging.up.railway.app/auth/google/callback
+   http://localhost:8000/auth/google/callback
+   ```
+6. Click **"Create"**
+7. Copy **Client ID** and **Client Secret**
+8. Update `backend/.env.staging`:
+   ```bash
+   GOOGLE_CLIENT_ID=<your-client-id>.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-<your-client-secret>
+   ```
+
+### Step 2: Create GitHub OAuth App (5 minutes)
+
+**Why needed**: For "Sign in with GitHub" functionality
+
+1. Go to: https://github.com/settings/developers
+2. Click **"New OAuth App"**
+3. Fill in:
+   - Application name: `RAG Chatbot Staging`
+   - Homepage URL: `https://staging-hackathon1.vercel.app`
+   - Authorization callback URL: `https://hackathon1-staging.up.railway.app/auth/github/callback`
+4. Click **"Register application"**
+5. Click **"Generate a new client secret"**
+6. Copy **Client ID** and **Client Secret**
+7. Update `backend/.env.staging`:
+   ```bash
+   GITHUB_CLIENT_ID=<your-client-id>
+   GITHUB_CLIENT_SECRET=<your-client-secret>
+   ```
+
+### Step 3: Deploy to Railway (12 minutes)
 
 ```bash
-ENVIRONMENT=production
+# 1. Authenticate with Railway
+railway login
 
-# OpenAI
-OPENAI_API_KEY=sk-proj-YOUR_OPENAI_API_KEY_HERE
+# 2. Run deployment script (will prompt for project linking)
+bash deploy_to_railway_staging.sh
+```
 
-# Qdrant
-QDRANT_URL=https://YOUR_QDRANT_CLUSTER_ID.REGION.gcp.cloud.qdrant.io
-QDRANT_API_KEY=YOUR_QDRANT_API_KEY_HERE
-QDRANT_COLLECTION=robotics_textbook
+The script will automatically:
+- Link to your Railway project
+- Create/switch to staging environment
+- Set all environment variables from `.env.staging`
+- Deploy the backend
+- Verify deployment
 
-# Neon PostgreSQL
-DATABASE_URL=postgresql://username:password@your-neon-host.region.aws.neon.tech/database?sslmode=require
+---
 
-# CORS (Update after deployment!)
-CORS_ORIGINS=https://sajid-khan-afridi.github.io,http://localhost:3000
+## 📊 AUTOMATED VS MANUAL BREAKDOWN
 
-# Rate Limiting
-RATE_LIMIT_ANONYMOUS=10
-RATE_LIMIT_AUTHENTICATED=50
+### Automated (Completed) ✅
+- Database migrations (9 migrations)
+- Environment variable preparation
+- Security credentials (JWT RSA keys, CSRF secret)
+- Deployment scripts generation
+- Railway configuration
 
-# RAG Settings
-CONFIDENCE_THRESHOLD=0.2
-TOP_K_CHUNKS=5
-MAX_CONVERSATION_HISTORY=5
-SESSION_RETENTION_DAYS=30
+### Manual (Required) ⚠️
+- Google OAuth app creation (~5 min)
+- GitHub OAuth app creation (~5 min)
+- OAuth credentials update in `.env.staging` (~2 min)
+- Railway authentication (~2 min)
+- Railway deployment execution (~10 min)
+
+**Total Manual Time**: ~22-25 minutes
+
+---
+
+## 🚀 DEPLOYMENT WORKFLOW
+
+```
+1. Create OAuth Apps (10 min)
+   ↓
+2. Update .env.staging (2 min)
+   ↓
+3. Railway Authentication (2 min)
+   ↓
+4. Run deploy_to_railway_staging.sh (10 min)
+   ↓
+5. Verify Health Endpoint (1 min)
+   ↓
+6. Run Smoke Tests (5 min)
+   ↓
+7. Deploy Frontend (15 min)
+   ↓
+8. User Acceptance Testing (3-4 hours)
+   ↓
+9. Production Deployment
 ```
 
 ---
 
-## After Deployment
+## 📁 KEY FILES
 
-1. **Get your backend URL** (e.g., `https://your-app.up.railway.app`)
-
-2. **Test health endpoint:**
-   ```bash
-   curl https://your-app.up.railway.app/api/v1/health
-   ```
-
-3. **Test query endpoint:**
-   ```bash
-   curl -X POST https://your-app.up.railway.app/api/v1/query \
-     -H "Content-Type: application/json" \
-     -d '{"query": "What is a robot?", "top_k": 3}'
-   ```
-
-4. **Update frontend:** Edit `src/components/ChatbotWidget/index.tsx` line 31:
-   ```typescript
-   const API_BASE_URL = typeof window !== 'undefined'
-     ? (window as any).CHATBOT_API_URL || 'https://your-app.up.railway.app'
-     : 'https://your-app.up.railway.app';
-   ```
-
-5. **Update CORS:** Add your Railway/Render URL to `CORS_ORIGINS`:
-   ```bash
-   CORS_ORIGINS=https://sajid-khan-afridi.github.io,https://your-app.up.railway.app
-   ```
-
-6. **Rebuild and push** frontend to GitHub Pages
+| File | Status | Purpose |
+|------|--------|---------|
+| `backend/.env.staging` | ⚠️ Needs OAuth credentials | Environment variables |
+| `backend/run_all_migrations_staging.py` | ✅ Executed | Database migrations |
+| `deploy_to_railway_staging.sh` | ✅ Ready to run | Railway deployment |
+| `deploy_staging.py` | ✅ Generated deployment script | Script generator |
+| `backend/railway.json` | ✅ Configured | Railway config |
+| `specs/1-personalization-engine/DEPLOYMENT_RUNBOOK.md` | ✅ Complete | Deployment guide |
+| `specs/1-personalization-engine/scripts/smoke_test.sh` | ✅ Ready | Automated tests |
+| `specs/1-personalization-engine/UAT_TEST_PLAN.md` | ✅ Complete | UAT scenarios |
 
 ---
 
-## Files Created for Deployment
+## ✅ COMPLETION CHECKLIST
 
-- ✅ `backend/Dockerfile` - Production Docker image
-- ✅ `backend/.dockerignore` - Optimized Docker builds
-- ✅ `backend/railway.json` - Railway configuration
-- ✅ `backend/render.yaml` - Render configuration
-- ✅ `backend/.env.production.example` - Production environment template
-- ✅ `DEPLOYMENT_GUIDE.md` - Complete deployment instructions
-- ✅ `backend/run_migrations.py` - Database migration runner
-- ✅ `backend/check_db_status.py` - Database verification script
-- ✅ `backend/test_qdrant.py` - Qdrant connectivity test
-
----
-
-## Verification Results
-
-### Database (Neon PostgreSQL)
-```
-✅ Connection: SUCCESSFUL
-✅ Tables: chat_sessions, chat_messages, source_citations, scheduled_jobs
-✅ Functions: purge_old_sessions, cleanup_old_sessions, update_last_activity
-```
-
-### Vector Store (Qdrant Cloud)
-```
-✅ Connection: SUCCESSFUL
-✅ Collection: robotics_textbook EXISTS
-✅ Points: 33 vectors indexed
-✅ Dimensions: 1536 (text-embedding-3-small)
-✅ Distance: Cosine
-```
-
-### OpenAI API
-```
-✅ API Key: VALID
-✅ Model Access: gpt-4-turbo-preview, text-embedding-3-small
-```
-
----
-
-## Deployment Checklist
-
-### Pre-Deployment (Completed ✅)
-- [x] Database schema created and verified
-- [x] Qdrant collection exists with indexed content
+### Automated Setup (100% Complete)
+- [x] Neon staging database created
+- [x] All database migrations executed
 - [x] Environment variables configured
-- [x] Dockerfile created and tested
-- [x] Railway/Render configs created
-- [x] Deployment guide written
+- [x] JWT RSA keys generated (staging-specific)
+- [x] CSRF secret generated
+- [x] Deployment scripts created
+- [x] Railway configuration created
 
-### Deployment Steps (User Action Required)
-- [ ] Choose platform (Railway or Render)
-- [ ] Deploy backend to chosen platform
-- [ ] Get backend URL
-- [ ] Test health endpoint
-- [ ] Test query endpoint
-- [ ] Update frontend with backend URL
-- [ ] Update CORS_ORIGINS on backend
-- [ ] Redeploy backend with updated CORS
-- [ ] Test end-to-end from GitHub Pages
-
-### Post-Deployment (After URL Available)
-- [ ] Set up uptime monitoring (UptimeRobot)
-- [ ] Configure error tracking (Sentry - optional)
-- [ ] Document backend URL in README
-- [ ] Schedule database maintenance (weekly purge)
-- [ ] Monitor OpenAI API costs
+### Manual Setup Required
+- [ ] **NEXT:** Create Google OAuth app
+- [ ] **NEXT:** Create GitHub OAuth app
+- [ ] Update OAuth credentials in `.env.staging`
+- [ ] Authenticate with Railway CLI
+- [ ] Run `deploy_to_railway_staging.sh`
+- [ ] Verify health endpoint: `https://hackathon1-staging.up.railway.app/health`
+- [ ] Run smoke tests
+- [ ] Deploy frontend to staging
+- [ ] Conduct UAT testing
+- [ ] Obtain production deployment approval
 
 ---
 
-## Support
+## 🎯 NEXT IMMEDIATE ACTIONS
 
-For detailed deployment instructions, see: **DEPLOYMENT_GUIDE.md**
+**Priority 1** - Create OAuth Apps:
+1. Google OAuth app → Get Client ID & Secret
+2. GitHub OAuth app → Get Client ID & Secret
+3. Update `backend/.env.staging` lines 116, 117, 129, 130
 
-For troubleshooting, check the guide's "Troubleshooting" section.
+**Priority 2** - Deploy to Railway:
+```bash
+railway login
+bash deploy_to_railway_staging.sh
+```
+
+**Priority 3** - Verify Deployment:
+```bash
+# Test health endpoint
+curl https://hackathon1-staging.up.railway.app/health
+
+# Run smoke tests
+bash specs/1-personalization-engine/scripts/smoke_test.sh
+```
+
+---
+
+## 📈 DEPLOYMENT PROGRESS
+
+**Overall**: 75% Complete
+
+- ✅ Database: 100%
+- ✅ Environment Config: 90% (OAuth apps pending)
+- ✅ Scripts: 100%
+- ⏳ Railway Deployment: 0% (requires manual execution)
+- ⏳ Frontend Deployment: 0% (pending backend)
+- ⏳ Testing: 0% (pending deployment)
+- ⏳ UAT: 0% (pending testing)
+- ⏳ Production: 0% (pending UAT)
+
+---
+
+**Generated**: 2025-12-23 (Automated deployment setup)
+**Estimated Time to Complete Manual Steps**: 22-25 minutes

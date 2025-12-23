@@ -18,6 +18,7 @@ from app.models.query import (
 from app.services.vector_service import vector_service
 from app.services.llm_service import llm_service
 from app.services.chat_service import chat_service
+from app.services.personalization_service import PersonalizationService
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -171,12 +172,45 @@ class RAGService:
         context = "\n".join(context_parts)
         logger.info(f"Built context from {len(search_results)} chunks ({len(context)} chars)")
 
-        # Step 7: Generate answer using LLM with context and history
+        # Step 6.5: Fetch user profile and build profile context (Phase 4B)
+        profile_context = None
+        if request.user_id:
+            try:
+                # Use chat_service pool to get database connection
+                if chat_service.pool:
+                    async with chat_service.pool.acquire() as conn:
+                        user_profile_data = await PersonalizationService.get_user_profile_with_classification(
+                            request.user_id, conn
+                        )
+                        if user_profile_data:
+                            skill_level = user_profile_data.get("skill_level")
+                            profile_context = PersonalizationService.build_profile_context(
+                                user_profile_data, skill_level
+                            )
+                            logger.info(
+                                f"Built profile context for user {request.user_id} "
+                                f"(skill_level={skill_level})"
+                            )
+                        else:
+                            logger.warning(f"No profile found for user {request.user_id}, using default")
+                else:
+                    logger.warning("Database pool not available, using default profile context")
+            except Exception as e:
+                logger.error(f"Failed to fetch user profile: {str(e)}", exc_info=True)
+                # Continue with default profile context (None will use LLM's default)
+
+        # If no profile context (unauthenticated or profile fetch failed), use default
+        if not profile_context:
+            profile_context = PersonalizationService.build_profile_context(None, None)
+            logger.debug("Using default intermediate profile context")
+
+        # Step 7: Generate answer using LLM with context, history, and profile (Phase 4B enhanced)
         try:
             llm_result = await llm_service.generate_response(
                 prompt=request.query,
                 context=context,
                 conversation_history=conversation_history,
+                profile_context=profile_context,
             )
 
             answer = llm_result["response"]
@@ -390,13 +424,39 @@ class RAGService:
             context_parts.append(f"[Source {idx}: {result.chapter_title}]\n{result.excerpt}\n")
         context = "\n".join(context_parts)
 
-        # Step 7: Stream answer from LLM
+        # Step 6.5: Fetch user profile and build profile context (Phase 4B)
+        profile_context = None
+        if request.user_id:
+            try:
+                if chat_service.pool:
+                    async with chat_service.pool.acquire() as conn:
+                        user_profile_data = await PersonalizationService.get_user_profile_with_classification(
+                            request.user_id, conn
+                        )
+                        if user_profile_data:
+                            skill_level = user_profile_data.get("skill_level")
+                            profile_context = PersonalizationService.build_profile_context(
+                                user_profile_data, skill_level
+                            )
+                            logger.info(
+                                f"Built profile context for streaming (user={request.user_id}, skill={skill_level})"
+                            )
+            except Exception as e:
+                logger.error(f"Failed to fetch user profile for streaming: {str(e)}", exc_info=True)
+
+        # If no profile context, use default
+        if not profile_context:
+            profile_context = PersonalizationService.build_profile_context(None, None)
+            logger.debug("Using default profile context for streaming")
+
+        # Step 7: Stream answer from LLM with profile context (Phase 4B enhanced)
         full_answer = ""
         try:
             async for chunk_text in llm_service.generate_response_stream(
                 prompt=request.query,
                 context=context,
                 conversation_history=conversation_history,
+                profile_context=profile_context,
             ):
                 full_answer += chunk_text
                 # Yield text chunk

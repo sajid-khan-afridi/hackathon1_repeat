@@ -1,0 +1,724 @@
+openapi: 3.1.0
+info:
+  title: Personalization Engine API
+  description: |
+    API endpoints for Phase 4B Personalization Engine: skill level classification,
+    chapter progress tracking, personalized recommendations, and profile-aware RAG chatbot.
+  version: 1.0.0
+  contact:
+    name: Robotics Textbook Platform Team
+    email: support@example.com
+
+servers:
+  - url: https://api.roboticstextbook.com/api/v1
+    description: Production server (Railway/Render)
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Skill Level
+    description: Skill level classification operations
+  - name: Progress Tracking
+    description: Chapter progress tracking operations
+  - name: Recommendations
+    description: Personalized chapter recommendation operations
+  - name: Chat (Enhanced)
+    description: Profile-aware RAG chatbot queries
+
+paths:
+  /skill-level:
+    get:
+      tags:
+        - Skill Level
+      summary: Get user's skill level classification
+      description: |
+        Retrieves the authenticated user's skill level classification (beginner/intermediate/advanced).
+        If no classification exists, computes it from user profile and stores it.
+      operationId: getSkillLevel
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Skill level retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillLevelResponse'
+              examples:
+                intermediate:
+                  value:
+                    user_id: "123e4567-e89b-12d3-a456-426614174000"
+                    skill_level: "intermediate"
+                    calculated_at: "2025-12-22T10:30:00Z"
+                    based_on_profile:
+                      experience_level: "intermediate"
+                      ros_familiarity: "basic"
+                      hardware_access: "simulation_only"
+                      learning_goal: "academic_research"
+                      preferred_language: "python"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Skill Level
+      summary: Recalculate user's skill level
+      description: |
+        Forces recalculation of skill level classification based on current user profile.
+        Typically called after user updates their profile attributes.
+      operationId: recalculateSkillLevel
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Skill level recalculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillLevelResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /progress:
+    get:
+      tags:
+        - Progress Tracking
+      summary: Get all chapter progress for user
+      description: |
+        Retrieves all chapter progress records (started, completed, bookmarked) for the authenticated user.
+      operationId: getAllProgress
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status (started or completed)
+          required: false
+          schema:
+            type: string
+            enum: [started, completed]
+        - name: is_bookmarked
+          in: query
+          description: Filter by bookmark status
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Progress records retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  progress:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChapterProgress'
+                  total_started:
+                    type: integer
+                    description: Count of started chapters
+                  total_completed:
+                    type: integer
+                    description: Count of completed chapters
+                  total_bookmarked:
+                    type: integer
+                    description: Count of bookmarked chapters
+              examples:
+                userProgress:
+                  value:
+                    progress:
+                      - id: "650e8400-e29b-41d4-a716-446655440001"
+                        user_id: "123e4567-e89b-12d3-a456-426614174000"
+                        chapter_id: "module-1/ros-intro"
+                        status: "completed"
+                        is_bookmarked: true
+                        started_at: "2025-12-20T14:00:00Z"
+                        completed_at: "2025-12-20T15:30:00Z"
+                        updated_at: "2025-12-21T09:00:00Z"
+                      - id: "650e8400-e29b-41d4-a716-446655440002"
+                        user_id: "123e4567-e89b-12d3-a456-426614174000"
+                        chapter_id: "module-2/ros-publishers"
+                        status: "started"
+                        is_bookmarked: false
+                        started_at: "2025-12-22T10:00:00Z"
+                        completed_at: null
+                        updated_at: "2025-12-22T10:00:00Z"
+                    total_started: 1
+                    total_completed: 1
+                    total_bookmarked: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /progress/start:
+    post:
+      tags:
+        - Progress Tracking
+      summary: Mark chapter as started
+      description: |
+        Records that user has started reading a chapter. Triggered after user spends 10+ seconds on chapter page.
+        If record already exists, returns 200 OK without modification.
+      operationId: markChapterStarted
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chapter_id
+              properties:
+                chapter_id:
+                  type: string
+                  description: Unique identifier for the chapter
+                  example: "module-1/ros-intro"
+      responses:
+        '201':
+          description: Chapter marked as started (new record created)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterProgress'
+        '200':
+          description: Chapter already started (existing record)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterProgress'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /progress/complete:
+    post:
+      tags:
+        - Progress Tracking
+      summary: Mark chapter as completed
+      description: |
+        Updates chapter progress to completed status. Triggered when user scrolls to bottom or explicitly marks complete.
+        Invalidates recommendation cache for this user.
+      operationId: markChapterCompleted
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chapter_id
+              properties:
+                chapter_id:
+                  type: string
+                  description: Unique identifier for the chapter
+                  example: "module-1/ros-intro"
+      responses:
+        '200':
+          description: Chapter marked as completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterProgress'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Chapter not started yet (must call /progress/start first)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /progress/bookmark:
+    post:
+      tags:
+        - Progress Tracking
+      summary: Toggle chapter bookmark
+      description: |
+        Toggles bookmark status for a chapter. Creates progress record if it doesn't exist.
+      operationId: toggleBookmark
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chapter_id
+              properties:
+                chapter_id:
+                  type: string
+                  description: Unique identifier for the chapter
+                  example: "module-1/ros-intro"
+                is_bookmarked:
+                  type: boolean
+                  description: Set to true to bookmark, false to unbookmark
+                  example: true
+      responses:
+        '200':
+          description: Bookmark toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterProgress'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /recommendations:
+    get:
+      tags:
+        - Recommendations
+      summary: Get personalized chapter recommendations
+      description: |
+        Returns up to 3 personalized chapter recommendations based on user's skill level,
+        learning goals, hardware access, and completed chapters. Results are cached for 1 hour.
+      operationId: getRecommendations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: force_refresh
+          in: query
+          description: Force recomputation even if cached (bypass cache)
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Recommendations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChapterRecommendation'
+                    maxItems: 3
+                  cached:
+                    type: boolean
+                    description: Whether result was served from cache
+                  cached_at:
+                    type: string
+                    format: date-time
+                    description: When the cached result was generated (if cached)
+              examples:
+                recommendations:
+                  value:
+                    recommendations:
+                      - chapter_id: "module-2/ros-publishers"
+                        title: "Creating ROS 2 Publishers"
+                        relevance_score: 0.92
+                        reason: "Matches your intermediate skill level and completes Module 1 prerequisites"
+                        module_number: 2
+                        difficulty_level: "intermediate"
+                      - chapter_id: "module-2/ros-subscribers"
+                        title: "Creating ROS 2 Subscribers"
+                        relevance_score: 0.88
+                        reason: "Practical content aligns with your career transition goal"
+                        module_number: 2
+                        difficulty_level: "intermediate"
+                      - chapter_id: "module-1/gazebo-simulation"
+                        title: "Gazebo Simulation Setup"
+                        relevance_score: 0.85
+                        reason: "Simulation-focused chapter matches your hardware access setting"
+                        module_number: 1
+                        difficulty_level: "beginner"
+                    cached: true
+                    cached_at: "2025-12-22T10:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Rate limit exceeded (50 requests/hour per user)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "RATE_LIMIT_EXCEEDED"
+                  message: "Recommendation API rate limit exceeded. Try again in 15 minutes."
+                  correlation_id: "abc-123-def"
+                  timestamp: "2025-12-22T10:35:00Z"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /chat/query:
+    post:
+      tags:
+        - Chat (Enhanced)
+      summary: Submit RAG chatbot query (profile-aware)
+      description: |
+        Submit a question to the RAG chatbot. For authenticated users, the chatbot considers
+        user profile (skill level, preferred language, hardware access) when generating answers.
+        For unauthenticated users, uses default intermediate-level responses.
+      operationId: submitChatQuery
+      security:
+        - BearerAuth: []
+        - {} # Also allow unauthenticated (will use default profile)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: User's question about robotics/ROS
+                  minLength: 5
+                  maxLength: 500
+                  example: "How do I create a ROS 2 publisher in Python?"
+      responses:
+        '200':
+          description: Answer generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQueryResponse'
+              examples:
+                beginnerAnswer:
+                  summary: Answer for beginner user
+                  value:
+                    answer: "A ROS 2 publisher is a node component that sends messages to a topic. Here's a step-by-step Python example:\n\n1. Import rclpy and Node\n2. Create a class inheriting from Node\n3. Use create_publisher() to set up the publisher\n4. Use publish() to send messages\n\nHere's a complete example..."
+                    sources:
+                      - chapter_id: "module-2/ros-publishers"
+                        title: "Creating ROS 2 Publishers"
+                        relevance_score: 0.95
+                      - chapter_id: "module-1/python-basics"
+                        title: "Python Programming for ROS"
+                        relevance_score: 0.82
+                    confidence: 0.93
+                    personalized: true
+                    profile_context:
+                      experience_level: "beginner"
+                      preferred_language: "python"
+                    response_time_ms: 1850
+                    correlation_id: "abc-123-def"
+                advancedAnswer:
+                  summary: Answer for advanced user
+                  value:
+                    answer: "Create a publisher using create_publisher<T>(topic, qos). Consider QoS profiles for reliability:\n\n- BEST_EFFORT: Lower latency, may drop messages\n- RELIABLE: Guarantees delivery, adds overhead\n\nFor production, tune QoS depth and deadline policies based on your system requirements..."
+                    sources:
+                      - chapter_id: "module-2/ros-publishers"
+                        title: "Creating ROS 2 Publishers"
+                        relevance_score: 0.95
+                      - chapter_id: "module-3/advanced-control"
+                        title: "Advanced Robot Control"
+                        relevance_score: 0.78
+                    confidence: 0.91
+                    personalized: true
+                    profile_context:
+                      experience_level: "advanced"
+                      preferred_language: "cpp"
+                    response_time_ms: 2100
+                    correlation_id: "xyz-456-ghi"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Rate limit exceeded (10 queries/hour for free users, 50/hour for authenticated)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Better Auth authentication (Phase 4A)
+
+  schemas:
+    SkillLevelResponse:
+      type: object
+      required:
+        - user_id
+        - skill_level
+        - calculated_at
+        - based_on_profile
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        skill_level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Computed skill level classification
+        calculated_at:
+          type: string
+          format: date-time
+          description: When the classification was computed
+        based_on_profile:
+          type: object
+          description: Profile attributes used for classification
+          properties:
+            experience_level:
+              type: string
+              enum: [beginner, intermediate, advanced]
+            ros_familiarity:
+              type: string
+              enum: [none, basic, proficient]
+            hardware_access:
+              type: string
+              enum: [simulation_only, partial_hardware, full_robot_lab]
+            learning_goal:
+              type: string
+              enum: [hobby_learning, academic_research, career_transition, startup_development]
+            preferred_language:
+              type: string
+              enum: [python, cpp, both]
+
+    ChapterProgress:
+      type: object
+      required:
+        - id
+        - user_id
+        - chapter_id
+        - status
+        - is_bookmarked
+        - started_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the progress record
+        user_id:
+          type: string
+          format: uuid
+          description: User this progress belongs to
+        chapter_id:
+          type: string
+          description: Unique identifier for the chapter
+          example: "module-1/ros-intro"
+        status:
+          type: string
+          enum: [started, completed]
+          description: Current progress status
+        is_bookmarked:
+          type: boolean
+          description: Whether user has bookmarked this chapter
+        started_at:
+          type: string
+          format: date-time
+          description: When user first opened the chapter
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When user marked chapter as completed (null if not completed)
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    ChapterRecommendation:
+      type: object
+      required:
+        - chapter_id
+        - title
+        - relevance_score
+        - reason
+        - module_number
+        - difficulty_level
+      properties:
+        chapter_id:
+          type: string
+          description: Unique identifier for the recommended chapter
+          example: "module-2/ros-publishers"
+        title:
+          type: string
+          description: Human-readable chapter title
+          example: "Creating ROS 2 Publishers"
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Computed relevance score from recommendation algorithm
+          example: 0.92
+        reason:
+          type: string
+          description: Human-readable explanation of why this chapter was recommended
+          example: "Matches your intermediate skill level and completes Module 1 prerequisites"
+        module_number:
+          type: integer
+          description: Module number for prerequisite ordering
+          example: 2
+        difficulty_level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Chapter difficulty classification
+
+    ChatQueryResponse:
+      type: object
+      required:
+        - answer
+        - sources
+        - confidence
+        - personalized
+        - response_time_ms
+        - correlation_id
+      properties:
+        answer:
+          type: string
+          description: Generated answer to user's question
+        sources:
+          type: array
+          description: Source chapters used to generate the answer
+          items:
+            type: object
+            properties:
+              chapter_id:
+                type: string
+              title:
+                type: string
+              relevance_score:
+                type: number
+                format: float
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Model confidence in the answer (0-1)
+        personalized:
+          type: boolean
+          description: Whether answer was personalized based on user profile
+        profile_context:
+          type: object
+          nullable: true
+          description: Profile attributes used for personalization (if authenticated)
+          properties:
+            experience_level:
+              type: string
+            preferred_language:
+              type: string
+            hardware_access:
+              type: string
+        response_time_ms:
+          type: integer
+          description: Total response time in milliseconds
+        correlation_id:
+          type: string
+          description: Request correlation ID for tracing
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - correlation_id
+            - timestamp
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: "INVALID_CHAPTER_ID"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Invalid chapter_id format. Must match pattern: module-N/chapter-slug"
+            correlation_id:
+              type: string
+              description: Request correlation ID for debugging
+            timestamp:
+              type: string
+              format: date-time
+              description: When the error occurred
+
+  responses:
+    BadRequest:
+      description: Bad request (invalid input)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "INVALID_INPUT"
+              message: "chapter_id is required and must be a non-empty string"
+              correlation_id: "abc-123-def"
+              timestamp: "2025-12-22T10:35:00Z"
+
+    Unauthorized:
+      description: Unauthorized (missing or invalid JWT token)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "UNAUTHORIZED"
+              message: "Authentication required. Please log in."
+              correlation_id: "abc-123-def"
+              timestamp: "2025-12-22T10:35:00Z"
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "Progress tracking rate limit exceeded. Try again in 1 minute."
+              correlation_id: "abc-123-def"
+              timestamp: "2025-12-22T10:35:00Z"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "INTERNAL_SERVER_ERROR"
+              message: "An unexpected error occurred. Please try again later."
+              correlation_id: "abc-123-def"
+              timestamp: "2025-12-22T10:35:00Z"

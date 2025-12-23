@@ -15,6 +15,7 @@ import type {
 } from '../../types/auth';
 import { updateProfile } from '../../services/authApi';
 import { AuthApiError } from '../../services/authApi';
+import { SkillLevelBadge } from './SkillLevelBadge';
 import styles from './ProfileSettings.module.css';
 
 export function ProfileSettings(): JSX.Element {
@@ -87,6 +88,19 @@ export function ProfileSettings(): JSX.Element {
           <h1 className={styles.title}>Profile Settings</h1>
           <p className={styles.subtitle}>
             Update your learning preferences to personalize your experience
+          </p>
+        </div>
+
+        {/* Skill Level Badge */}
+        <div className={styles.skillLevelSection}>
+          <h2 className={styles.sectionTitle}>Your Skill Level</h2>
+          <p className={styles.sectionDescription}>
+            Based on your profile, you're classified as:
+          </p>
+          <SkillLevelBadge showRecalculate size="large" />
+          <p className={styles.skillLevelHint}>
+            Your skill level is automatically calculated from your programming experience and ROS familiarity.
+            Update the fields below and click "Recalculate" to refresh your classification.
           </p>
         </div>
 

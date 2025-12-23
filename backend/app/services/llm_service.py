@@ -84,6 +84,7 @@ When answering:
         prompt: str,
         context: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
+        profile_context: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Generate response using OpenAI Chat Completions with retrieved context.
@@ -92,6 +93,7 @@ When answering:
             prompt: User's question
             context: Retrieved context from vector search (concatenated chunks)
             conversation_history: List of previous messages [{"role": "user|assistant", "content": "..."}]
+            profile_context: Optional personalized system message based on user profile (Phase 4B)
 
         Returns:
             Dictionary with:
@@ -104,8 +106,9 @@ When answering:
             Exception: If OpenAI API call fails
         """
         try:
-            # Build messages array
-            messages = [{"role": "system", "content": self.SYSTEM_PROMPT}]
+            # Build messages array with profile-aware system prompt (Phase 4B enhancement)
+            system_prompt = profile_context if profile_context else self.SYSTEM_PROMPT
+            messages = [{"role": "system", "content": system_prompt}]
 
             # Add conversation history (last N exchanges)
             if conversation_history:
@@ -159,6 +162,7 @@ Please answer based on the context above."""
         prompt: str,
         context: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
+        profile_context: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """
         Generate streaming response using OpenAI Chat Completions with retrieved context.
@@ -167,6 +171,7 @@ Please answer based on the context above."""
             prompt: User's question
             context: Retrieved context from vector search (concatenated chunks)
             conversation_history: List of previous messages [{"role": "user|assistant", "content": "..."}]
+            profile_context: Optional personalized system message based on user profile (Phase 4B)
 
         Yields:
             Text chunks as they arrive from the LLM
@@ -175,8 +180,9 @@ Please answer based on the context above."""
             Exception: If OpenAI API call fails
         """
         try:
-            # Build messages array (same as non-streaming)
-            messages = [{"role": "system", "content": self.SYSTEM_PROMPT}]
+            # Build messages array with profile-aware system prompt (Phase 4B enhancement)
+            system_prompt = profile_context if profile_context else self.SYSTEM_PROMPT
+            messages = [{"role": "system", "content": system_prompt}]
 
             # Add conversation history (last N exchanges)
             if conversation_history:

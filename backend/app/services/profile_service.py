@@ -140,6 +140,20 @@ class ProfileService:
 
             profile = ProfileResponse(**dict(row))
             logger.info(f"Updated profile for user: {user_id}, complete: {profile.is_complete}")
+
+            # T054: Invalidate recommendation cache when profile is updated
+            # Profile changes (skill level, learning goals, hardware) affect recommendations
+            try:
+                from app.services.recommendation_service import get_recommendation_service
+                recommendation_service = get_recommendation_service()
+                recommendation_service.invalidate_cache(str(user_id))
+                logger.debug(f"Invalidated recommendation cache for user {user_id} after profile update")
+            except Exception as cache_error:
+                # Log error but don't fail the request if cache invalidation fails
+                logger.warning(
+                    f"Failed to invalidate recommendation cache for user {user_id}: {cache_error}"
+                )
+
             return profile
         finally:
             await conn.close()

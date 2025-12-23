@@ -54,7 +54,10 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
             "/openapi.json",
             "/auth/signup",  # Public endpoint - no session yet
             "/auth/login",   # Public endpoint - no session yet
+            "/auth/refresh",  # Uses refresh token cookie for auth, not CSRF
+            "/auth/logout",   # Logout should work even without CSRF token
             "/auth/google/callback",  # OAuth callback uses state param
+            "/auth/github/callback",  # GitHub OAuth callback uses state param
             "/api/v1/query",  # Public RAG endpoint
         ]
         self.cookie_secure = cookie_secure
@@ -110,8 +113,8 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
             key=CSRF_COOKIE_NAME,
             value=csrf_token,
             httponly=False,  # Must be readable by JavaScript to include in headers
-            secure=self.cookie_secure,  # HTTPS only in production
-            samesite=self.cookie_samesite,  # Lax for auth flows, Strict for higher security
+            secure=True,  # Required for SameSite=None
+            samesite="none",  # Allow cross-origin cookie sending (GitHub Pages -> Railway)
             max_age=86400,  # 24 hours (matches access token expiry)
             path="/",
         )

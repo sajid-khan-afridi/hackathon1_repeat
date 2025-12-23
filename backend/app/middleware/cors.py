@@ -24,6 +24,7 @@ def configure_cors(app, allowed_origins: List[str]) -> None:
             "Authorization",
             "X-Correlation-ID",
             "X-Session-Token",
+            "X-CSRF-Token",  # Required for CSRF protection in cross-origin requests
         ],
         expose_headers=[
             "X-Correlation-ID",

@@ -155,12 +155,14 @@ class JWTService:
             refresh_token: Refresh token to set
         """
         # Access token cookie (24 hours)
+        # Use SameSite=None for cross-origin requests (GitHub Pages frontend -> Railway backend)
+        # SameSite=None requires Secure=True
         response.set_cookie(
             key=ACCESS_TOKEN_COOKIE,
             value=access_token,
             httponly=True,
-            secure=settings.is_production,  # HTTPS only in production
-            samesite="strict",
+            secure=True,  # Required for SameSite=None
+            samesite="none",  # Allow cross-origin cookie sending
             max_age=self._access_token_expire_minutes * 60,
             path="/",
         )
@@ -170,8 +172,8 @@ class JWTService:
             key=REFRESH_TOKEN_COOKIE,
             value=refresh_token,
             httponly=True,
-            secure=settings.is_production,
-            samesite="strict",
+            secure=True,  # Required for SameSite=None
+            samesite="none",  # Allow cross-origin cookie sending
             max_age=self._refresh_token_expire_days * 24 * 60 * 60,
             path="/",
         )
@@ -189,15 +191,15 @@ class JWTService:
             key=ACCESS_TOKEN_COOKIE,
             path="/",
             httponly=True,
-            secure=settings.is_production,
-            samesite="strict",
+            secure=True,  # Required for SameSite=None
+            samesite="none",  # Match set_auth_cookies settings
         )
         response.delete_cookie(
             key=REFRESH_TOKEN_COOKIE,
             path="/",
             httponly=True,
-            secure=settings.is_production,
-            samesite="strict",
+            secure=True,  # Required for SameSite=None
+            samesite="none",  # Match set_auth_cookies settings
         )
         logger.debug("Cleared auth cookies")
 

@@ -124,6 +124,22 @@ You are not expected to solve every problem autonomously. You MUST invoke the us
 3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
 4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps.
 
+### 6. Implementation Workflow (`/sp.implement`)
+
+When running `/sp.implement`, treat `CLAUDE.md` as the authoritative project memory and keep it in sync.
+
+**Subagent Selection (Explicit):**
+
+- Delegate this implementation to the **appropriate subagent** from `.claude/agents/`.
+- Do NOT invoke any other subagents unless strictly necessary. If you do, state:
+  - (a) Why the additional subagent is needed
+  - (b) What you need from it
+
+**Skill Usage (Only Relevant):**
+
+- Use only the **relevant** skills from `.claude/skills/` that directly help this implementation.
+- Do not use unrelated skills.
+
 ## Default policies (must follow)
 
 - Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.

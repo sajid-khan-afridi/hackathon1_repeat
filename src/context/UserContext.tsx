@@ -4,6 +4,7 @@ export interface UserProfile {
   experienceLevel: 'beginner' | 'intermediate' | 'advanced';
   rosFamiliarity: 'novice' | 'intermediate' | 'expert';
   hardwareAccess: boolean;
+  preferredLanguage?: 'python' | 'cpp' | 'both';
 }
 
 interface UserContextType {
@@ -40,7 +41,8 @@ function loadFromStorage(): UserProfile | null {
         parsed &&
         typeof parsed.experienceLevel === 'string' &&
         typeof parsed.rosFamiliarity === 'string' &&
-        typeof parsed.hardwareAccess === 'boolean'
+        typeof parsed.hardwareAccess === 'boolean' &&
+        (parsed.preferredLanguage === undefined || typeof parsed.preferredLanguage === 'string')
       ) {
         return parsed as UserProfile;
       }

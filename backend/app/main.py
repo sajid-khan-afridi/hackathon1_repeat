@@ -80,7 +80,7 @@ async def simple_health() -> JSONResponse:
 
 
 # Import and include routers
-from app.routers import health, query, sessions, auth, oauth, users
+from app.routers import health, query, sessions, auth, oauth, users, personalization, progress
 
 app.include_router(health.router, prefix="/api/v1", tags=["health"])
 app.include_router(query.router, prefix="/api/v1", tags=["query"])
@@ -88,3 +88,5 @@ app.include_router(sessions.router, prefix="/api/v1/chat", tags=["sessions"])
 app.include_router(auth.router, prefix="/auth", tags=["authentication"])
 app.include_router(oauth.router, prefix="/auth", tags=["oauth"])
 app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(personalization.router, tags=["personalization"])
+app.include_router(progress.router, tags=["progress"])

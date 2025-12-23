@@ -17,6 +17,9 @@ qdrant-client==1.12.1
 # PostgreSQL async driver
 asyncpg==0.30.0
 
+# Caching (Phase 4B)
+cachetools==5.3.2
+
 # Rate limiting
 slowapi==0.1.9
 

@@ -31,14 +31,37 @@ class JWTService:
         self._access_token_expire_minutes = settings.jwt_access_token_expire_minutes
         self._refresh_token_expire_days = settings.jwt_refresh_token_expire_days
 
+    def _clean_pem_key(self, key: str) -> str:
+        """
+        Clean a PEM key string to ensure proper formatting.
+
+        Handles common issues with environment variable stored keys:
+        - Escaped newlines (\\n -> \n)
+        - Multiple consecutive newlines
+        - Extra whitespace
+        """
+        # Replace escaped newlines
+        key = key.replace("\\n", "\n")
+
+        # Split into lines and clean
+        lines = key.strip().split("\n")
+        cleaned_lines = []
+
+        for line in lines:
+            line = line.strip()
+            if line:  # Skip empty lines in the middle
+                cleaned_lines.append(line)
+
+        # Rejoin with proper newlines
+        return "\n".join(cleaned_lines)
+
     @property
     def private_key(self) -> str:
         """Get the private key for signing tokens."""
         if self._private_key is None:
             if not settings.jwt_private_key:
                 raise ValueError("JWT_PRIVATE_KEY not configured")
-            # Handle escaped newlines in environment variable
-            self._private_key = settings.jwt_private_key.replace("\\n", "\n")
+            self._private_key = self._clean_pem_key(settings.jwt_private_key)
         return self._private_key
 
     @property
@@ -47,8 +70,7 @@ class JWTService:
         if self._public_key is None:
             if not settings.jwt_public_key:
                 raise ValueError("JWT_PUBLIC_KEY not configured")
-            # Handle escaped newlines in environment variable
-            self._public_key = settings.jwt_public_key.replace("\\n", "\n")
+            self._public_key = self._clean_pem_key(settings.jwt_public_key)
         return self._public_key
 
     def create_access_token(self, user_id: UUID, email: str) -> str:

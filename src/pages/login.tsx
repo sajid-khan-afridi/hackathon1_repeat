@@ -6,6 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Layout from '@theme/Layout';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useAuth } from '../hooks/useAuth';
 import { LoginForm } from '../components/Auth';
 import styles from './auth.module.css';
@@ -38,6 +39,10 @@ export default function LoginPage(): JSX.Element {
   const { isAuthenticated, isLoading } = useAuth();
   const [oauthError, setOauthError] = useState<string | null>(null);
 
+  // Get base URLs for navigation
+  const homeUrl = useBaseUrl('/');
+  const signupUrl = useBaseUrl('/signup');
+
   // Check for OAuth errors on mount
   useEffect(() => {
     const error = getOAuthError();
@@ -52,17 +57,17 @@ export default function LoginPage(): JSX.Element {
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       // Use window.location for Docusaurus compatibility
-      window.location.href = '/';
+      window.location.href = homeUrl;
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, homeUrl]);
 
   const handleSuccess = () => {
     // Redirect to home or profile wizard
-    window.location.href = '/';
+    window.location.href = homeUrl;
   };
 
   const handleSignupClick = () => {
-    window.location.href = '/signup';
+    window.location.href = signupUrl;
   };
 
   // Show loading state while checking auth

@@ -12,19 +12,24 @@ import type {
   ChapterProgressToggleBookmark,
 } from '../types/progress';
 
+// Production API URL
+const PRODUCTION_API_URL = 'https://hackathon1repeat-production.up.railway.app';
+
 // Get API URL from Docusaurus config or fallback
 const getApiUrl = (): string => {
   if (typeof window !== 'undefined') {
-    // Check for Docusaurus config (primary source)
+    // Check if running on production domain (GitHub Pages) - highest priority
+    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
+      return PRODUCTION_API_URL;
+    }
+
+    // Check for Docusaurus config
     const docusaurusConfig = (window as any).__DOCUSAURUS__;
     if (docusaurusConfig?.siteConfig?.customFields?.apiUrl) {
       return docusaurusConfig.siteConfig.customFields.apiUrl;
     }
-    // Fallback: Check if we're on the production domain
-    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
-      return 'https://hackathon1repeat-production.up.railway.app';
-    }
   }
+  // Default to localhost for development
   return 'http://localhost:8000';
 };
 

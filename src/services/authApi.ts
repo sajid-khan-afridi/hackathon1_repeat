@@ -14,10 +14,18 @@ import type {
   ProfileUpdate,
 } from '../types/auth';
 
+// Production API URL
+const PRODUCTION_API_URL = 'https://hackathon1repeat-production.up.railway.app';
+
 // API base URL - uses Docusaurus config or environment variable
 const getApiUrl = (): string => {
   // In Docusaurus, we can access customFields from docusaurus.config.ts
   if (typeof window !== 'undefined') {
+    // Check if running on production domain (GitHub Pages)
+    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
+      return PRODUCTION_API_URL;
+    }
+
     // Check for environment variable first (safe browser check)
     const envUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
                    (typeof process !== 'undefined' && process.env?.API_URL);

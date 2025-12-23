@@ -6,9 +6,17 @@
 import React from 'react';
 import styles from './AuthForms.module.css';
 
+// Production API URL
+const PRODUCTION_API_URL = 'https://hackathon1repeat-production.up.railway.app';
+
 // API base URL for OAuth redirect
 const getApiUrl = (): string => {
   if (typeof window !== 'undefined') {
+    // Check if running on production domain (GitHub Pages)
+    if (window.location.hostname === 'sajid-khan-afridi.github.io') {
+      return PRODUCTION_API_URL;
+    }
+
     const envUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
                    (typeof process !== 'undefined' && process.env?.API_URL);
     if (envUrl) return envUrl;
@@ -18,6 +26,7 @@ const getApiUrl = (): string => {
       return docusaurusConfig.siteConfig.customFields.apiUrl;
     }
   }
+  // Default to localhost for local development
   return 'http://localhost:8000';
 };
 

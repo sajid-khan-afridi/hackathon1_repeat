@@ -97,6 +97,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: '/login',
+          label: 'Login',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/sajid-khan-afridi/hackathon1_repeat',
           position: 'right',
           className: 'header-github-link',

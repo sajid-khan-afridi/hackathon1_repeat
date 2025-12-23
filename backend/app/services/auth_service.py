@@ -581,7 +581,7 @@ class AuthService:
             refresh_token=new_refresh_token,
         )
 
-    async def get_current_user(self, user_id: UUID) -> Optional[Tuple[UserResponse, ProfileResponse]]:
+    async def get_current_user(self, user_id: UUID) -> Optional[Tuple[UserResponse, Optional[ProfileResponse]]]:
         """
         Get current user info by ID.
 
@@ -589,16 +589,27 @@ class AuthService:
             user_id: User's UUID
 
         Returns:
-            Tuple of (UserResponse, ProfileResponse) or None
+            Tuple of (UserResponse, ProfileResponse or None) or None
         """
-        user = await user_service.get_user_by_id(user_id)
-        if not user:
-            return None
+        try:
+            logger.debug(f"get_current_user called for user_id: {user_id}")
 
-        user_response = await user_service.to_response(user)
-        profile = await user_service.get_user_profile(user_id)
+            user = await user_service.get_user_by_id(user_id)
+            if not user:
+                logger.warning(f"User not found for user_id: {user_id}")
+                return None
 
-        return user_response, profile
+            logger.debug(f"User found: {user.email}")
+            user_response = await user_service.to_response(user)
+            logger.debug(f"User response created for: {user.email}")
+
+            profile = await user_service.get_user_profile(user_id)
+            logger.debug(f"Profile fetched for user_id: {user_id}, profile is None: {profile is None}")
+
+            return user_response, profile
+        except Exception as e:
+            logger.error(f"Error in get_current_user for user_id {user_id}: {type(e).__name__}: {e}")
+            raise
 
     async def get_active_sessions(self, user_id: UUID) -> list[dict]:
         """

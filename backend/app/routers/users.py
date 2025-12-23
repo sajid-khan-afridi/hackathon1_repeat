@@ -5,7 +5,7 @@ User profile router for profile management endpoints.
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 
 from app.middleware.auth import AuthenticatedUser, get_current_user
 from app.models.profile import ProfileCreate, ProfileUpdate, ProfileResponse
@@ -15,6 +15,23 @@ from app.services.auth_service import auth_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+@router.options("/profile")
+async def options_profile():
+    """
+    Handle OPTIONS preflight for /profile endpoint.
+    CORS middleware should handle this, but explicit handler ensures it works.
+    """
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 
 
 @router.get("/profile", response_model=ProfileResponse)

@@ -14,3 +14,42 @@ See https://github.com/facebook/docusaurus/pull/11142
 :global(.navbar__items--right) > :last-child {
   padding-right: 0;
 }
+
+/* Auth nav item styles */
+.authNavItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  color: var(--ifm-navbar-link-color);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logoutButton {
+  background: none;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  color: var(--ifm-color-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+/* Hide email on small screens */
+@media (max-width: 996px) {
+  .userEmail {
+    display: none;
+  }
+}

@@ -8,6 +8,8 @@ import SearchBar from '@theme/SearchBar';
 import NavbarMobileSidebarToggle from '@theme/Navbar/MobileSidebar/Toggle';
 import NavbarLogo from '@theme/Navbar/Logo';
 import NavbarSearch from '@theme/Navbar/Search';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import { useAuth } from '../../../hooks/useAuth';
 
 import styles from './styles.module.css';
 
@@ -56,11 +58,56 @@ function NavbarContentLayout({ left, right }: { left: ReactNode; right: ReactNod
   );
 }
 
+/**
+ * Auth-aware navbar item that shows Login or User menu based on auth state.
+ */
+function AuthNavItem(): ReactNode {
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const loginUrl = useBaseUrl('/login');
+  const homeUrl = useBaseUrl('/');
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = homeUrl;
+  };
+
+  // Show nothing while loading to prevent flash
+  if (isLoading) {
+    return null;
+  }
+
+  if (isAuthenticated && user) {
+    return (
+      <div className={styles.authNavItem}>
+        <span className={styles.userEmail}>{user.email}</span>
+        <button
+          className={clsx('navbar__item', styles.logoutButton)}
+          onClick={handleLogout}
+          type="button"
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <a href={loginUrl} className="navbar__item navbar__link">
+      Login
+    </a>
+  );
+}
+
 export default function NavbarContent(): ReactNode {
   const mobileSidebar = useNavbarMobileSidebar();
 
   const items = useNavbarItems();
   const [leftItems, rightItems] = splitNavbarItems(items);
+
+  // Filter out the static "Login" item - we'll render AuthNavItem instead
+  const filteredRightItems = rightItems.filter(
+    (item) => !('to' in item && item.to === '/login')
+  );
 
   const searchBarItem = items.find((item) => item.type === 'search');
 
@@ -78,7 +125,8 @@ export default function NavbarContent(): ReactNode {
         // TODO stop hardcoding items?
         // Ask the user to add the respective navbar items => more flexible
         <>
-          <NavbarItems items={rightItems} />
+          <AuthNavItem />
+          <NavbarItems items={filteredRightItems} />
           <NavbarColorModeToggle className={styles.colorModeToggle} />
           {!searchBarItem && (
             <NavbarSearch>

@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import Layout from '@theme/Layout';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useAuth } from '../hooks/useAuth';
 import { SignupForm } from '../components/Auth';
 import styles from './auth.module.css';
@@ -12,21 +13,25 @@ import styles from './auth.module.css';
 export default function SignupPage(): JSX.Element {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Get base URLs for navigation
+  const homeUrl = useBaseUrl('/');
+  const loginUrl = useBaseUrl('/login');
+
   // Redirect to home if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       // Use window.location for Docusaurus compatibility
-      window.location.href = '/';
+      window.location.href = homeUrl;
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, homeUrl]);
 
   const handleSuccess = () => {
     // Redirect to home (profile wizard will be triggered by AuthContext)
-    window.location.href = '/';
+    window.location.href = homeUrl;
   };
 
   const handleLoginClick = () => {
-    window.location.href = '/login';
+    window.location.href = loginUrl;
   };
 
   // Show loading state while checking auth

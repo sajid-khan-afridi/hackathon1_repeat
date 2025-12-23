@@ -1,5 +1,6 @@
 """
 FastAPI application entry point for RAG Chatbot Core.
+Version: 2.0.0 - Added auth, personalization, and progress endpoints
 """
 
 import logging
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="RAG Chatbot API",
     description="AI-powered question answering system for robotics textbook",
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/api/docs" if settings.is_development else None,
     redoc_url="/api/redoc" if settings.is_development else None,
 )

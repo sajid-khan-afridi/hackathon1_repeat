@@ -23,6 +23,58 @@ async def debug_test():
     return {"status": "ok", "message": "Debug endpoint working"}
 
 
+@router.get("/debug/key-check")
+async def debug_key_check():
+    """Debug endpoint to check JWT key configuration."""
+    try:
+        # Try to access the keys
+        private_key = jwt_service.private_key
+        public_key = jwt_service.public_key
+
+        return {
+            "status": "ok",
+            "private_key_configured": len(private_key) > 0,
+            "private_key_starts_with": private_key[:30] if private_key else None,
+            "public_key_configured": len(public_key) > 0,
+            "public_key_starts_with": public_key[:30] if public_key else None,
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+        }
+
+
+@router.get("/debug/token-verify")
+async def debug_token_verify(request: Request):
+    """Debug endpoint to test token verification."""
+    token = jwt_service.get_access_token_from_request(request)
+    if not token:
+        return {"status": "no_token", "message": "No access token in request"}
+
+    # Try to decode without verification first
+    import jwt as pyjwt
+    try:
+        unverified = pyjwt.decode(token, options={"verify_signature": False})
+    except Exception as e:
+        return {"status": "decode_error", "error": str(e)}
+
+    # Now try with verification
+    payload = jwt_service.verify_token(token, expected_type="access")
+    if payload:
+        return {
+            "status": "verified",
+            "payload": payload,
+        }
+    else:
+        return {
+            "status": "verification_failed",
+            "unverified_payload": unverified,
+            "message": "Token decoded but verification failed",
+        }
+
+
 @router.get("/debug/auth-test")
 async def debug_auth_test(
     current_user: AuthenticatedUser = Depends(get_current_user),

@@ -28,10 +28,10 @@ app = FastAPI(
     redoc_url="/api/redoc" if settings.is_development else None,
 )
 
-# Configure CORS
-configure_cors(app, settings.cors_origins_list)
+# Middleware order matters! In Starlette, middleware added LAST runs FIRST (outermost).
+# CORS must be outermost to handle OPTIONS preflight before other middleware.
 
-# Configure CSRF protection (FR-027)
+# Configure CSRF protection (FR-027) - runs after CORS
 configure_csrf_protection(
     app,
     cookie_secure=not settings.is_development,  # Secure cookies in production only
@@ -42,6 +42,10 @@ app.add_middleware(UserIdentificationMiddleware)
 
 # Add logging middleware
 app.add_middleware(LoggingMiddleware)
+
+# Configure CORS - MUST BE LAST so it runs FIRST (outermost middleware)
+# This ensures OPTIONS preflight requests are handled before any other middleware
+configure_cors(app, settings.cors_origins_list)
 
 
 @app.on_event("startup")

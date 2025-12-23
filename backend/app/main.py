@@ -84,6 +84,16 @@ async def simple_health() -> JSONResponse:
     return JSONResponse(content={"status": "ok"})
 
 
+@app.get("/debug/cors")
+async def debug_cors() -> JSONResponse:
+    """Debug endpoint to verify CORS configuration."""
+    return JSONResponse(content={
+        "cors_origins": settings.cors_origins_list,
+        "environment": settings.environment,
+        "middleware_order": "CSRF -> UserID -> Logging -> CORS (outermost)",
+    })
+
+
 # Import and include routers
 from app.routers import health, query, sessions, auth, oauth, users, personalization, progress
 

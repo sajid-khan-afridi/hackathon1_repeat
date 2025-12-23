@@ -135,6 +135,12 @@ class JWTService:
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid token: {e}")
             return None
+        except ValueError as e:
+            logger.error(f"JWT key configuration error: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error verifying token: {type(e).__name__}: {e}")
+            return None
 
     def get_token_expiry_seconds(self) -> int:
         """Get access token expiry time in seconds."""

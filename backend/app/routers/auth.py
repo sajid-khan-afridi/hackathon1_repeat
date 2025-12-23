@@ -17,6 +17,24 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get("/debug/test")
+async def debug_test():
+    """Debug endpoint to test basic routing."""
+    return {"status": "ok", "message": "Debug endpoint working"}
+
+
+@router.get("/debug/auth-test")
+async def debug_auth_test(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+):
+    """Debug endpoint to test auth middleware."""
+    return {
+        "status": "ok",
+        "user_id": str(current_user.user_id),
+        "email": current_user.email,
+    }
+
+
 @router.get("/csrf")
 async def get_csrf_token():
     """

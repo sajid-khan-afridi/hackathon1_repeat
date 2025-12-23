@@ -52,7 +52,10 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
             "/api/docs",
             "/api/redoc",
             "/openapi.json",
+            "/auth/signup",  # Public endpoint - no session yet
+            "/auth/login",   # Public endpoint - no session yet
             "/auth/google/callback",  # OAuth callback uses state param
+            "/api/v1/query",  # Public RAG endpoint
         ]
         self.cookie_secure = cookie_secure
         self.cookie_samesite = cookie_samesite

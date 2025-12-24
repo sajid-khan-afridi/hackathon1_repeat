@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, ReactNode } from 'react';
+import { useAuthContext } from './AuthContext';
+import type { UserProfile as AuthUserProfile, ROSFamiliarity, HardwareAccess } from '../types/auth';
 
 export interface UserProfile {
   experienceLevel: 'beginner' | 'intermediate' | 'advanced';
@@ -20,6 +22,46 @@ const defaultUserContext: UserContextType = {
 };
 
 export const UserContext = createContext<UserContextType>(defaultUserContext);
+
+/**
+ * Maps AuthContext ROSFamiliarity to UserContext rosFamiliarity
+ */
+function mapRosFamiliarity(ros: ROSFamiliarity | null): 'novice' | 'intermediate' | 'expert' {
+  switch (ros) {
+    case 'none':
+      return 'novice';
+    case 'basic':
+      return 'intermediate';
+    case 'proficient':
+      return 'expert';
+    default:
+      return 'novice';
+  }
+}
+
+/**
+ * Maps AuthContext HardwareAccess to UserContext hardwareAccess (boolean)
+ */
+function mapHardwareAccess(hardware: HardwareAccess | null): boolean {
+  // simulation_only means no physical hardware
+  return hardware !== null && hardware !== 'simulation_only';
+}
+
+/**
+ * Converts AuthContext profile to UserContext profile format
+ */
+function mapAuthProfileToUserProfile(authProfile: AuthUserProfile | null): UserProfile | null {
+  if (!authProfile || !authProfile.experienceLevel) {
+    return null;
+  }
+
+  return {
+    experienceLevel: authProfile.experienceLevel,
+    rosFamiliarity: mapRosFamiliarity(authProfile.rosFamiliarity),
+    hardwareAccess: mapHardwareAccess(authProfile.hardwareAccess),
+    preferredLanguage: authProfile.preferredLanguage || undefined,
+  };
+}
 
 interface UserProviderProps {
   children: ReactNode;
@@ -74,11 +116,30 @@ function saveToStorage(profile: UserProfile | null): void {
 export function UserProvider({ children }: UserProviderProps) {
   const [userProfile, setUserProfileState] = React.useState<UserProfile | null>(loadFromStorage);
 
+  // Get auth profile to sync with
+  const { profile: authProfile, isAuthenticated } = useAuthContext();
+
   // Memoized setter that also persists to localStorage
   const setUserProfile = useCallback((profile: UserProfile | null) => {
     setUserProfileState(profile);
     saveToStorage(profile);
   }, []);
+
+  // Sync UserContext with AuthContext profile when it changes
+  // This ensures PersonalizedSection sees updates from ProfileSettings
+  useEffect(() => {
+    if (isAuthenticated && authProfile) {
+      const mappedProfile = mapAuthProfileToUserProfile(authProfile);
+      if (mappedProfile) {
+        setUserProfileState(mappedProfile);
+        saveToStorage(mappedProfile);
+      }
+    } else if (!isAuthenticated) {
+      // Clear profile on logout
+      setUserProfileState(null);
+      saveToStorage(null);
+    }
+  }, [authProfile, isAuthenticated]);
 
   return (
     <UserContext.Provider value={{ userProfile, setUserProfile }}>{children}</UserContext.Provider>

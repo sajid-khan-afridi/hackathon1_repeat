@@ -4,8 +4,10 @@ Version: 2.0.0 - Added auth, personalization, and progress endpoints
 """
 
 import logging
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import settings
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.cors import configure_cors
@@ -46,6 +48,60 @@ app.add_middleware(LoggingMiddleware)
 # Configure CORS - MUST BE LAST so it runs FIRST (outermost middleware)
 # This ensures OPTIONS preflight requests are handled before any other middleware
 configure_cors(app, settings.cors_origins_list)
+
+
+def add_cors_headers(response: JSONResponse, request: Request) -> JSONResponse:
+    """Add CORS headers to response based on request origin."""
+    origin = request.headers.get("origin", "")
+    allowed_origins = settings.cors_origins_list
+
+    # If origin is in allowed list, add CORS headers
+    if origin in allowed_origins or "*" in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin or "*"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+
+    return response
+
+
+@app.exception_handler(StarletteHTTPException)
+async def cors_http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    """
+    Custom HTTP exception handler that includes CORS headers.
+    This ensures CSRF errors (403) and other HTTP errors have proper CORS headers.
+    """
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+    return add_cors_headers(response, request)
+
+
+@app.exception_handler(RequestValidationError)
+async def cors_validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """
+    Custom validation exception handler that includes CORS headers.
+    """
+    response = JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+    return add_cors_headers(response, request)
+
+
+@app.exception_handler(Exception)
+async def cors_generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """
+    Generic exception handler that includes CORS headers.
+    Ensures all unhandled exceptions still return proper CORS headers.
+    """
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    response = JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+    return add_cors_headers(response, request)
 
 
 @app.on_event("startup")

@@ -12,7 +12,7 @@ from typing import Dict, Any, AsyncGenerator, Tuple
 from fastapi import APIRouter, HTTPException, status, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from app.models.query import QueryRequest, QueryResponse, StreamChunk
+from app.models.query import QueryRequest, QueryResponse, StreamChunk, TokenUsage
 from app.services.rag_service import rag_service
 from app.config import settings
 
@@ -155,7 +155,8 @@ async def generate_sse_stream(query_request: QueryRequest) -> AsyncGenerator[str
     try:
         async for chunk in rag_service.process_query_stream(query_request):
             # Convert StreamChunk to JSON and format as SSE
-            chunk_dict = chunk.model_dump(exclude_none=True)
+            # Use mode='json' to ensure UUID and other types are serialized properly
+            chunk_dict = chunk.model_dump(exclude_none=True, mode='json')
             sse_data = f"data: {json.dumps(chunk_dict)}\n\n"
             yield sse_data
 
@@ -171,8 +172,13 @@ async def generate_sse_stream(query_request: QueryRequest) -> AsyncGenerator[str
             done=True,
             sources=[],
             confidence=0.0,
+            tokens_used=TokenUsage(
+                input_tokens=0,
+                output_tokens=0,
+                total_tokens=0,
+            ),
         )
-        yield f"data: {json.dumps(error_chunk.model_dump(exclude_none=True))}\n\n"
+        yield f"data: {json.dumps(error_chunk.model_dump(exclude_none=True, mode='json'))}\n\n"
 
 
 @router.post("/query", status_code=status.HTTP_200_OK)

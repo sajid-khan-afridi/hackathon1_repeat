@@ -394,12 +394,19 @@ class RAGService:
             )
         except Exception as e:
             logger.error(f"Vector search failed: {str(e)}", exc_info=True)
-            # Yield error chunk
+            # Yield error chunk with diagnostic info
+            error_msg = f"I'm currently unable to search the textbook content. Error: {str(e)[:100]}"
+            logger.error(f"Vector search error details: {str(e)}")
             yield StreamChunk(
-                chunk="I'm currently unable to search the textbook content. Please try again later.",
+                chunk=error_msg,
                 done=True,
                 sources=[],
                 confidence=0.0,
+                tokens_used=TokenUsage(
+                    input_tokens=0,
+                    output_tokens=0,
+                    total_tokens=0,
+                ),
             )
             return
 
@@ -415,6 +422,11 @@ class RAGService:
                 sources=[],
                 confidence=0.0,
                 session_id=off_topic_response.session_id,
+                tokens_used=TokenUsage(
+                    input_tokens=0,
+                    output_tokens=0,
+                    total_tokens=0,
+                ),
             )
             return
 
@@ -469,6 +481,11 @@ class RAGService:
                 done=True,
                 sources=[],
                 confidence=0.0,
+                tokens_used=TokenUsage(
+                    input_tokens=0,
+                    output_tokens=0,
+                    total_tokens=0,
+                ),
             )
             return
 

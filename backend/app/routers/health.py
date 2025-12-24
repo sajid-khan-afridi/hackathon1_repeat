@@ -62,13 +62,20 @@ async def health_check() -> HealthStatus:
             c.name == settings.qdrant_collection for c in collections.collections
         )
         if collection_exists:
-            results["vector_store"] = "healthy"
-            results["details"]["vector_store"] = f"Collection '{settings.qdrant_collection}' found"
+            # Get collection info including vector count
+            collection_info = qdrant.get_collection(settings.qdrant_collection)
+            vector_count = collection_info.points_count
+            if vector_count > 0:
+                results["vector_store"] = "healthy"
+                results["details"]["vector_store"] = f"Collection '{settings.qdrant_collection}' has {vector_count} vectors"
+            else:
+                results["vector_store"] = "degraded"
+                results["details"]["vector_store"] = f"Collection '{settings.qdrant_collection}' exists but has 0 vectors - content not indexed!"
         else:
             results["vector_store"] = "degraded"
             results["details"][
                 "vector_store"
-            ] = f"Collection '{settings.qdrant_collection}' not found"
+            ] = f"Collection '{settings.qdrant_collection}' not found - run indexing script"
     except Exception as e:
         results["vector_store"] = "unhealthy"
         results["details"]["vector_store"] = f"Connection failed: {str(e)}"

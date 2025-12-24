@@ -12,6 +12,7 @@
  */
 
 import React, { useState } from 'react';
+import Link from '@docusaurus/Link';
 import styles from './ChatbotWidget.module.css';
 import type { SourceCitation } from './types';
 
@@ -123,15 +124,14 @@ export default function SourceCitations({
               </span>
 
               <div className={styles.sourceContent}>
-                {/* Chapter link */}
-                <a
-                  href={getChapterUrl(source.chapter_id)}
+                {/* Chapter link - using Docusaurus Link for proper baseUrl handling */}
+                <Link
+                  to={getChapterUrl(source.chapter_id)}
                   className={styles.sourceLink}
                   aria-label={`Navigate to ${source.chapter_title}`}
-                  // Open in same tab for seamless navigation
                 >
                   {source.chapter_title}
-                </a>
+                </Link>
 
                 {/* Relevance score badge */}
                 <span

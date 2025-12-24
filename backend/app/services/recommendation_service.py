@@ -9,6 +9,7 @@ Related: research.md Section 3 - Recommendation Algorithm Design
 """
 
 import asyncio
+import json
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import logging
@@ -283,7 +284,12 @@ class RecommendationService:
                 raise ValueError(f"No skill classification found for user_id={user_id}")
 
             user_skill_level = skill_classification_row['skill_level']
-            based_on_profile = skill_classification_row['based_on_profile']
+            based_on_profile_raw = skill_classification_row['based_on_profile']
+            # Parse JSON string if needed (asyncpg returns string for JSONB when inserted as string)
+            if isinstance(based_on_profile_raw, str):
+                based_on_profile = json.loads(based_on_profile_raw)
+            else:
+                based_on_profile = based_on_profile_raw
 
             # Extract profile attributes
             user_learning_goal = based_on_profile.get('learning_goal', 'hobby_exploration')

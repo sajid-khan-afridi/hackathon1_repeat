@@ -20,6 +20,15 @@ from app.models.profile import ExperienceLevel, ROSFamiliarity
 logger = logging.getLogger(__name__)
 
 
+def _parse_based_on_profile(value):
+    """Parse based_on_profile from database - handles both dict and JSON string."""
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        return json.loads(value)
+    return value
+
+
 class ClassificationService:
     """Service for skill level classification operations."""
 
@@ -179,7 +188,7 @@ class ClassificationService:
             skill_level=result["skill_level"],
             calculated_at=result["calculated_at"],
             updated_at=result["updated_at"],
-            based_on_profile=result["based_on_profile"],
+            based_on_profile=_parse_based_on_profile(result["based_on_profile"]),
         )
 
     @staticmethod
@@ -214,7 +223,7 @@ class ClassificationService:
             skill_level=result["skill_level"],
             calculated_at=result["calculated_at"],
             updated_at=result["updated_at"],
-            based_on_profile=result["based_on_profile"],
+            based_on_profile=_parse_based_on_profile(result["based_on_profile"]),
         )
 
     @staticmethod

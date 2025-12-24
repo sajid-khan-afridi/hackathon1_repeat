@@ -110,7 +110,7 @@ class ProfileService:
         values = []
         param_idx = 1
 
-        for field, value in profile_data.dict(exclude_unset=True).items():
+        for field, value in profile_data.model_dump(exclude_unset=True, by_alias=False).items():
             if value is not None:
                 update_fields.append(f"{field} = ${param_idx}")
                 values.append(value)

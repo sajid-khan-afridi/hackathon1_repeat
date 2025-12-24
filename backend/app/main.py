@@ -4,6 +4,7 @@ Version: 2.0.0 - Added auth, personalization, and progress endpoints
 """
 
 import logging
+import asyncpg
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -13,6 +14,7 @@ from app.middleware.logging import LoggingMiddleware
 from app.middleware.cors import configure_cors
 from app.middleware.rate_limit import UserIdentificationMiddleware
 from app.middleware.csrf import configure_csrf_protection
+from app.services.recommendation_service import initialize_recommendation_service
 
 # Configure logging
 logging.basicConfig(
@@ -20,6 +22,9 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# Global database pool for services that need it
+db_pool: asyncpg.Pool | None = None
 
 # Create FastAPI application
 app = FastAPI(
@@ -107,15 +112,40 @@ async def cors_generic_exception_handler(request: Request, exc: Exception) -> JS
 @app.on_event("startup")
 async def startup_event() -> None:
     """Initialize services on application startup."""
+    global db_pool
     logger.info("Starting RAG Chatbot API")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"CORS Origins: {settings.cors_origins_list}")
+
+    # Initialize database connection pool
+    try:
+        db_pool = await asyncpg.create_pool(
+            settings.database_url,
+            min_size=2,
+            max_size=10,
+            command_timeout=60,
+        )
+        logger.info("Database connection pool created successfully")
+
+        # Initialize RecommendationService with the pool
+        initialize_recommendation_service(db_pool)
+        logger.info("RecommendationService initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database pool or services: {e}")
+        # Don't fail startup - recommendations will just return errors
+        # Other endpoints can still create individual connections
 
 
 @app.on_event("shutdown")
 async def shutdown_event() -> None:
     """Cleanup on application shutdown."""
+    global db_pool
     logger.info("Shutting down RAG Chatbot API")
+
+    # Close database connection pool
+    if db_pool:
+        await db_pool.close()
+        logger.info("Database connection pool closed")
 
 
 @app.get("/")

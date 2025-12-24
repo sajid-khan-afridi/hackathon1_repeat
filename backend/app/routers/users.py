@@ -85,6 +85,8 @@ async def update_profile(
         404: Profile not found
     """
     try:
+        logger.info(f"Updating profile for user {current_user.user_id}")
+        logger.debug(f"Profile data received: {profile_data.model_dump()}")
         profile = await profile_service.update_profile(current_user.user_id, profile_data)
         logger.info(f"Profile updated for user {current_user.user_id}, complete: {profile.is_complete}")
         return profile
@@ -95,6 +97,18 @@ async def update_profile(
                 "error": {
                     "code": "PROFILE_NOT_FOUND",
                     "message": str(e),
+                }
+            },
+        )
+    except Exception as e:
+        logger.error(f"Error updating profile for user {current_user.user_id}: {type(e).__name__}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": {
+                    "code": "PROFILE_UPDATE_ERROR",
+                    "message": f"Failed to update profile: {type(e).__name__}",
+                    "debug": str(e),
                 }
             },
         )

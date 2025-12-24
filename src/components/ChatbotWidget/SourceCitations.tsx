@@ -23,17 +23,39 @@ interface SourceCitationsProps {
 
 /**
  * Formats chapter_id to URL path
- * Example: "module-1-chapter-2" -> "/docs/module-1/chapter-2"
+ *
+ * Handles multiple formats:
+ * - Qdrant format: "..-..-..-docs-module-2-isaac-sim-chapter-1-introduction"
+ *   -> "/docs/module-2-isaac-sim/chapter-1-introduction"
+ * - Legacy format: "module-1-chapter-2" -> "/docs/module-1/chapter-2"
  */
 function getChapterUrl(chapterId: string): string {
-  // Split on first dash to separate module from chapter
+  // Handle Qdrant format: ..-..-..-docs-module-X-name-chapter-Y-name
+  if (chapterId.startsWith('..')) {
+    // Remove leading parent directory references (..-..-..- or similar)
+    const cleaned = chapterId.replace(/^(\.\.?-)+/, '');
+
+    // Format: docs-module-X-name-chapter-Y-name
+    // Split on "-chapter-" to separate module path from chapter file
+    if (cleaned.startsWith('docs-')) {
+      const withoutDocs = cleaned.substring(5); // Remove "docs-"
+      const chapterIdx = withoutDocs.indexOf('-chapter-');
+      if (chapterIdx > 0) {
+        const modulePart = withoutDocs.substring(0, chapterIdx);
+        const chapterPart = withoutDocs.substring(chapterIdx + 1);
+        return `/docs/${modulePart}/${chapterPart}`;
+      }
+    }
+  }
+
+  // Legacy format: module-1-chapter-2 -> /docs/module-1/chapter-2
   const parts = chapterId.split('-');
-  if (parts.length >= 4) {
-    // Format: module-1-chapter-2 -> /docs/module-1/chapter-2
+  if (parts.length >= 4 && parts[0] === 'module' && parts[2] === 'chapter') {
     const moduleNum = parts[1];
     const chapterNum = parts[3];
     return `/docs/module-${moduleNum}/chapter-${chapterNum}`;
   }
+
   // Fallback: use chapter_id as-is
   return `/docs/${chapterId}`;
 }

@@ -64,6 +64,7 @@ function NavbarContentLayout({ left, right }: { left: ReactNode; right: ReactNod
 function AuthNavItem(): ReactNode {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
   const loginUrl = useBaseUrl('/login');
+  const profileUrl = useBaseUrl('/profile');
   const homeUrl = useBaseUrl('/');
 
   const handleLogout = async () => {
@@ -79,6 +80,9 @@ function AuthNavItem(): ReactNode {
   if (isAuthenticated && user) {
     return (
       <div className={styles.authNavItem}>
+        <a href={profileUrl} className={styles.profileLink} title="View Profile">
+          👤 Profile
+        </a>
         <span className={styles.userEmail}>{user.email}</span>
         <button
           className={clsx('navbar__item', styles.logoutButton)}

@@ -9,9 +9,21 @@ import NavbarMobileSidebarToggle from '@theme/Navbar/MobileSidebar/Toggle';
 import NavbarLogo from '@theme/Navbar/Logo';
 import NavbarSearch from '@theme/Navbar/Search';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import { useLocation } from '@docusaurus/router';
 import { useAuth } from '../../../hooks/useAuth';
 
 import styles from './styles.module.css';
+
+/**
+ * Profile icon SVG component for consistent rendering across browsers
+ */
+function ProfileIcon(): ReactNode {
+  return (
+    <svg className={styles.profileIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+    </svg>
+  );
+}
 
 function useNavbarItems() {
   // TODO temporary casting until ThemeConfig type is improved
@@ -63,9 +75,13 @@ function NavbarContentLayout({ left, right }: { left: ReactNode; right: ReactNod
  */
 function AuthNavItem(): ReactNode {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const location = useLocation();
   const loginUrl = useBaseUrl('/login');
   const profileUrl = useBaseUrl('/profile');
   const homeUrl = useBaseUrl('/');
+
+  // Check if currently on profile page for active state
+  const isOnProfilePage = location.pathname.includes('/profile');
 
   const handleLogout = async () => {
     await logout();
@@ -80,8 +96,17 @@ function AuthNavItem(): ReactNode {
   if (isAuthenticated && user) {
     return (
       <div className={styles.authNavItem}>
-        <a href={profileUrl} className={styles.profileLink} title="View Profile">
-          👤 Profile
+        <a
+          href={profileUrl}
+          className={clsx(
+            styles.profileLink,
+            isOnProfilePage && styles.profileLinkActive
+          )}
+          title="View Profile"
+          aria-current={isOnProfilePage ? 'page' : undefined}
+        >
+          <ProfileIcon />
+          Profile
         </a>
         <span className={styles.userEmail}>{user.email}</span>
         <button

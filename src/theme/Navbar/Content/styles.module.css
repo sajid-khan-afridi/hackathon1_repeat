@@ -31,20 +31,46 @@ See https://github.com/facebook/docusaurus/pull/11142
   white-space: nowrap;
 }
 
+/* Profile link - styled as button to match Logout */
 .profileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
   color: var(--ifm-navbar-link-color);
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
   padding: 0.375rem 0.75rem;
+  border: 1px solid var(--ifm-navbar-link-color);
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .profileLink:hover {
   color: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
   background: var(--ifm-color-primary-lightest, rgba(37, 99, 235, 0.1));
   text-decoration: none;
+}
+
+/* Active state when on profile page */
+.profileLinkActive {
+  background: var(--ifm-color-primary);
+  color: white;
+  border-color: var(--ifm-color-primary);
+}
+
+.profileLinkActive:hover {
+  background: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary-dark);
+  color: white;
+}
+
+/* Profile SVG icon */
+.profileIcon {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
 }
 
 .logoutButton {
@@ -63,8 +89,12 @@ See https://github.com/facebook/docusaurus/pull/11142
   color: white;
 }
 
-/* Hide email on small screens */
+/* Hide auth items on mobile - they appear in sidebar instead */
 @media (max-width: 996px) {
+  .authNavItem {
+    display: none;
+  }
+
   .userEmail {
     display: none;
   }

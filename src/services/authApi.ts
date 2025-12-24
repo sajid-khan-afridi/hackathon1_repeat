@@ -12,7 +12,68 @@ import type {
   MessageResponse,
   UserProfile,
   ProfileUpdate,
+  User,
 } from '../types/auth';
+
+// ============================================
+// Case Conversion Utilities
+// ============================================
+
+/**
+ * Convert snake_case string to camelCase.
+ */
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+/**
+ * Convert camelCase string to snake_case.
+ */
+function camelToSnake(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+
+/**
+ * Recursively convert object keys from snake_case to camelCase.
+ */
+function convertKeysToCamelCase<T>(obj: unknown): T {
+  if (obj === null || obj === undefined) {
+    return obj as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertKeysToCamelCase(item)) as T;
+  }
+  if (typeof obj === 'object') {
+    const converted: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      const camelKey = snakeToCamel(key);
+      converted[camelKey] = convertKeysToCamelCase(value);
+    }
+    return converted as T;
+  }
+  return obj as T;
+}
+
+/**
+ * Recursively convert object keys from camelCase to snake_case.
+ */
+function convertKeysToSnakeCase<T>(obj: unknown): T {
+  if (obj === null || obj === undefined) {
+    return obj as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertKeysToSnakeCase(item)) as T;
+  }
+  if (typeof obj === 'object') {
+    const converted: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      const snakeKey = camelToSnake(key);
+      converted[snakeKey] = convertKeysToSnakeCase(value);
+    }
+    return converted as T;
+  }
+  return obj as T;
+}
 
 // Production API URL
 const PRODUCTION_API_URL = 'https://hackathon1repeat-production.up.railway.app';
@@ -116,7 +177,9 @@ async function apiRequest<T>(
     headers,
   });
 
-  const data = await response.json();
+  const rawData = await response.json();
+  // Convert snake_case keys to camelCase for frontend compatibility
+  const data = convertKeysToCamelCase<Record<string, unknown>>(rawData);
 
   if (!response.ok) {
     // Handle 401 Unauthorized - attempt token refresh
@@ -273,9 +336,11 @@ export async function getProfile(): Promise<UserProfile> {
  * Create a new profile for the current user.
  */
 export async function createProfile(data: ProfileUpdate): Promise<UserProfile> {
+  // Convert camelCase keys to snake_case for API compatibility
+  const snakeCaseData = convertKeysToSnakeCase(data);
   return apiRequest<UserProfile>('/users/profile', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(snakeCaseData),
   });
 }
 
@@ -283,9 +348,11 @@ export async function createProfile(data: ProfileUpdate): Promise<UserProfile> {
  * Update the current user's profile.
  */
 export async function updateProfile(data: ProfileUpdate): Promise<UserProfile> {
+  // Convert camelCase keys to snake_case for API compatibility
+  const snakeCaseData = convertKeysToSnakeCase(data);
   return apiRequest<UserProfile>('/users/profile', {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(snakeCaseData),
   });
 }
 

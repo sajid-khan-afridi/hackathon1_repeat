@@ -585,6 +585,8 @@ class AuthService:
         """
         Get current user info by ID.
 
+        Auto-creates an empty profile if one doesn't exist (fixes P0 backend API failures).
+
         Args:
             user_id: User's UUID
 
@@ -604,6 +606,23 @@ class AuthService:
             logger.debug(f"User response created for: {user.email}")
 
             profile = await user_service.get_user_profile(user_id)
+
+            # P0 Fix: Auto-create profile if it doesn't exist
+            # This ensures users can always access profile-dependent features
+            # (skill-level, recommendations, profile updates)
+            if profile is None:
+                logger.info(f"Auto-creating profile for user_id: {user_id}")
+                try:
+                    await user_service.create_empty_profile(user_id)
+                    profile = await user_service.get_user_profile(user_id)
+                    logger.info(f"Auto-created profile for user_id: {user_id}")
+                except Exception as profile_error:
+                    # Log but don't fail - profile creation might fail if it already exists
+                    # due to race condition, which is fine
+                    logger.warning(f"Could not auto-create profile for {user_id}: {profile_error}")
+                    # Try to fetch again in case it was created by another request
+                    profile = await user_service.get_user_profile(user_id)
+
             logger.debug(f"Profile fetched for user_id: {user_id}, profile is None: {profile is None}")
 
             return user_response, profile

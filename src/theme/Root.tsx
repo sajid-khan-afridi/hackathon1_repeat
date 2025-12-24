@@ -3,7 +3,7 @@ import { AuthProvider } from '@site/src/context/AuthContext';
 import { UserProvider } from '@site/src/context/UserContext';
 import { LanguageProvider } from '@site/src/context/LanguageContext';
 import GlobalFloatingChat from '@site/src/components/GlobalFloatingChat';
-import { ProfileBannerWrapper } from '@site/src/components/Profile/ProfileBannerWrapper';
+// ProfileBannerWrapper moved to Layout component to render AFTER navbar
 
 interface RootProps {
   children: ReactNode;
@@ -57,8 +57,7 @@ export default function Root({ children }: RootProps): JSX.Element {
           Skip to main content
         </a>
 
-        {/* Profile completion banner - shows for authenticated users with incomplete profiles */}
-        <ProfileBannerWrapper />
+        {/* Profile completion banner moved to Layout component for proper positioning after navbar */}
 
         {children}
 

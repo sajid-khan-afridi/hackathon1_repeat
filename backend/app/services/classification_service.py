@@ -3,6 +3,7 @@ Classification Service for Phase 4B Personalization Engine.
 Handles skill level classification logic using weighted scoring algorithm.
 """
 
+import json
 import logging
 from uuid import UUID
 from datetime import datetime
@@ -164,7 +165,7 @@ class ClassificationService:
             """,
             user_id,
             skill_level,
-            profile_snapshot,
+            json.dumps(profile_snapshot),
         )
 
         logger.info(

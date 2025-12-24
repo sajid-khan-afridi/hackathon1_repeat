@@ -127,6 +127,9 @@ async def startup_event() -> None:
         )
         logger.info("Database connection pool created successfully")
 
+        # Run critical migrations on startup
+        await run_startup_migrations(db_pool)
+
         # Initialize RecommendationService with the pool
         initialize_recommendation_service(db_pool)
         logger.info("RecommendationService initialized successfully")
@@ -134,6 +137,80 @@ async def startup_event() -> None:
         logger.error(f"Failed to initialize database pool or services: {e}")
         # Don't fail startup - recommendations will just return errors
         # Other endpoints can still create individual connections
+
+
+async def run_startup_migrations(pool: asyncpg.Pool) -> None:
+    """Run critical database migrations on startup."""
+    logger.info("Running startup migrations...")
+
+    async with pool.acquire() as conn:
+        # Create skill_level_classifications table if not exists
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS skill_level_classifications (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+                skill_level VARCHAR(20) NOT NULL CHECK (skill_level IN ('beginner', 'intermediate', 'advanced')),
+                calculated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                based_on_profile JSONB NOT NULL
+            )
+        """)
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_skill_level_user ON skill_level_classifications(user_id)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_skill_level_tier ON skill_level_classifications(skill_level)")
+        logger.info("skill_level_classifications table ready")
+
+        # Create chapter_progress table if not exists
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS chapter_progress (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                chapter_id VARCHAR(255) NOT NULL,
+                status VARCHAR(20) NOT NULL CHECK (status IN ('started', 'completed')),
+                is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE,
+                started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                completed_at TIMESTAMP WITH TIME ZONE,
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                CONSTRAINT unique_user_chapter UNIQUE (user_id, chapter_id)
+            )
+        """)
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_chapter_progress_user ON chapter_progress(user_id)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_chapter_progress_status ON chapter_progress(status)")
+        logger.info("chapter_progress table ready")
+
+        # Create chapter_metadata table if not exists
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS chapter_metadata (
+                chapter_id VARCHAR(255) PRIMARY KEY,
+                module_number INTEGER NOT NULL CHECK (module_number > 0),
+                title VARCHAR(500) NOT NULL,
+                difficulty_level VARCHAR(20) NOT NULL CHECK (difficulty_level IN ('beginner', 'intermediate', 'advanced')),
+                prerequisites JSONB NOT NULL DEFAULT '[]',
+                requires_hardware BOOLEAN NOT NULL DEFAULT FALSE,
+                learning_goal_tags JSONB NOT NULL DEFAULT '[]',
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+            )
+        """)
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_chapter_metadata_difficulty ON chapter_metadata(difficulty_level)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_chapter_metadata_module ON chapter_metadata(module_number)")
+        logger.info("chapter_metadata table ready")
+
+        # Insert sample chapter metadata if empty
+        count = await conn.fetchval("SELECT COUNT(*) FROM chapter_metadata")
+        if count == 0:
+            await conn.execute("""
+                INSERT INTO chapter_metadata (chapter_id, module_number, title, difficulty_level, prerequisites, requires_hardware, learning_goal_tags) VALUES
+                ('module-1/ros-intro', 1, 'Introduction to ROS 2', 'beginner', '[]', FALSE, '["theoretical", "practical"]'),
+                ('module-1/linux-basics', 1, 'Linux Basics for Robotics', 'beginner', '[]', FALSE, '["practical"]'),
+                ('module-1/python-basics', 1, 'Python Programming for ROS', 'beginner', '[]', FALSE, '["practical"]'),
+                ('module-2/ros-publishers', 2, 'Creating ROS 2 Publishers', 'intermediate', '["module-1/ros-intro", "module-1/python-basics"]', FALSE, '["practical", "theoretical"]'),
+                ('module-2/ros-subscribers', 2, 'Creating ROS 2 Subscribers', 'intermediate', '["module-1/ros-intro", "module-1/python-basics"]', FALSE, '["practical", "theoretical"]'),
+                ('module-3/advanced-control', 3, 'Advanced Robot Control', 'advanced', '["module-2/ros-publishers", "module-2/ros-subscribers"]', TRUE, '["practical", "research"]')
+                ON CONFLICT (chapter_id) DO NOTHING
+            """)
+            logger.info("Inserted sample chapter metadata")
+
+    logger.info("Startup migrations completed")
 
 
 @app.on_event("shutdown")

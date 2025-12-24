@@ -95,10 +95,16 @@ class ClassificationService:
 
         Returns:
             Skill level: 'beginner', 'intermediate', or 'advanced'
+
+        Note:
+            Uses small epsilon (0.001) for floating-point comparison to handle
+            edge cases like advanced experience + no ROS = 2.2 (should be advanced).
         """
-        if skill_score <= ClassificationService.BEGINNER_THRESHOLD:
+        EPSILON = 0.001
+
+        if skill_score <= ClassificationService.BEGINNER_THRESHOLD + EPSILON:
             return "beginner"
-        elif skill_score <= ClassificationService.INTERMEDIATE_THRESHOLD:
+        elif skill_score < ClassificationService.INTERMEDIATE_THRESHOLD - EPSILON:
             return "intermediate"
         else:
             return "advanced"

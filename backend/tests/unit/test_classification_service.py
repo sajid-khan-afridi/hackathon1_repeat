@@ -37,7 +37,7 @@ class TestSkillScoreCalculation:
             "intermediate", "proficient"
         )
         # (0.6 * 2) + (0.4 * 3) = 2.4
-        assert score == 2.4
+        assert abs(score - 2.4) < 0.001
 
     def test_advanced_proficient(self):
         """Test advanced experience + proficient ROS -> highest score."""
@@ -49,7 +49,7 @@ class TestSkillScoreCalculation:
         """Test advanced experience + no ROS -> mid-high score."""
         score = ClassificationService._calculate_skill_score("advanced", "none")
         # (0.6 * 3) + (0.4 * 1) = 2.2
-        assert score == 2.2
+        assert abs(score - 2.2) < 0.001
 
     def test_invalid_experience_defaults_to_beginner(self):
         """Test invalid experience level defaults to beginner value."""
@@ -87,10 +87,10 @@ class TestSkillLevelDetermination:
         level = ClassificationService._determine_skill_level(2.0)
         assert level == "intermediate"
 
-    def test_score_2_2_is_intermediate(self):
-        """Test score at intermediate threshold boundary -> intermediate."""
+    def test_score_2_2_is_advanced(self):
+        """Test score at intermediate threshold boundary -> advanced (advanced experience + no ROS)."""
         level = ClassificationService._determine_skill_level(2.2)
-        assert level == "intermediate"
+        assert level == "advanced"
 
     def test_score_2_3_is_advanced(self):
         """Test score just above intermediate threshold -> advanced."""
@@ -375,10 +375,10 @@ class TestClassificationConsistency:
 
     def test_classification_thresholds_are_correct(self):
         """Test that threshold boundaries match spec (FR-003)."""
-        # From research.md:
+        # Updated thresholds:
         # - skill_score <= 1.4: beginner
-        # - 1.4 < skill_score <= 2.2: intermediate
-        # - skill_score > 2.2: advanced
+        # - 1.4 < skill_score < 2.2: intermediate
+        # - skill_score >= 2.2: advanced (so advanced experience + no ROS = advanced)
 
         assert ClassificationService.BEGINNER_THRESHOLD == 1.4
         assert ClassificationService.INTERMEDIATE_THRESHOLD == 2.2
@@ -386,5 +386,5 @@ class TestClassificationConsistency:
         # Test boundary cases
         assert ClassificationService._determine_skill_level(1.4) == "beginner"
         assert ClassificationService._determine_skill_level(1.41) == "intermediate"
-        assert ClassificationService._determine_skill_level(2.2) == "intermediate"
-        assert ClassificationService._determine_skill_level(2.21) == "advanced"
+        assert ClassificationService._determine_skill_level(2.19) == "intermediate"
+        assert ClassificationService._determine_skill_level(2.2) == "advanced"

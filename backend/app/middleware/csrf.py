@@ -59,6 +59,10 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
             "/auth/google/callback",  # OAuth callback uses state param
             "/auth/github/callback",  # GitHub OAuth callback uses state param
             "/api/v1/query",  # Public RAG endpoint
+            "/users/profile",  # P0 fix: exempt profile - JWT auth provides protection
+            "/api/v1/skill-level",  # Exempt personalization endpoints - JWT protected
+            "/api/v1/recommendations",  # Exempt recommendations - JWT protected
+            "/api/v1/progress",  # Exempt progress tracking - JWT protected
         ]
         self.cookie_secure = cookie_secure
         self.cookie_samesite = cookie_samesite

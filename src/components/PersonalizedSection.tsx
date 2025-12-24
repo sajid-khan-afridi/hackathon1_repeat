@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { useUserContext } from '@site/src/context/UserContext';
+import { useAuth } from '@site/src/hooks/useAuth';
+import type { ROSFamiliarity, HardwareAccess } from '@site/src/types/auth';
 
 interface PersonalizedSectionProps {
   level?: 'beginner' | 'intermediate' | 'advanced';
@@ -8,6 +10,30 @@ interface PersonalizedSectionProps {
   language?: 'python' | 'cpp';
   hardware?: 'physical' | 'simulation';
   children: React.ReactNode;
+}
+
+/**
+ * Maps AuthContext ROSFamiliarity to PersonalizedSection rosFamiliarity values
+ */
+function mapRosFamiliarity(ros: ROSFamiliarity | null | undefined): 'novice' | 'intermediate' | 'expert' | undefined {
+  switch (ros) {
+    case 'none':
+      return 'novice';
+    case 'basic':
+      return 'intermediate';
+    case 'proficient':
+      return 'expert';
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Maps AuthContext HardwareAccess to boolean for PersonalizedSection
+ */
+function mapHardwareAccess(hardware: HardwareAccess | null | undefined): boolean | undefined {
+  if (hardware === null || hardware === undefined) return undefined;
+  return hardware !== 'simulation_only';
 }
 
 /**
@@ -60,41 +86,63 @@ export default function PersonalizedSection({
   children,
 }: PersonalizedSectionProps): React.ReactElement | null {
   const { userProfile } = useUserContext();
+  const { profile: authProfile, isAuthenticated } = useAuth();
 
   /**
    * Determines if content should be shown based on user profile and section filters.
    * Implements filtering logic from FR-020 to FR-023 (Adaptive Content Depth).
    *
-   * @param profile - User profile from context
-   * @param props - PersonalizedSection props
+   * Priority: AuthContext profile (source of truth) > UserContext (localStorage fallback)
+   *
    * @returns true if content should be shown, false to hide
    */
   const shouldShowContent = useMemo(() => {
-    // If no user profile, show all content (default view for anonymous users)
-    if (!userProfile) {
+    // Determine which profile to use - prefer AuthContext (source of truth)
+    let effectiveProfile: {
+      experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
+      rosFamiliarity?: 'novice' | 'intermediate' | 'expert';
+      hardwareAccess?: boolean;
+      preferredLanguage?: 'python' | 'cpp' | 'both';
+    } | null = null;
+
+    if (isAuthenticated && authProfile?.experienceLevel) {
+      // Use auth profile (mapped to match expected types)
+      effectiveProfile = {
+        experienceLevel: authProfile.experienceLevel,
+        rosFamiliarity: mapRosFamiliarity(authProfile.rosFamiliarity),
+        hardwareAccess: mapHardwareAccess(authProfile.hardwareAccess),
+        preferredLanguage: authProfile.preferredLanguage || undefined,
+      };
+    } else if (userProfile) {
+      // Fallback to localStorage profile for anonymous/legacy users
+      effectiveProfile = userProfile;
+    }
+
+    // If no profile available, show all content (default view for anonymous users)
+    if (!effectiveProfile) {
       return true;
     }
 
     // Language filtering (FR-020: preferred_language filter)
     if (language) {
       // Special case: If user prefers "both", show all code examples
-      if (userProfile.preferredLanguage === 'both') {
+      if (effectiveProfile.preferredLanguage === 'both') {
         // Allow language-specific content to be shown
-      } else if (userProfile.preferredLanguage && userProfile.preferredLanguage !== language) {
+      } else if (effectiveProfile.preferredLanguage && effectiveProfile.preferredLanguage !== language) {
         return false; // Hide if language doesn't match user preference
       }
     }
 
     // Experience level filtering (FR-021: level filter)
     if (level) {
-      if (userProfile.experienceLevel !== level) {
+      if (effectiveProfile.experienceLevel !== level) {
         return false; // Hide if level doesn't match
       }
     }
 
     // ROS familiarity filtering (existing feature)
     if (rosFamiliarity) {
-      if (userProfile.rosFamiliarity !== rosFamiliarity) {
+      if (effectiveProfile.rosFamiliarity !== rosFamiliarity) {
         return false;
       }
     }
@@ -103,7 +151,7 @@ export default function PersonalizedSection({
     // Support both old (hardwareAccess boolean) and new (hardware string) props
     if (hardware === 'physical') {
       // Only show physical hardware content if user has hardware access
-      if (userProfile.hardwareAccess === false) {
+      if (effectiveProfile.hardwareAccess === false) {
         return false;
       }
     } else if (hardware === 'simulation') {
@@ -112,13 +160,13 @@ export default function PersonalizedSection({
 
     // Backward compatibility: old hardwareAccess prop
     if (hardwareAccess !== undefined) {
-      if (userProfile.hardwareAccess !== hardwareAccess) {
+      if (effectiveProfile.hardwareAccess !== hardwareAccess) {
         return false;
       }
     }
 
     return true; // Show content if all filters pass
-  }, [userProfile, level, rosFamiliarity, hardwareAccess, language, hardware]);
+  }, [userProfile, authProfile, isAuthenticated, level, rosFamiliarity, hardwareAccess, language, hardware]);
 
   // Generate accessible label describing the personalization criteria (WCAG 2.1 AA)
   const ariaLabel = useMemo(() => {

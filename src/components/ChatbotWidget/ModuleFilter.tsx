@@ -31,7 +31,7 @@ const MODULE_INFO: Record<number, string> = {
 export default function ModuleFilter({
   selectedModule,
   onModuleChange
-}: ModuleFilterProps): JSX.Element {
+}: ModuleFilterProps): React.ReactElement {
   /**
    * Handle dropdown selection change
    */

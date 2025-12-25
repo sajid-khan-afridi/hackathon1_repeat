@@ -46,7 +46,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
+export function AuthProvider({ children }: AuthProviderProps): React.ReactElement {
   const [state, setState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,

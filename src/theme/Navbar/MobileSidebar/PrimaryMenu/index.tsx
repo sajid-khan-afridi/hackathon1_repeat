@@ -84,10 +84,20 @@ export default function NavbarMobilePrimaryMenu(): ReactNode {
   // Should we allow providing a different list of items?
   const items = useNavbarItems();
 
+  // Filter out Login item - MobileAuthSection handles auth links to avoid duplicates
+  const filteredItems = items.filter((item) => {
+    // Filter out items that link to login page
+    if ('to' in item && item.to === '/login') return false;
+    if ('href' in item && typeof item.href === 'string' && item.href.includes('/login')) return false;
+    // Filter out items with label "Login"
+    if ('label' in item && item.label === 'Login') return false;
+    return true;
+  });
+
   return (
     <>
       <ul className="menu__list">
-        {items.map((item, i) => (
+        {filteredItems.map((item, i) => (
           <NavbarItem mobile {...item} onClick={() => mobileSidebar.toggle()} key={i} />
         ))}
       </ul>

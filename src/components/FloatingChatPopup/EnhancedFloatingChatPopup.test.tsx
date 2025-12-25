@@ -299,8 +299,9 @@ describe('EnhancedFloatingChatPopup', () => {
       // Move mouse
       fireEvent.mouseMove(document, { clientX: 200, clientY: 200 });
 
-      // Should update position
-      expect(popup).toHaveStyle({ left: expect.any(String) });
+      // Should update position - check that left style contains a pixel value
+      const style = popup.getAttribute('style') || '';
+      expect(style).toMatch(/left:\s*\d+px/);
     });
 
     it('should not drag when clicking buttons in header', () => {
@@ -312,7 +313,9 @@ describe('EnhancedFloatingChatPopup', () => {
       fireEvent.mouseMove(document, { clientX: 200, clientY: 200 });
 
       const popup = screen.getByRole('dialog');
-      expect(popup).not.toHaveStyle({ left: expect.any(String) });
+      // Should NOT have left position set (dragging didn't happen)
+      const style = popup.getAttribute('style') || '';
+      expect(style).not.toMatch(/left:\s*\d+px/);
     });
   });
 

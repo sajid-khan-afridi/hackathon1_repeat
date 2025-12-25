@@ -289,7 +289,7 @@ interface ChatbotWidgetProps {
 export default function ChatbotWidget({
   moduleFilter,
   difficultyFilter
-}: ChatbotWidgetProps = {}): JSX.Element {
+}: ChatbotWidgetProps = {}): React.ReactElement {
   const [state, dispatch] = useReducer(chatReducer, null, getInitialState);
   const { isAuthenticated } = useAuthContext();
 

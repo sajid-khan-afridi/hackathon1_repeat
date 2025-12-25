@@ -2,6 +2,9 @@ require('@testing-library/jest-dom');
 
 // Note: Docusaurus mocks are defined in tests/__mocks__/ and mapped in jest.config.js
 
+// Mock scrollIntoView (not available in jsdom)
+Element.prototype.scrollIntoView = jest.fn();
+
 // Mock technical terms glossary data
 jest.mock('@site/src/data/technical-terms.json', () => ({
   terms: [

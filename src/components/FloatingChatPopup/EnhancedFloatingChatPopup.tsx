@@ -32,7 +32,7 @@ export default function EnhancedFloatingChatPopup({
   isOpen,
   onClose,
   animationState
-}: EnhancedFloatingChatPopupProps): JSX.Element | null {
+}: EnhancedFloatingChatPopupProps): React.ReactElement | null {
   const popupRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -132,6 +132,7 @@ export default function EnhancedFloatingChatPopup({
       previousFocusRef.current.focus();
       previousFocusRef.current = null;
     }
+    return undefined;
   }, [isOpen, animationState]);
 
   /**

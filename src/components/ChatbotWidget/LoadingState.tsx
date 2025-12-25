@@ -21,7 +21,7 @@ interface LoadingStateProps {
 export default function LoadingState({
   isStreaming = false,
   message
-}: LoadingStateProps): JSX.Element {
+}: LoadingStateProps): React.ReactElement {
   const defaultMessage = isStreaming
     ? 'Streaming response...'
     : 'Thinking...';

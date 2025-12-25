@@ -43,7 +43,7 @@ function formatTimestamp(date: Date): string {
 export default function MessageList({
   messages,
   isLoading
-}: MessageListProps): JSX.Element {
+}: MessageListProps): React.ReactElement {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 

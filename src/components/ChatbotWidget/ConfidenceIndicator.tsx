@@ -45,7 +45,7 @@ function getConfidenceExplanation(confidence: number): string {
 export default function ConfidenceIndicator({
   confidence,
   showWarning = false
-}: ConfidenceIndicatorProps): JSX.Element {
+}: ConfidenceIndicatorProps): React.ReactElement | null {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const level = getConfidenceLevel(confidence);
   const percentage = Math.round(confidence * 100);

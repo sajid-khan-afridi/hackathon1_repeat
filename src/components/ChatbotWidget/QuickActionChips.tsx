@@ -58,7 +58,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
 export default function QuickActionChips({
   actions = DEFAULT_ACTIONS,
   onActionClick
-}: QuickActionChipsProps): JSX.Element {
+}: QuickActionChipsProps): React.ReactElement {
   return (
     <div className={styles.quickActionChips} role="group" aria-label="Quick actions">
       {actions.map((action, index) => (

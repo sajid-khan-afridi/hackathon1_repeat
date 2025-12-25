@@ -193,9 +193,9 @@ async function apiRequest<T>(
         } catch (refreshError) {
           // Refresh failed, throw original error
           if (data.error) {
-            throw new AuthApiError(data.error);
+            throw new AuthApiError(data.error as ApiError['error']);
           }
-          throw new Error(data.message || 'An error occurred');
+          throw new Error((data.message as string) || 'An error occurred');
         }
       }
 
@@ -223,16 +223,16 @@ async function apiRequest<T>(
       } catch (refreshError) {
         // Refresh failed, throw original error
         if (data.error) {
-          throw new AuthApiError(data.error);
+          throw new AuthApiError(data.error as ApiError['error']);
         }
-        throw new Error(data.message || 'An error occurred');
+        throw new Error((data.message as string) || 'An error occurred');
       }
     }
 
     if (data.error) {
-      throw new AuthApiError(data.error);
+      throw new AuthApiError(data.error as ApiError['error']);
     }
-    throw new Error(data.message || 'An error occurred');
+    throw new Error((data.message as string) || 'An error occurred');
   }
 
   return data as T;

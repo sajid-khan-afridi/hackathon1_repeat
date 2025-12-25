@@ -27,6 +27,7 @@ module.exports = {
     '^@docusaurus/useIsBrowser$': '<rootDir>/tests/__mocks__/useIsBrowser.js',
     '^@docusaurus/theme-common$': '<rootDir>/tests/__mocks__/theme-common.js',
     '^@docusaurus/theme-common/internal$': '<rootDir>/tests/__mocks__/theme-common-internal.js',
+    '^@docusaurus/Link$': '<rootDir>/tests/__mocks__/docusaurusLink.js',
   },
   testMatch: [
     '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',

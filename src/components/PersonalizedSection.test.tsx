@@ -9,6 +9,24 @@ jest.mock('@site/src/context/UserContext', () => ({
   useUserContext: () => mockUseUserContext(),
 }));
 
+// Mock the useAuth hook to avoid requiring AuthProvider - use @site/ alias
+jest.mock('@site/src/hooks/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: false,
+    isLoading: false,
+    user: null,
+    profile: null,
+    login: jest.fn(),
+    signup: jest.fn(),
+    logout: jest.fn(),
+    refreshAuth: jest.fn(),
+    updateProfile: jest.fn(),
+    isProfileComplete: false,
+    userEmail: null,
+    userId: null,
+  }),
+}));
+
 describe('PersonalizedSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -233,7 +251,7 @@ describe('PersonalizedSection', () => {
       expect(section).toHaveClass('personalized-section--beginner');
     });
 
-    it('applies default CSS class when no user profile', () => {
+    it('applies level CSS class regardless of user profile', () => {
       mockUseUserContext.mockReturnValue({
         userProfile: null,
       });
@@ -246,7 +264,8 @@ describe('PersonalizedSection', () => {
 
       const section = screen.getByRole('region');
       expect(section).toHaveClass('personalized-section');
-      expect(section).toHaveClass('personalized-section--default');
+      // Class is based on level prop, not user profile
+      expect(section).toHaveClass('personalized-section--intermediate');
     });
   });
 });

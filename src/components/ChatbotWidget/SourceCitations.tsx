@@ -73,7 +73,7 @@ function getRelevanceClass(score: number): string {
 export default function SourceCitations({
   sources,
   defaultExpanded = false
-}: SourceCitationsProps): JSX.Element {
+}: SourceCitationsProps): React.ReactElement | null {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   if (sources.length === 0) {

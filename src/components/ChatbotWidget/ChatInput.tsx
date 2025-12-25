@@ -29,7 +29,7 @@ export default function ChatInput({
   onSubmit,
   isLoading,
   inputId = 'chatbot-input'
-}: ChatInputProps): JSX.Element {
+}: ChatInputProps): React.ReactElement {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 

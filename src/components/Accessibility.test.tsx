@@ -7,6 +7,38 @@ import TechnicalTerm from './TechnicalTerm';
 import { UserProvider } from '../context/UserContext';
 import { LanguageProvider } from '../context/LanguageContext';
 
+// Mock the useAuth hook to avoid requiring AuthProvider
+jest.mock('../hooks/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: false,
+    isLoading: false,
+    user: null,
+    profile: null,
+    login: jest.fn(),
+    signup: jest.fn(),
+    logout: jest.fn(),
+    refreshAuth: jest.fn(),
+    updateProfile: jest.fn(),
+    isProfileComplete: false,
+    userEmail: null,
+    userId: null,
+  }),
+  default: () => ({
+    isAuthenticated: false,
+    isLoading: false,
+    user: null,
+    profile: null,
+    login: jest.fn(),
+    signup: jest.fn(),
+    logout: jest.fn(),
+    refreshAuth: jest.fn(),
+    updateProfile: jest.fn(),
+    isProfileComplete: false,
+    userEmail: null,
+    userId: null,
+  }),
+}));
+
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 

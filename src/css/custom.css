@@ -986,6 +986,28 @@ html {
     width: 24px;
     height: 24px;
   }
+
+  /* ==================== CRITICAL FIX: Hide desktop nav links on mobile ==================== */
+  /* Hide left-side navigation links (Modules, Get Started, AI Assistant) - they go in hamburger menu */
+  .navbar__inner .navbar__items:not(.navbar__items--right) > .navbar__link,
+  .navbar__inner .navbar__items:not(.navbar__items--right) > .navbar__item > .navbar__link {
+    display: none !important;
+  }
+
+  /* Hide the Login link in main navbar on mobile - it appears in mobile sidebar */
+  .navbar__items--right > a.navbar__link[href*="login"] {
+    display: none !important;
+  }
+
+  /* Ensure navbar is clean on mobile: just hamburger + logo + essential right icons */
+  .navbar__inner {
+    justify-content: space-between;
+  }
+
+  /* Keep right-side icons (GitHub, dark mode toggle) visible but compact */
+  .navbar__items--right {
+    gap: 0.25rem;
+  }
 }
 
 /* ==================== Global Reduced Motion Support ==================== */

@@ -1,0 +1,16 @@
+/**
+ * Glossary Page Styles
+ * Phase 5: Translation Feature - T042
+ */
+
+.glossaryPage {
+  min-height: calc(100vh - 60px);
+  padding-block: 2rem;
+  background: var(--ifm-background-color);
+}
+
+@media (max-width: 640px) {
+  .glossaryPage {
+    padding-block: 1rem;
+  }
+}

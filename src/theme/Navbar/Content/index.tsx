@@ -11,6 +11,7 @@ import NavbarSearch from '@theme/Navbar/Search';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useLocation } from '@docusaurus/router';
 import { useAuth } from '../../../hooks/useAuth';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 
 import styles from './styles.module.css';
 
@@ -156,6 +157,7 @@ export default function NavbarContent(): ReactNode {
         <>
           <AuthNavItem />
           <NavbarItems items={filteredRightItems} />
+          <LanguageToggle className={styles.languageToggle} />
           <NavbarColorModeToggle className={styles.colorModeToggle} />
           {!searchBarItem && (
             <NavbarSearch>

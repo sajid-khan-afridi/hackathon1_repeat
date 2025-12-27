@@ -1,0 +1,96 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-27T00:00:00Z",
+  "terms": [
+    {
+      "id": "ros-2",
+      "english": "ROS 2",
+      "urduTransliteration": "آر او ایس ٹو",
+      "definition": "Robot Operating System 2 - the next-generation robotics middleware providing tools, libraries, and conventions for building robot applications.",
+      "definitionUrdu": "روبوٹ آپریٹنگ سسٹم 2 - اگلی نسل کا روبوٹکس مڈل ویئر جو روبوٹ ایپلیکیشنز بنانے کے لیے ٹولز، لائبریریز اور کنونشنز فراہم کرتا ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["node", "topic", "publisher", "subscriber"]
+    },
+    {
+      "id": "node",
+      "english": "Node",
+      "urduTransliteration": "نوڈ",
+      "definition": "A process in ROS 2 that performs computation, sends and receives messages through topics, services, and actions.",
+      "definitionUrdu": "ROS 2 میں ایک پروسیس جو کمپیوٹیشن کرتا ہے اور ٹاپکس، سروسز اور ایکشنز کے ذریعے پیغامات بھیجتا اور وصول کرتا ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "publisher", "subscriber", "topic"]
+    },
+    {
+      "id": "publisher",
+      "english": "Publisher",
+      "urduTransliteration": "پبلشر",
+      "definition": "A ROS 2 entity that sends messages to a topic, allowing other nodes to subscribe and receive the data.",
+      "definitionUrdu": "ROS 2 کا ایک حصہ جو ٹاپک پر پیغامات بھیجتا ہے، جس سے دوسرے نوڈز سبسکرائب کر کے ڈیٹا حاصل کر سکتے ہیں",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["subscriber", "topic", "node"]
+    },
+    {
+      "id": "subscriber",
+      "english": "Subscriber",
+      "urduTransliteration": "سبسکرائبر",
+      "definition": "A ROS 2 entity that receives messages from a topic published by other nodes.",
+      "definitionUrdu": "ROS 2 کا ایک حصہ جو دوسرے نوڈز کی شائع کردہ ٹاپک سے پیغامات وصول کرتا ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["publisher", "topic", "node"]
+    },
+    {
+      "id": "topic",
+      "english": "Topic",
+      "urduTransliteration": "ٹاپک",
+      "definition": "A named bus over which nodes exchange messages in a publish-subscribe pattern.",
+      "definitionUrdu": "ایک نامزد بس جس پر نوڈز پبلش-سبسکرائب پیٹرن میں پیغامات کا تبادلہ کرتے ہیں",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["publisher", "subscriber", "message"]
+    },
+    {
+      "id": "isaac-sim",
+      "english": "Isaac Sim",
+      "urduTransliteration": "آئساک سم",
+      "definition": "NVIDIA's physics-based robot simulation platform built on Omniverse for developing, testing, and training AI-based robots.",
+      "definitionUrdu": "این ویڈیا کا فزکس بیسڈ روبوٹ سیمولیشن پلیٹ فارم جو Omniverse پر بنایا گیا ہے، AI پر مبنی روبوٹس کی تیاری، جانچ اور تربیت کے لیے",
+      "category": "Simulation",
+      "relatedTerms": ["urdf", "gazebo"]
+    },
+    {
+      "id": "urdf",
+      "english": "URDF",
+      "urduTransliteration": "یو آر ڈی ایف",
+      "definition": "Unified Robot Description Format - an XML format for representing a robot model including joints, links, and visual properties.",
+      "definitionUrdu": "یونائیٹڈ روبوٹ ڈسکریپشن فارمیٹ - روبوٹ ماڈل کی نمائندگی کے لیے ایک XML فارمیٹ جس میں جوائنٹس، لنکس اور بصری خصوصیات شامل ہیں",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["joint", "link", "gazebo"]
+    },
+    {
+      "id": "gazebo",
+      "english": "Gazebo",
+      "urduTransliteration": "گیزیبو",
+      "definition": "An open-source 3D robotics simulator that integrates with ROS for testing robot behaviors in virtual environments.",
+      "definitionUrdu": "ایک اوپن سورس 3D روبوٹکس سیمولیٹر جو ورچوئل ماحول میں روبوٹ رویوں کی جانچ کے لیے ROS کے ساتھ مربوط ہے",
+      "category": "Simulation",
+      "relatedTerms": ["ros-2", "isaac-sim", "urdf"]
+    },
+    {
+      "id": "python",
+      "english": "Python",
+      "urduTransliteration": "پائتھون",
+      "definition": "A high-level programming language widely used in robotics for scripting, automation, and machine learning applications.",
+      "definitionUrdu": "ایک اعلیٰ سطحی پروگرامنگ زبان جو روبوٹکس میں اسکرپٹنگ، آٹومیشن اور مشین لرننگ ایپلیکیشنز کے لیے وسیع پیمانے پر استعمال ہوتی ہے",
+      "category": "Programming Languages",
+      "relatedTerms": ["rclpy"]
+    },
+    {
+      "id": "rclpy",
+      "english": "rclpy",
+      "urduTransliteration": "آر سی ایل پیائی",
+      "definition": "The Python client library for ROS 2, providing Python bindings for the ROS 2 API.",
+      "definitionUrdu": "ROS 2 کے لیے پائتھون کلائنٹ لائبریری، ROS 2 API کے لیے پائتھون بائنڈنگز فراہم کرتی ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "python", "rclcpp"]
+    }
+  ]
+}

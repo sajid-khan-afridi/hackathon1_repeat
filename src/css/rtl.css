@@ -1,0 +1,249 @@
+/**
+ * RTL (Right-to-Left) Stylesheet for Urdu Language Support
+ * Uses CSS logical properties for consistent RTL layout
+ * Imported when locale is 'ur' (Urdu)
+ */
+
+/* Apply RTL direction to the entire document when Urdu is selected */
+html[lang="ur"],
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: start;
+}
+
+/* RTL-specific body styles */
+[dir="rtl"] body {
+  font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+
+/* Navbar RTL adjustments */
+[dir="rtl"] .navbar__inner {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar__brand {
+  margin-inline-start: 0;
+  margin-inline-end: 2rem;
+}
+
+[dir="rtl"] .navbar__items {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar__items--right {
+  flex-direction: row-reverse;
+}
+
+/* Sidebar RTL adjustments */
+[dir="rtl"] .theme-doc-sidebar-container {
+  order: 2;
+}
+
+[dir="rtl"] .main-wrapper > div {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .menu {
+  text-align: start;
+}
+
+[dir="rtl"] .menu__list {
+  padding-inline-start: 0;
+  padding-inline-end: 1rem;
+}
+
+[dir="rtl"] .menu__link {
+  padding-inline: 1rem;
+}
+
+/* List styles with logical properties */
+[dir="rtl"] ul,
+[dir="rtl"] ol {
+  padding-inline-start: 2rem;
+  padding-inline-end: 0;
+}
+
+/* Code blocks - keep LTR for code */
+[dir="rtl"] pre,
+[dir="rtl"] code,
+[dir="rtl"] .prism-code,
+[dir="rtl"] .theme-code-block {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+}
+
+/* Tables RTL support */
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: start;
+}
+
+/* Blockquotes RTL */
+[dir="rtl"] blockquote {
+  border-inline-start: 4px solid var(--ifm-color-primary);
+  border-inline-end: none;
+  padding-inline-start: 1rem;
+  padding-inline-end: 0;
+  margin-inline: 0;
+}
+
+/* Pagination RTL */
+[dir="rtl"] .pagination-nav {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .pagination-nav__label::before,
+[dir="rtl"] .pagination-nav__label::after {
+  transform: scaleX(-1);
+}
+
+/* Footer RTL */
+[dir="rtl"] .footer__links {
+  text-align: start;
+}
+
+[dir="rtl"] .footer__col {
+  text-align: start;
+}
+
+/* Search RTL */
+[dir="rtl"] .DocSearch-Button {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .DocSearch-Button-Placeholder {
+  text-align: start;
+}
+
+/* Admonitions RTL */
+[dir="rtl"] .admonition {
+  border-inline-start: 4px solid;
+  border-inline-end: none;
+}
+
+[dir="rtl"] .admonition-icon {
+  margin-inline-end: 0.75rem;
+  margin-inline-start: 0;
+}
+
+/* TOC (Table of Contents) RTL */
+[dir="rtl"] .table-of-contents {
+  text-align: start;
+}
+
+[dir="rtl"] .table-of-contents__link {
+  padding-inline-start: 1rem;
+}
+
+/* Form elements RTL */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: start;
+}
+
+/* Breadcrumbs RTL */
+[dir="rtl"] .breadcrumbs {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .breadcrumbs__separator {
+  transform: scaleX(-1);
+}
+
+/* Technical terms - keep in English (LTR) */
+[dir="rtl"] .technical-term,
+[dir="rtl"] [data-technical-term] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Inline code in RTL context */
+[dir="rtl"] :not(pre) > code {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Images and figures */
+[dir="rtl"] figure {
+  text-align: center;
+}
+
+[dir="rtl"] figcaption {
+  text-align: center;
+}
+
+/* Versioning badge */
+[dir="rtl"] .badge {
+  margin-inline-start: 0.5rem;
+  margin-inline-end: 0;
+}
+
+/* Edit page link */
+[dir="rtl"] .theme-edit-this-page {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .theme-edit-this-page svg {
+  margin-inline-end: 0;
+  margin-inline-start: 0.5rem;
+}
+
+/* DocCard RTL */
+[dir="rtl"] .DocCard {
+  text-align: start;
+}
+
+[dir="rtl"] .DocCard__title {
+  text-align: start;
+}
+
+/* Language toggle RTL positioning */
+[dir="rtl"] .language-toggle {
+  margin-inline-start: 0;
+  margin-inline-end: 0.5rem;
+}
+
+/* Mobile responsive RTL adjustments */
+@media (max-width: 996px) {
+  [dir="rtl"] .navbar-sidebar {
+    transform: translateX(100%);
+    left: auto;
+    right: 0;
+  }
+
+  [dir="rtl"] .navbar-sidebar--show {
+    transform: translateX(0);
+  }
+
+  [dir="rtl"] .navbar-sidebar__brand {
+    flex-direction: row-reverse;
+  }
+}
+
+/* Print styles for RTL */
+@media print {
+  [dir="rtl"] {
+    direction: rtl;
+  }
+
+  [dir="rtl"] pre,
+  [dir="rtl"] code {
+    direction: ltr;
+  }
+}
+
+/* Reduced motion for RTL animations */
+@media (prefers-reduced-motion: reduce) {
+  [dir="rtl"] * {
+    transition-duration: 0.01ms !important;
+  }
+}

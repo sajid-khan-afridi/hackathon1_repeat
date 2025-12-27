@@ -1,0 +1,26 @@
+{
+  "title": {
+    "message": "روبوٹکس نصابی کتاب",
+    "description": "The title in the navbar"
+  },
+  "item.label.Modules": {
+    "message": "ماڈیولز",
+    "description": "Navbar item with label Modules"
+  },
+  "item.label.Get Started": {
+    "message": "شروع کریں",
+    "description": "Navbar item with label Get Started"
+  },
+  "item.label.AI Assistant": {
+    "message": "🤖 اے آئی اسسٹنٹ",
+    "description": "Navbar item with label AI Assistant"
+  },
+  "item.label.Glossary": {
+    "message": "📖 اصطلاحات",
+    "description": "Navbar item with label Glossary"
+  },
+  "item.label.Login": {
+    "message": "لاگ ان",
+    "description": "Navbar item with label Login"
+  }
+}

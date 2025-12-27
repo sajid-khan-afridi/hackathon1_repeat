@@ -41,9 +41,11 @@ A returning user who prefers Urdu wants their language preference remembered acr
 
 **Acceptance Scenarios**:
 
-1. **Given** a user selects Urdu as their preferred language, **When** they close and reopen the browser, **Then** the site loads in Urdu by default
-2. **Given** an authenticated user sets language preference on desktop, **When** they log in on a different device, **Then** their language preference is synced from their profile
-3. **Given** a guest user selects Urdu, **When** they later create an account, **Then** their localStorage preference is migrated to their user profile
+1. **Given** a user selects Urdu as their preferred language, **When** they close and reopen the browser, **Then** the site loads in Urdu by default (via localStorage)
+
+> **Deferred to Future Enhancement:**
+> - Cross-device sync for authenticated users (requires backend API)
+> - Guest-to-account preference migration (requires auth integration)
 
 ---
 
@@ -99,8 +101,8 @@ When translation service is unavailable, users should still be able to access co
 - **FR-003**: System MUST preserve code blocks, code snippets, and variable names unchanged during translation
 - **FR-004**: System MUST render Urdu content in RTL (Right-to-Left) layout with proper text direction
 - **FR-005**: System MUST provide a language toggle component accessible from all pages
-- **FR-006**: System MUST persist language preference in localStorage for guest users
-- **FR-007**: System MUST sync language preference with user profile for authenticated users
+- **FR-006**: System MUST persist language preference in localStorage for all users
+- **FR-007**: ~~System MUST sync language preference with user profile for authenticated users~~ *[DEFERRED: Cross-device sync requires backend API integration]*
 - **FR-008**: System MUST provide a bilingual technical glossary (English-Urdu)
 - **FR-009**: System MUST display hover tooltips showing English terms when users hover over technical terms in Urdu content
 - **FR-010**: System MUST cache translated chapters indefinitely, invalidating cache only when source chapter content changes (detected via content hash comparison)
@@ -114,8 +116,8 @@ When translation service is unavailable, users should still be able to access co
 
 - **Translation**: Represents a translated version of a chapter (source language, target language, content, technical terms, timestamp, cache status)
 - **Technical Term**: An entry in the bilingual glossary (English term, Urdu transliteration, definition, category, related terms)
-- **Language Preference**: User's selected language (language code, source: localStorage/profile, last updated)
-- **Translation Cache**: Stored translated content (chapter ID, language, source content hash, translated content, created date); cache never expires but is invalidated when source content hash changes
+- **Language Preference**: User's selected language stored in localStorage (language code, last updated)
+- **Translation Cache**: File-based cache using `.meta.json` files alongside translated MDX (chapter ID, language, source content hash, created date); cache invalidated when source content hash changes
 
 ## Success Criteria *(mandatory)*
 
@@ -155,8 +157,11 @@ When translation service is unavailable, users should still be able to access co
 - Phase 2 (Content Creation) must be complete with 10 MDX chapters available
 - `urdu-translator` skill must be operational
 - `react-components` skill for UI components
-- Neon Postgres for storing translation cache and glossary data
 - Existing Docusaurus theme must support RTL CSS extensions
+
+> **Architecture Decision (2025-12-27):**
+> - **TranslationCache**: File-based storage using `.meta.json` files alongside translated MDX (not Postgres). Simpler, free, version-controlled.
+> - **Language Preference**: Client-only localStorage for all users. No backend sync required. Cross-device sync deferred to future enhancement.
 
 ## Risks
 

@@ -1,0 +1,589 @@
+---
+title: "باب 4: Isaac Sim ماحول کی ترتیب"
+sidebar_position: 4
+description: "NVIDIA Isaac Sim کی تنصیب، ترتیب اور نیویگیشن سیکھیں، بشمول ROS 2 bridge سیٹ اپ اور بنیادی منظر کی تخلیق"
+keywords:
+  - Isaac Sim
+  - NVIDIA
+  - simulation
+  - ROS 2
+  - robotics
+  - GPU
+  - Omniverse
+tags:
+  - isaac-sim
+  - simulation
+  - setup
+  - ros2-bridge
+learning_objectives:
+  - "NVIDIA Isaac Sim 2023.1.0 یا بعد کا ورژن انسٹال اور ترتیب دیں"
+  - "Isaac Sim انٹرفیس نیویگیٹ کریں اور بنیادی تصورات سمجھیں"
+  - "دو طرفہ مواصلات کے لیے ROS 2 bridge سیٹ اپ کریں"
+  - "بنیادی سیمولیشن مناظر بنائیں اور اثاثے درآمد کریں"
+difficulty_level: beginner
+ros_version: humble
+prerequisites: ["ch01", "ch02", "ch03"]
+estimated_time: 65
+personalization_variants:
+  experience_level: true
+  ros_familiarity: true
+  hardware_access: true
+---
+
+# باب 4: Isaac Sim ماحول کی ترتیب
+
+## تعارف
+
+NVIDIA Isaac Sim ایک طاقتور روبوٹکس سیمولیشن پلیٹ فارم ہے جو روبوٹکس الگورتھمز کی ترقی اور جانچ کے لیے فوٹو ریئلسٹک ماحول فراہم کرتا ہے۔ یہ NVIDIA کے Omniverse پلیٹ فارم پر بنایا گیا ہے اور جدید فزکس سیمولیشن، سینسر سیمولیشن، اور ROS 2 کے ساتھ ہموار انضمام پیش کرتا ہے۔
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Isaac Sim کو ایک انتہائی جدید ویڈیو گیم سمجھیں جہاں آپ حقیقت پسندانہ ماحول میں روبوٹ بنا اور ٹیسٹ کر سکتے ہیں۔ اصل ہارڈویئر پروگرام کرنے (جو مہنگا اور خطرناک ہو سکتا ہے) کے بجائے، آپ پہلے سیمولیشن میں سب کچھ ٹیسٹ کر سکتے ہیں۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Isaac Sim ایک جامع سیمولیشن ایکو سسٹم فراہم کرتا ہے جس میں PhysX پر مبنی فزکس، USD پر مبنی منظر کی تفصیل، اور ریئل ٹائم رے ٹریسڈ رینڈرنگ شامل ہے۔ یہ پیچیدہ ملٹی روبوٹ منظرناموں، سینسر فیوژن سیمولیشن، اور دوبارہ پیدا کرنے کے قابل تحقیقی نتائج کے لیے deterministic فزکس کی سہولت دیتا ہے۔
+</PersonalizedSection>
+
+## 4.1 سسٹم کی ضروریات
+
+Isaac Sim انسٹال کرنے سے پہلے، یقینی بنائیں کہ آپ کا سسٹم ان ضروریات کو پورا کرتا ہے:
+
+<PersonalizedSection hardwareAccess={true}>
+**ہارڈویئر کی ضروریات:**
+- NVIDIA GPU جس میں Turing آرکیٹیکچر یا جدید تر ہو (RTX 20 سیریز یا بعد کا)
+- کم از کم 8 GB VRAM (پیچیدہ مناظر کے لیے 16 GB تجویز کردہ)
+- کم از کم 16 GB RAM (32 GB تجویز کردہ)
+- کم از کم 50 GB خالی جگہ کے ساتھ SSD
+- Ubuntu 20.04 یا 22.04 LTS (ضروری)
+- Python 3.7-3.10 ہم آہنگ ماحول
+
+**GPU آرکیٹیکچر چیک:**
+```bash
+nvidia-smi --query-gpu=name,compute_cap --format=csv
+```
+compute capability 7.0 یا اس سے زیادہ تلاش کریں۔
+</PersonalizedSection>
+
+<PersonalizedSection hardwareAccess={false}>
+**کلاؤڈ/VM ضروریات:**
+- NVIDIA GPUs کے ساتھ کلاؤڈ سروس (AWS G4/G5، GCP A2/A3، یا Azure NC سیریز)
+- کم از کم 4 vCPUs اور 16 GB RAM
+- Isaac Sim اور اثاثوں کے لیے 100 GB سٹوریج
+- Omniverse Cloud sync کے لیے مستحکم انٹرنیٹ کنکشن
+</PersonalizedSection>
+
+## 4.2 تنصیب کا عمل
+
+### مرحلہ 1: NVIDIA اکاؤنٹ بنائیں
+
+1. [NVIDIA Developer](https://developer.nvidia.com/) ملاحظہ کریں
+2. مفت اکاؤنٹ بنائیں یا لاگ ان کریں
+3. Isaac Sim پروڈکٹ پیج پر جائیں
+
+### مرحلہ 2: Isaac Sim ڈاؤن لوڈ کریں
+
+```bash
+# تنصیب کی ڈائریکٹری بنائیں
+mkdir -p ~/isaac_sim
+cd ~/isaac_sim
+
+# Isaac Sim 2023.1.0 ڈاؤن لوڈ کریں (ورژن ضرورت کے مطابق ایڈجسٹ کریں)
+wget https://developer.nvidia.com/downloads/compute/machine-learning/isaac/sim/2023_1_0/isaac-sim-2023.1.0-linux.tar.gz
+
+# آرکائیو نکالیں
+tar -xzf isaac-sim-2023.1.0-linux.tar.gz
+```
+
+### مرحلہ 3: Python ماحول ترتیب دیں
+
+<PersonalizedSection level="beginner">
+Isaac Sim اپنا Python ماحول لے کر آتا ہے۔ یہ آپ کے سسٹم Python کے ساتھ تنازعات سے بچاتا ہے۔
+</PersonalizedSection>
+
+```python
+# test: true
+# Python ماحول کی ترتیب کی تصدیق
+import sys
+import os
+
+# Isaac Sim Python ورژن چیک کریں
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
+
+# ضروری پیکجز چیک کریں
+try:
+    import carb
+    print(f"Carb SDK version: {carb.__version__}")
+except ImportError:
+    print("Carb SDK نہیں ملی - یقینی بنائیں Isaac Sim ماحول فعال ہے")
+
+# omni.kit.ui چیک کریں
+try:
+    import omni.kit.ui
+    print("OmniKit UI module دستیاب ہے")
+except ImportError:
+    print("OmniKit UI module نہیں ملی")
+
+# Isaac Sim مخصوص ماڈیولز چیک کریں
+try:
+    import isaac
+    print("Isaac Sim ماڈیولز دستیاب ہیں")
+except ImportError:
+    print("Isaac Sim ماڈیولز نہیں ملے - ماحول source کرنے کی ضرورت ہو سکتی ہے")
+```
+
+### مرحلہ 4: ماحول کی ترتیب
+
+```bash
+# ~/.bashrc یا ~/.zshrc میں شامل کریں
+export ISAAC_SIM_PATH=$HOME/isaac_sim/isaac-sim
+export PYTHONPATH=$ISAAC_SIM_PATH/python:$PYTHONPATH
+export LD_LIBRARY_PATH=$ISAAC_SIM_PATH/lib:$LD_LIBRARY_PATH
+
+# ماحول کو source کریں
+source ~/.bashrc  # یا source ~/.zshrc
+```
+
+## 4.3 پہلی لانچ
+
+### Isaac Sim لانچ کرنا
+
+```bash
+cd ~/isaac_sim/isaac-sim
+./isaac-sim.sh
+```
+
+<PersonalizedSection level="beginner">
+پہلی لانچ میں کچھ وقت لگ سکتا ہے کیونکہ Isaac Sim ضروری اثاثے ڈاؤن لوڈ کرتا ہے۔ صبر کریں - یہ عام ہے!
+</PersonalizedSection>
+
+### انٹرفیس نیویگیشن
+
+1. **Viewport**: منظر کا مرکزی 3D ویو
+2. **Stage Tab**: منظر میں اشیاء شامل/ترمیم کریں
+3. **Content Tab**: اثاثے براؤز اور درآمد کریں
+4. **Render Settings**: بصری معیار ایڈجسٹ کریں
+5. **Physics Settings**: فزکس سیمولیشن ترتیب دیں
+6. **Console**: لاگز اور ڈیبگ معلومات دیکھیں
+
+<PersonalizedSection level="advanced">
+اہم شارٹ کٹس:
+- **Alt + LMB**: کیمرہ گھمائیں
+- **Alt + MMB**: کیمرہ پین کریں
+- **Alt + RMB**: کیمرہ زوم کریں
+- **F**: منتخب شے کو فریم کریں
+- **Ctrl + D**: شے کی نقل بنائیں
+- **Delete**: منتخب شے ہٹائیں
+</PersonalizedSection>
+
+## 4.4 اپنا پہلا منظر بنانا
+
+### بنیادی منظر کی تخلیق
+
+```python
+# test: true
+# بنیادی سیمولیشن منظر بنانے کا اسکرپٹ
+import omni.kit.commands
+from pxr import Gf, Sdf, Usd, UsdGeom
+
+def create_basic_scene():
+    """زمینی طیارے اور روشنی کے ساتھ بنیادی منظر بنائیں۔"""
+
+    # Stage حاصل کریں
+    stage = omni.usd.get_context().get_stage()
+
+    # زمینی طیارہ بنائیں
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Xform",
+        prim_path="/World/GroundPlane",
+        attributes={
+            "axis": "Y",
+            "size": 1000,
+            "color": (0.5, 0.5, 0.5, 1.0),
+            "doubleSided": True
+        }
+    )
+
+    # محیطی روشنی کے لیے ڈوم لائٹ بنائیں
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="DomeLight",
+        prim_path="/World/DomeLight",
+        attributes={
+            "intensity": 1000,
+            "color": (0.8, 0.8, 0.8, 1.0)
+        }
+    )
+
+    # سورج کی روشنی بنائیں
+    result, path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="DistantLight",
+        prim_path="/World/SunLight",
+        attributes={
+            "intensity": 5000,
+            "color": (1.0, 0.95, 0.8, 1.0),
+            "temperature": 6500
+        }
+    )
+
+    # ڈیفالٹ کیمرہ پوزیشن سیٹ کریں
+    camera_prim = stage.GetPrimAtPath("/OmniverseKit_Persp")
+    if camera_prim:
+        camera = UsdGeom.Camera(camera_prim)
+        camera.GetCamera().SetClippingRange(0.1, 1000.0)
+
+    print("بنیادی منظر کامیابی سے بنایا گیا!")
+
+# منظر کی تخلیق چلائیں
+create_basic_scene()
+```
+
+### روبوٹ درآمد کرنا
+
+```python
+# test: true
+# منظر میں روبوٹ درآمد کرنے کا اسکرپٹ
+import omni.kit.commands
+from pxr import Gf
+
+def import_robot():
+    """منظر میں روبوٹ ماڈل درآمد کریں۔"""
+
+    # روبوٹ USD پاتھ (اپنے روبوٹ کے لیے ایڈجسٹ کریں)
+    robot_usd_path = "http://omniverse-content-library.s3-website-us-east-1.amazonaws.com/Assets/Isaac/2023.1/Isaac/Robots/Franka/franka.usd"
+
+    # روبوٹ درآمد کریں
+    result, robot_path = omni.kit.commands.execute(
+        "CreatePrimWithUsd",
+        prim_path="/World/Franka",
+        usd_path=robot_usd_path
+    )
+
+    if result:
+        # روبوٹ کی پوزیشن سیٹ کریں
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=robot_path,
+            translation={"x": 0, "y": 0, "z": 0.8},
+            rotation={"x": 0, "y": 0, "z": 0}
+        )
+
+        # روبوٹ کے لیے فزکس فعال کریں
+        physics_api = omni.physics.get_physics_interface()
+        physics_api.apply_rigid_body_collider(robot_path + "/base_link")
+
+        print(f"روبوٹ کامیابی سے {robot_path} پر درآمد ہوا")
+    else:
+        print("روبوٹ درآمد کرنے میں ناکامی")
+
+# روبوٹ درآمد کریں
+import_robot()
+```
+
+## 4.5 ROS 2 Bridge سیٹ اپ
+
+### ROS 2 Bridge انسٹال کرنا
+
+ROS 2 bridge Isaac Sim کو ROS 2 nodes کے ساتھ بات چیت کرنے کی اجازت دیتا ہے۔
+
+```bash
+# Isaac Sim Python ماحول میں
+pip install ros2-bridge
+```
+
+### ROS 2 Bridge ترتیب دینا
+
+```python
+# test: true
+# Isaac Sim میں ROS 2 bridge ترتیب دیں
+import carb
+import omni.isaac.core.utils.nucleus as nucleus
+
+def configure_ros_bridge():
+    """Isaac Sim کے لیے ROS 2 bridge ترتیب دیں۔"""
+
+    # ROS 2 bridge extension حاصل کریں
+    ros_bridge_extension = "/isaac/ros2_bridge"
+
+    # Extension فعال کریں
+    carb.settings.get_settings().set("/persistent/app/extension/enabledExtensions", [
+        ros_bridge_extension
+    ])
+
+    # Bridge ترتیبات سیٹ کریں
+    settings = carb.settings.get_settings()
+
+    # ROS 2 domain ترتیبات
+    settings.set("/ros/ros2_bridge/domain_id", 0)
+    settings.set("/ros/ros2_bridge/namespace", "isaac")
+    settings.set("/ros/ros2_bridge/remappings", [])
+
+    # Frame ID میپنگز
+    settings.set("/ros/ros2_bridge/frame_id", "world")
+    settings.set("/ros/ros2_bridge/odom_frame_id", "odom")
+
+    # پبلشنگ فریکوئنسی (Hz)
+    settings.set("/ros/ros2_bridge/clock_publish_frequency", 60.0)
+    settings.set("/ros/ros2_bridge/transform_tree_publish_frequency", 60.0)
+
+    print("ROS 2 bridge کامیابی سے ترتیب دیا گیا!")
+
+# Bridge ترتیب دیں
+configure_ros_bridge()
+```
+
+### روبوٹ سٹیٹ ROS 2 پر شائع کرنا
+
+```python
+# test: true
+# روبوٹ جوائنٹ سٹیٹس ROS 2 پر شائع کریں
+import omni.isaac.core.utils.nucleus as nucleus
+from omni.isaac.core import ArticulationView
+from omni.isaac.core.robots import RobotDescription
+import numpy as np
+
+def setup_robot_state_publisher():
+    """ROS 2 پر روبوٹ سٹیٹ پبلشنگ سیٹ اپ کریں۔"""
+
+    # روبوٹ ڈسکرپشن تعریف کریں
+    robot_description = RobotDescription(
+        name="franka",
+        robot_prim_path="/World/Franka",
+        usd_path=robot_usd_path,
+        articulation_controller=None
+    )
+
+    # Articulation view بنائیں
+    articulation_view = ArticulationView(
+        prim_paths_expr=f"/World/Franka/.*",
+        reset_robot_usd=False
+    )
+
+    # فزکس ترتیبات لاگو کریں
+    articulation_view.apply_physics_material(
+        physics_material_path="/World/PhysicsMaterial",
+        stronger_than_descendants=False
+    )
+
+    # Articulation شروع کریں
+    articulation_view.initialize_physics()
+
+    # ROS 2 publisher بنائیں
+    from omni.isaac.ros2_bridge import Ros2Bridge
+    ros_bridge = Ros2Bridge()
+
+    # روبوٹ سٹیٹ publisher رجسٹر کریں
+    ros_bridge.register_publisher(
+        node_name="isaac_robot_state_publisher",
+        topic_name="joint_states",
+        publisher_type="joint_states",
+        articulation_view=articulation_view
+    )
+
+    print("روبوٹ سٹیٹ publisher کامیابی سے رجسٹر ہوا!")
+
+    return articulation_view, ros_bridge
+
+# Publisher سیٹ اپ کریں
+articulation, bridge = setup_robot_state_publisher()
+```
+
+## 4.6 سینسر سیمولیشن
+
+### کیمرہ شامل کرنا
+
+```python
+# test: true
+# کیمرہ سینسر شامل اور ترتیب دیں
+import omni.kit.commands
+from pxr import Gf
+
+def add_camera_sensor():
+    """روبوٹ میں کیمرہ سینسر شامل کریں۔"""
+
+    # کیمرہ بنائیں
+    result, camera_path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Camera",
+        prim_path="/World/Franka/Camera",
+        attributes={
+            "focalLength": 24.0,
+            "horizontalAperture": 20.955,
+            "verticalAperture": 15.708,
+            "clippingRange": (0.1, 1000.0)
+        }
+    )
+
+    if result:
+        # روبوٹ کلائی پر کیمرہ کی پوزیشن
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=camera_path,
+            translation={"x": 0.0, "y": 0.0, "z": 0.5},
+            rotation={"x": 90, "y": 0, "z": 0}
+        )
+
+        # روبوٹ کلائی سے منسلک کریں
+        omni.kit.commands.execute(
+            "ParentPrim",
+            prim_path=camera_path,
+            parent_path="/World/Franka/panda_hand"
+        )
+
+        # کیمرے کے لیے ROS 2 bridge ترتیب دیں
+        from omni.isaac.ros2_bridge import Ros2Bridge
+        ros_bridge = Ros2Bridge()
+
+        ros_bridge.register_publisher(
+            node_name="isaac_camera_publisher",
+            topic_name="/camera/image_raw",
+            publisher_type="camera",
+            prim_path=camera_path
+        )
+
+        ros_bridge.register_publisher(
+            node_name="isaac_camera_info_publisher",
+            topic_name="/camera/camera_info",
+            publisher_type="camera_info",
+            prim_path=camera_path
+        )
+
+        print(f"کیمرہ سینسر {camera_path} پر شامل کیا گیا")
+
+    return camera_path if result else None
+
+# کیمرہ سینسر شامل کریں
+camera_path = add_camera_sensor()
+```
+
+### LiDAR سینسر شامل کرنا
+
+```python
+# test: true
+# روبوٹ میں LiDAR سینسر شامل کریں
+import omni.kit.commands
+
+def add_lidar_sensor():
+    """روبوٹ میں LiDAR سینسر شامل کریں۔"""
+
+    # LiDAR بنائیں
+    result, lidar_path = omni.kit.commands.execute(
+        "CreatePrim",
+        prim_type="Lidar",
+        prim_path="/World/Franka/Lidar",
+        attributes={
+            "horizontalResolution": 360,
+            "verticalResolution": 32,
+            "horizontalFov": 360.0,
+            "maxRange": 10.0,
+            "minRange": 0.1,
+            "rotationRate": 10.0,
+            "drawPoints": True,
+            "drawLines": True
+        }
+    )
+
+    if result:
+        # روبوٹ بیس پر LiDAR کی پوزیشن
+        omni.kit.commands.execute(
+            "TransformPrim",
+            path=lidar_path,
+            translation={"x": 0.0, "y": 0.0, "z": 1.0},
+            rotation={"x": 0, "y": 0, "z": 0}
+        )
+
+        # روبوٹ بیس سے منسلک کریں
+        omni.kit.commands.execute(
+            "ParentPrim",
+            prim_path=lidar_path,
+            parent_path="/World/Franka/base_link"
+        )
+
+        # LiDAR کے لیے ROS 2 bridge ترتیب دیں
+        from omni.isaac.ros2_bridge import Ros2Bridge
+        ros_bridge = Ros2Bridge()
+
+        ros_bridge.register_publisher(
+            node_name="isaac_lidar_publisher",
+            topic_name="/scan",
+            publisher_type="laser_scan",
+            prim_path=lidar_path
+        )
+
+        ros_bridge.register_publisher(
+            node_name="isaac_pointcloud_publisher",
+            topic_name="/points",
+            publisher_type="point_cloud",
+            prim_path=lidar_path
+        )
+
+        print(f"LiDAR سینسر {lidar_path} پر شامل کیا گیا")
+
+    return lidar_path if result else None
+
+# LiDAR سینسر شامل کریں
+lidar_path = add_lidar_sensor()
+```
+
+## مشقیں
+
+### مشق 4.1: منظر کی تبدیلیاں (ابتدائی)
+
+**سیکھنے کا مقصد**: مختلف سیمولیشن ماحول بنانے کی مشق کریں
+
+#### مسئلہ
+تین مختلف منظر کی تبدیلیاں بنائیں:
+1. **انڈور لیب منظر**: میزیں، کرسیاں، اور لیب آلات کے ساتھ
+2. **آؤٹ ڈور ٹیرین**: پہاڑیاں، رکاوٹیں، اور متنوع زمین کے ساتھ
+3. **فیکٹری فلور**: کنویئر بیلٹس، شیلفز، اور صنعتی آلات کے ساتھ
+
+#### ابتدائی کوڈ
+```python
+# اس عمل درآمد کو مکمل کریں
+import omni.kit.commands
+from pxr import Gf
+
+def create_scene_variation(scene_type):
+    """مختلف منظر کی تبدیلیاں بنائیں۔"""
+
+    if scene_type == "indoor":
+        # TODO: انڈور لیب ماحول بنائیں
+        # - میزیں اور کرسیاں شامل کریں
+        # - لیب آلات (کمپیوٹرز، مانیٹرز) شامل کریں
+        # - مناسب روشنی سیٹ کریں
+
+    elif scene_type == "outdoor":
+        # TODO: آؤٹ ڈور ٹیرین بنائیں
+        # - پہاڑیوں کے ساتھ ٹیرین بنائیں
+        # - چٹانیں اور رکاوٹیں شامل کریں
+        # - قدرتی روشنی شامل کریں
+
+    elif scene_type == "factory":
+        # TODO: فیکٹری فلور بنائیں
+        # - کنویئر بیلٹس شامل کریں
+        # - شیلفز اور سٹوریج شامل کریں
+        # - صنعتی روشنی شامل کریں
+
+    pass
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- NVIDIA Isaac Sim کیسے انسٹال اور ترتیب دیں
+- سیمولیشن مناظر بنانا اور ان میں ہیرا پھیری کرنا
+- دو طرفہ مواصلات کے لیے ROS 2 bridge سیٹ اپ کرنا
+- مختلف سینسرز (کیمرہ، LiDAR) شامل اور ترتیب دینا
+- ملٹی روبوٹ سیمولیشنز بنانا
+- کارکردگی کی اصلاح کی تکنیکیں
+
+اہم نکات:
+- Isaac Sim روبوٹکس سیمولیشن کے لیے ایک طاقتور پلیٹ فارم فراہم کرتا ہے
+- ROS 2 bridge ROS 2 ایکو سسٹم کے ساتھ ہموار انضمام کو قابل بناتا ہے
+- حقیقت پسندانہ سیمولیشن کے لیے مناسب منظر کی ترتیب اہم ہے
+- پیچیدہ مناظر کے لیے کارکردگی کی اصلاح ضروری ہے
+- ملٹی روبوٹ منظرناموں میں محتاط namespace انتظام کی ضرورت ہے
+
+اگلا باب URDF کا استعمال کرتے ہوئے روبوٹ ماڈلنگ اور مزید پیچیدہ سیمولیشنز کے لیے Isaac Sim میں روبوٹس درآمد کرنے کا جائزہ لے گا۔

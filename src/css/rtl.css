@@ -9,6 +9,16 @@ html[lang="ur"],
 html[dir="rtl"] {
   direction: rtl;
   text-align: start;
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal overflow on body and main containers */
+[dir="rtl"] body,
+[dir="rtl"] #__docusaurus,
+[dir="rtl"] .main-wrapper {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* RTL-specific body styles */
@@ -73,6 +83,17 @@ html[dir="rtl"] {
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
+}
+
+/* Ensure code blocks don't cause horizontal overflow */
+[dir="rtl"] pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+[dir="rtl"] .theme-code-block {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Tables RTL support */

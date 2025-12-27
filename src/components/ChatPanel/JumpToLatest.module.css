@@ -1,0 +1,84 @@
+/**
+ * JumpToLatest Styles
+ */
+
+.button {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-end: 80px;
+  transform: translateX(-50%);
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+
+  padding: 0.5rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  animation: fadeUp 200ms ease-out forwards;
+  transition:
+    background-color var(--animation-duration-fast, 150ms) ease,
+    box-shadow var(--animation-duration-fast, 150ms) ease,
+    transform var(--animation-duration-fast, 150ms) ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.button:hover {
+  background-color: var(--ifm-color-primary-dark);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.button:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  background-color: white;
+  color: var(--ifm-color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    animation: none;
+    transition: none;
+  }
+
+  .button:active {
+    transform: translateX(-50%);
+  }
+}

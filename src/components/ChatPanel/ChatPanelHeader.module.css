@@ -1,0 +1,89 @@
+/**
+ * ChatPanelHeader Styles
+ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .header {
+  background-color: var(--ifm-color-primary-dark);
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color var(--animation-duration-fast, 150ms) ease,
+    opacity var(--animation-duration-fast, 150ms) ease;
+}
+
+.controlButton:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.controlButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.controlButton:active {
+  opacity: 0.8;
+}
+
+.controlButton.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.closeButton:hover {
+  background-color: rgba(239, 68, 68, 0.8);
+}
+
+/* Minimized state */
+.minimized {
+  padding: 0.5rem 0.75rem;
+}
+
+.minimized .title {
+  font-size: 0.875rem;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .controlButton {
+    transition: none;
+  }
+}

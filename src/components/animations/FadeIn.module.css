@@ -1,0 +1,75 @@
+/**
+ * FadeIn Animation Styles
+ *
+ * CSS Module for FadeIn component animations.
+ * Uses GPU-accelerated properties only (transform, opacity).
+ */
+
+/* Base fade-in styles */
+.fadeIn {
+  opacity: 0;
+  transition:
+    opacity var(--fade-duration, 400ms) ease-out,
+    transform var(--fade-duration, 400ms) ease-out;
+  transition-delay: var(--fade-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+/* When visible */
+.fadeIn.visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Reduced motion - instant visibility */
+.fadeIn.reducedMotion {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* === Variant: fade (opacity only) === */
+.fade {
+  transform: none;
+}
+
+/* === Variant: fade-up === */
+.fade_up {
+  transform: translateY(20px);
+}
+
+.fade_up.visible {
+  transform: translateY(0);
+}
+
+/* === Variant: fade-down === */
+.fade_down {
+  transform: translateY(-20px);
+}
+
+.fade_down.visible {
+  transform: translateY(0);
+}
+
+/* === Variant: fade-left === */
+.fade_left {
+  transform: translateX(-20px);
+}
+
+.fade_left.visible {
+  transform: translateX(0);
+}
+
+/* === Variant: fade-right === */
+.fade_right {
+  transform: translateX(20px);
+}
+
+.fade_right.visible {
+  transform: translateX(0);
+}
+
+/* Clean up will-change after animation completes */
+.fadeIn.visible {
+  will-change: auto;
+}

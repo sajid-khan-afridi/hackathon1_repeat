@@ -1,0 +1,108 @@
+/**
+ * ProgressBar Styles
+ *
+ * Linear progress indicator with determinate and indeterminate modes.
+ * Respects reduced motion preferences.
+ */
+
+.progressContainer {
+  width: 100%;
+  overflow: hidden;
+}
+
+.progressTrack {
+  width: 100%;
+  height: var(--progress-height, 4px);
+  background: var(--ifm-color-emphasis-200);
+  border-radius: var(--progress-radius, 2px);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--ifm-color-primary);
+  border-radius: inherit;
+  transition: width 0.3s ease-out;
+}
+
+/* Indeterminate animation */
+.indeterminate .progressFill {
+  width: 30%;
+  animation: indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Size variants */
+.small .progressTrack {
+  --progress-height: 2px;
+}
+
+.large .progressTrack {
+  --progress-height: 8px;
+  --progress-radius: 4px;
+}
+
+/* Color variants */
+.success .progressFill {
+  background: var(--ifm-color-success);
+}
+
+.warning .progressFill {
+  background: var(--ifm-color-warning);
+}
+
+.error .progressFill {
+  background: var(--ifm-color-danger);
+}
+
+/* Label styling */
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.progressLabelText {
+  font-weight: 500;
+}
+
+.progressLabelValue {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion: no animation for indeterminate */
+@media (prefers-reduced-motion: reduce) {
+  .indeterminate .progressFill {
+    animation: none;
+    width: 50%;
+    opacity: 0.7;
+  }
+
+  .progressFill {
+    transition: none;
+  }
+}

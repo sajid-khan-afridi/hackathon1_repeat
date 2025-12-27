@@ -1,0 +1,76 @@
+/**
+ * SkeletonLoader Styles
+ *
+ * Shimmer animation for loading placeholders.
+ * Respects reduced motion preferences.
+ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base, rgba(0, 0, 0, 0.08)) 0%,
+    var(--skeleton-highlight, rgba(0, 0, 0, 0.12)) 50%,
+    var(--skeleton-base, rgba(0, 0, 0, 0.08)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--skeleton-radius, 4px);
+}
+
+/* Dark mode support */
+[data-theme='dark'] .skeleton {
+  --skeleton-base: rgba(255, 255, 255, 0.08);
+  --skeleton-highlight: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Variant styles */
+.text {
+  height: 1em;
+  width: 100%;
+}
+
+.title {
+  height: 1.5em;
+  width: 60%;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.button {
+  height: 36px;
+  width: 100px;
+  border-radius: 4px;
+}
+
+.card {
+  padding: 1rem;
+  border-radius: 8px;
+  min-height: 120px;
+}
+
+/* Reduced motion: static gray background */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--skeleton-base, rgba(0, 0, 0, 0.08));
+  }
+}

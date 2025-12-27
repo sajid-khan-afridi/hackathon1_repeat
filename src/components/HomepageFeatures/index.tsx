@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
+import { FadeIn } from '@site/src/components/animations';
 import styles from './styles.module.css';
 
 type FeatureItem = {
@@ -81,7 +82,12 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({ title, icon, description, link, highlight }: FeatureItem) {
+interface FeatureProps extends FeatureItem {
+  /** Index for stagger animation */
+  index: number;
+}
+
+function Feature({ title, icon, description, link, highlight, index }: FeatureProps) {
   const content = (
     <>
       <div className={styles.featureIcon}>{icon}</div>
@@ -99,9 +105,11 @@ function Feature({ title, icon, description, link, highlight }: FeatureItem) {
 
   return (
     <div className={clsx('col col--4', styles.featureCol)}>
-      <div className={clsx(styles.featureCard, { [styles.featureHighlight]: highlight })}>
-        {content}
-      </div>
+      <FadeIn variant="fade-up" staggerIndex={index} staggerDelay={100} threshold={0.1}>
+        <div className={clsx(styles.featureCard, { [styles.featureHighlight]: highlight })}>
+          {content}
+        </div>
+      </FadeIn>
     </div>
   );
 }
@@ -110,17 +118,19 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
-        <div className={styles.featuresHeader}>
-          <Heading as="h2" className={styles.featuresTitle}>
-            Everything You Need to Master Robotics
-          </Heading>
-          <p className={styles.featuresSubtitle}>
-            Comprehensive curriculum designed for students, researchers, and professionals
-          </p>
-        </div>
+        <FadeIn variant="fade-up" threshold={0.2}>
+          <div className={styles.featuresHeader}>
+            <Heading as="h2" className={styles.featuresTitle}>
+              Everything You Need to Master Robotics
+            </Heading>
+            <p className={styles.featuresSubtitle}>
+              Comprehensive curriculum designed for students, researchers, and professionals
+            </p>
+          </div>
+        </FadeIn>
         <div className="row">
           {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+            <Feature key={idx} {...props} index={idx} />
           ))}
         </div>
       </div>

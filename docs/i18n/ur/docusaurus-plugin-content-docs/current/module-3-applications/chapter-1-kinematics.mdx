@@ -1,0 +1,120 @@
+---
+title: "باب 1: روبوٹ Kinematics"
+sidebar_position: 1
+description: "روبوٹک manipulators کے لیے forward اور inverse kinematics سیکھیں، بشمول ریاضیاتی بنیادیں اور عملی نفاذ"
+keywords:
+  - kinematics
+  - forward kinematics
+  - inverse kinematics
+  - Jacobian
+  - DH parameters
+  - manipulators
+  - robotics
+  - transformation matrices
+tags:
+  - kinematics
+  - manipulators
+  - mathematics
+  - robotics
+difficulty_level: intermediate
+ros_version: humble
+---
+
+# باب 1: روبوٹ Kinematics
+
+## تعارف
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Kinematics حرکت کا مطالعہ ہے بغیر قوتوں پر غور کیے۔ روبوٹس کے لیے، یہ ہمیں سمجھنے میں مدد کرتا ہے کہ روبوٹ کے جوائنٹس اس کے end-effector (روبوٹ کا "ہاتھ") کی پوزیشن سے کیسے تعلق رکھتے ہیں۔ اسے ایسے سمجھیں جیسے آپ سمجھ رہے ہوں کہ آپ کے کندھے، کہنی اور کلائی کی حرکات یہ طے کرتی ہیں کہ آپ کا ہاتھ کہاں جاتا ہے۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+روبوٹ kinematics جوائنٹ configurations کو end-effector poses پر میپ کرنے (forward kinematics) اور اس کے برعکس (inverse kinematics) کے لیے ریاضیاتی فریم ورک فراہم کرتا ہے۔ یہ باب Denavit-Hartenberg convention، تجزیاتی اور عددی IK حل، اور Jacobian-based velocity control کا احاطہ کرتا ہے۔
+</PersonalizedSection>
+
+## 1.1 Coordinate Transformations
+
+### Homogeneous Transformations
+
+ایک 3D transformation rotation اور translation کو یکجا کرتا ہے:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+import numpy as np
+
+def homogeneous_transform(R, t):
+    """
+    Homogeneous transformation matrix بنائیں
+
+    Args:
+        R: 3x3 rotation matrix
+        t: 3x1 translation vector
+
+    Returns:
+        4x4 homogeneous transformation matrix
+    """
+    T = np.eye(4)
+    T[:3, :3] = R
+    T[:3, 3] = t
+    return T
+
+# مثال: Z-axis کے گرد 45 ڈگری rotation
+theta = np.radians(45)
+R = np.array([
+    [np.cos(theta), -np.sin(theta), 0],
+    [np.sin(theta), np.cos(theta), 0],
+    [0, 0, 1]
+])
+t = np.array([1, 0, 0])  # X-axis پر 1 میٹر translation
+
+T = homogeneous_transform(R, t)
+print("Transformation Matrix:")
+print(T)
+```
+
+:::tip سیکھنے کی تجویز
+Transformation matrices کو سمجھنے کے لیے، پہلے 2D میں rotation اور translation کی مشق کریں، پھر 3D میں جائیں۔
+:::
+
+## 1.2 Forward Kinematics
+
+Forward kinematics جوائنٹ angles دیے گئے ہوں تو end-effector کی پوزیشن اور orientation کا حساب لگاتا ہے۔
+
+### DH Parameters
+
+Denavit-Hartenberg (DH) convention چار parameters استعمال کرتا ہے:
+- **θ (theta)**: جوائنٹ angle (revolute joints کے لیے)
+- **d**: لنک offset
+- **a**: لنک length
+- **α (alpha)**: لنک twist
+
+```python
+def dh_transform(theta, d, a, alpha):
+    """
+    DH parameters سے transformation matrix بنائیں
+    """
+    ct = np.cos(theta)
+    st = np.sin(theta)
+    ca = np.cos(alpha)
+    sa = np.sin(alpha)
+
+    return np.array([
+        [ct, -st*ca, st*sa, a*ct],
+        [st, ct*ca, -ct*sa, a*st],
+        [0, sa, ca, d],
+        [0, 0, 0, 1]
+    ])
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- Homogeneous transformation matrices کا استعمال
+- DH parameters کے ذریعے forward kinematics
+- Inverse kinematics کی بنیادی تصورات
+
+:::info اگلا باب
+[باب 2: Navigation](/docs/module-3-applications/chapter-2-navigation) میں ہم روبوٹ نیویگیشن سیکھیں گے۔
+:::

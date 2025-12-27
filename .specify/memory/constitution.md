@@ -55,6 +55,7 @@ Last Generated: 2025-12-10
 ### I. Agent Specialization & Clear Ownership
 
 **Rules:**
+
 - Each agent owns a specific domain with clearly defined skills and responsibilities
 - No agent may invoke skills outside its designated skill set
 - Cross-domain work requires explicit coordination through the Orchestrator agent
@@ -63,6 +64,7 @@ Last Generated: 2025-12-10
 **Rationale:** Prevents skill misuse, ensures domain expertise is properly applied, and maintains clear accountability for deliverables.
 
 **Agent Roster:**
+
 1. **Orchestrator Agent** - Coordination, spec compliance, conflict resolution (no direct skills)
 2. **ContentWriter Agent** - Technical authoring (`mdx-writer`)
 3. **DocusaurusBuilder Agent** - Frontend infrastructure (`docusaurus-init`, `react-components`, `github-pages-deploy`)
@@ -74,6 +76,7 @@ Last Generated: 2025-12-10
 ### II. Quality Over Speed
 
 **Rules:**
+
 - Every phase has mandatory quality gates that MUST pass before proceeding
 - Test coverage minimum: 80% for all core functionality
 - Code review required for all implementations (peer or agent review)
@@ -83,6 +86,7 @@ Last Generated: 2025-12-10
 **Rationale:** Educational platforms require high reliability. Students depend on accurate information and stable systems. Technical debt in educational content compounds learning difficulties.
 
 **Quality Gates per Phase (Summary - see QUALITY GATES section for complete criteria):**
+
 > **Note**: This is a high-level summary only (Tier 2). For authoritative detailed exit criteria, see the QUALITY GATES section below (lines 927-990) which serves as the single source of truth (Tier 1). Per ADR-003, plan phases must match the detailed criteria exactly.
 
 - Phase 1: Lighthouse scores > 85, build success, dark mode functional
@@ -96,6 +100,7 @@ Last Generated: 2025-12-10
 ### III. Smallest Viable Change (YAGNI)
 
 **Rules:**
+
 - Implement only what is explicitly required by the current phase
 - No premature abstractions or "future-proofing"
 - Prefer editing existing code over creating new files
@@ -105,6 +110,7 @@ Last Generated: 2025-12-10
 **Rationale:** Over-engineering wastes resources and creates maintenance burden. Build incrementally with quality gates between phases ensures we validate before expanding.
 
 **Examples:**
+
 - ✅ Direct database queries → ❌ Repository pattern "for future flexibility"
 - ✅ Inline validation → ❌ Complex validation framework for 3 fields
 - ✅ Delete unused code → ❌ Keep it "just in case"
@@ -112,6 +118,7 @@ Last Generated: 2025-12-10
 ### IV. Security by Default
 
 **Rules:**
+
 - No secrets in code (use `.env`, GitHub Secrets for CI/CD)
 - All user input sanitized before storage/processing (prevent XSS, SQL injection)
 - HTTPS-only for all external API calls
@@ -125,6 +132,7 @@ Last Generated: 2025-12-10
 ### V. Observability & Measurability
 
 **Rules:**
+
 - Structured JSON logging for all backend operations
 - Correlation IDs for request tracing (API errors, RAG queries)
 - Log levels: DEBUG, INFO, WARN, ERROR, CRITICAL
@@ -134,12 +142,14 @@ Last Generated: 2025-12-10
 **Rationale:** Cannot improve what is not measured. Observability enables debugging, performance optimization, and data-driven decisions.
 
 **Examples:**
+
 - ✅ "RAG response time p95 < 3s" → ❌ "Fast RAG responses"
 - ✅ "80% test coverage" → ❌ "Well-tested code"
 
 ### VI. Accessibility & Inclusivity (WCAG 2.1 AA)
 
 **Rules:**
+
 - All images MUST have alt text
 - Keyboard navigation functional for all interactive elements
 - Focus indicators visible and styled
@@ -154,6 +164,7 @@ Last Generated: 2025-12-10
 ### VII. Free Tier Sustainability
 
 **Rules:**
+
 - Respect all free tier limits (Qdrant 1GB, Neon 0.5GB, GitHub Pages 100GB/month)
 - Monitor usage proactively (alert at 80% of limits)
 - Implement rate limiting to protect quotas (10 queries/hour free users, 50/hour authenticated)
@@ -165,6 +176,7 @@ Last Generated: 2025-12-10
 ### VIII. Prompt History Records (PHR) for All Work
 
 **Rules:**
+
 - Create PHR after EVERY user prompt that results in implementation, planning, debugging, or spec work
 - Route PHRs to appropriate subdirectory:
   - `constitution` → `history/prompts/constitution/`
@@ -182,6 +194,7 @@ Last Generated: 2025-12-10
 ### IX. Architectural Decision Records (ADR) for Significant Decisions
 
 **Rules:**
+
 - Suggest ADR creation when ALL three criteria met:
   1. **Impact:** Long-term consequences? (framework, data model, API, security, platform)
   2. **Alternatives:** Multiple viable options considered?
@@ -194,6 +207,7 @@ Last Generated: 2025-12-10
 **Rationale:** ADRs capture the "why" behind architectural choices, enabling future maintainers to understand tradeoffs and constraints.
 
 **Suggestion Format:**
+
 ```
 📋 Architectural decision detected: [brief-description]
    Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
@@ -202,6 +216,7 @@ Last Generated: 2025-12-10
 ### X. Human as Tool (Explicit Escalation)
 
 **Rules:**
+
 - Agent MUST escalate to user when:
   1. **Ambiguous Requirements:** User intent unclear → Ask 2-3 targeted questions
   2. **Unforeseen Dependencies:** Dependencies not in spec → Surface and ask for prioritization
@@ -211,189 +226,6 @@ Last Generated: 2025-12-10
 - State recommendation if you have one
 
 **Rationale:** Agents are not omniscient. User judgment is required for ambiguous decisions. Escalation prevents wasted work on wrong assumptions.
-
----
-
-## AGENT ARCHITECTURE
-
-### 1. Orchestrator Agent
-
-**Purpose:** Project coordination, task delegation, spec compliance
-**Skills:** None (pure orchestration logic)
-
-**Responsibilities:**
-- Coordinate work across all agents
-- Ensure spec compliance and constitution adherence
-- Resolve inter-agent conflicts
-- Monitor project progress and quality gates
-- Approve phase transitions
-
-**Success Criteria:**
-- All phases complete with quality gates passed
-- No agent conflicts escalate beyond resolution
-- PHRs created for all significant work
-- ADRs suggested for architectural decisions
-
-**Does NOT Own:**
-- Direct code implementation
-- Content authoring
-- Infrastructure provisioning
-
----
-
-### 2. ContentWriter Agent
-
-**Purpose:** Technical chapter authoring and educational content creation
-**Skills:** `mdx-writer`
-
-**Responsibilities:**
-- Author technical chapters in MDX format
-- Create code examples and exercises
-- Ensure learning objectives are met
-- Maintain consistent technical depth
-
-**Success Criteria:**
-- Chapters match learning objectives (100%)
-- Code examples execute without errors (100%)
-- Technical accuracy validated by domain experts
-- Readability score appropriate for graduate level (Flesch-Kincaid 12-14)
-
-**Does NOT Own:**
-- Frontend UI implementation
-- Backend service development
-- Translation or personalization logic
-
----
-
-### 3. DocusaurusBuilder Agent
-
-**Purpose:** Frontend development and site infrastructure
-**Skills:** `docusaurus-init`, `react-components`, `github-pages-deploy`
-
-**Responsibilities:**
-- Initialize and configure Docusaurus v3 site
-- Develop React components for interactive features
-- Implement responsive design and dark mode
-- Deploy to GitHub Pages
-
-**Success Criteria:**
-- Lighthouse scores: Performance > 90, Accessibility > 90, Best Practices > 90
-- Mobile responsive (320px to 2560px viewport)
-- Dark mode toggle works across all pages
-- Build time < 5 minutes for full site
-
-**Does NOT Own:**
-- Content authoring (MDX files)
-- Backend API development
-- Authentication logic
-
----
-
-### 4. RAGArchitect Agent
-
-**Purpose:** Backend/AI engineering for RAG chatbot system
-**Skills:** `qdrant-vectorstore`, `neon-postgres`, `fastapi-backend`, `openai-agents-sdk`
-
-**Responsibilities:**
-- Design and implement vector search pipeline
-- Build FastAPI backend for RAG queries
-- Integrate OpenAI Agents SDK for intelligent responses
-- Optimize retrieval accuracy and latency
-
-**Success Criteria:**
-- Retrieval relevance score (NDCG@10) > 0.8
-- Query response time p95 < 3 seconds (end-to-end)
-- No hallucinations on test question set (100% faithfulness)
-- Vector store handles 1000+ chapter chunks efficiently
-
-**Performance Budget:**
-- Embedding generation: < 500ms
-- Vector search: < 1s
-- LLM generation: < 1.5s
-- Total: < 3s (p95)
-
-**Does NOT Own:**
-- Frontend chatbot UI
-- User authentication
-- Content translation
-
----
-
-### 5. AuthEngineer Agent
-
-**Purpose:** Authentication and user management
-**Skills:** `better-auth-setup`, `user-profiling`, `neon-postgres`
-
-**Responsibilities:**
-- Implement Better Auth for authentication flows
-- Design user profile schema in Neon Postgres
-- Handle session management and token refresh
-- Implement user preference storage
-
-**Success Criteria:**
-- Email + Google OAuth functional (100% success rate)
-- Session tokens expire after 24h and refresh properly
-- User profiles store learning preferences correctly
-- Auth flow passes all security tests (OWASP Top 10)
-
-**Security Requirements:**
-- No plaintext passwords stored
-- JWT tokens signed with RS256
-- CSRF protection enabled
-- Rate limiting: 10 failed login attempts → 15min lockout
-
-**Does NOT Own:**
-- Content personalization algorithms
-- RAG chatbot logic
-- Frontend component development
-
----
-
-### 6. PersonalizationEngine Agent
-
-**Purpose:** Adaptive content delivery based on user profiles
-**Skills:** `content-adapter`, `user-profiling`
-
-**Responsibilities:**
-- Analyze user learning preferences
-- Adapt content difficulty and depth
-- Recommend chapters based on skill level
-- Track learning progress
-
-**Success Criteria:**
-- Personalization response time < 2 seconds
-- Adaptation accuracy validated by user feedback (> 70% satisfaction)
-- Skill level classification accuracy > 80%
-- Recommendation relevance score > 0.75
-
-**Does NOT Own:**
-- Content authoring
-- Authentication logic
-- Translation services
-
----
-
-### 7. TranslationService Agent
-
-**Purpose:** Urdu translation with technical term preservation
-**Skills:** `urdu-translator`, `react-components`
-
-**Responsibilities:**
-- Translate technical content to Urdu
-- Preserve technical terms (ROS, Python, etc.)
-- Implement RTL UI components
-- Validate translation quality
-
-**Success Criteria:**
-- Translation generation: < 5s per chapter
-- Technical term preservation: 100% (validated against term list)
-- Grammar correctness: Pass native speaker review
-- RTL rendering: No layout breaks on any page
-
-**Does NOT Own:**
-- Original content creation
-- Authentication logic
-- Backend API development
 
 ---
 
@@ -441,6 +273,7 @@ Last Generated: 2025-12-10
 **Framework:** Jest (TypeScript), Pytest (Python)
 
 **Requirements:**
+
 - All utility functions tested
 - All business logic tested
 - Edge cases and error paths covered
@@ -450,6 +283,7 @@ Last Generated: 2025-12-10
 **Framework:** React Testing Library
 
 **Requirements:**
+
 - All interactive components tested
 - User interactions simulated (click, input, navigation)
 - Accessibility checks included (axe-core)
@@ -458,12 +292,14 @@ Last Generated: 2025-12-10
 ### Integration Testing
 
 **RAG Pipeline:**
+
 - Test end-to-end query flow (input → embedding → search → generation)
 - Validate relevance scores on 50-question test set
 - Measure latency for representative queries
 - **Pass Criteria:** NDCG@10 > 0.8, p95 latency < 3s
 
 **Authentication Flow:**
+
 - Test email signup, login, logout
 - Test Google OAuth flow
 - Test token refresh and expiration
@@ -472,6 +308,7 @@ Last Generated: 2025-12-10
 ### Translation Testing
 
 **Validation:**
+
 - 100% technical term preservation (automated check against term list)
 - Grammar correctness (native speaker review sample)
 - RTL rendering (visual regression tests)
@@ -482,6 +319,7 @@ Last Generated: 2025-12-10
 **Framework:** Playwright
 
 **Critical User Journeys:**
+
 1. New user signup → browse chapters → ask RAG question → get answer
 2. Existing user login → personalized recommendations → bookmark chapter
 3. User switches to Urdu → RTL layout renders → translation displays correctly
@@ -495,11 +333,13 @@ Last Generated: 2025-12-10
 ### Responsive Design
 
 **Breakpoints:**
+
 - Mobile: 320px - 767px
 - Tablet: 768px - 1023px
 - Desktop: 1024px+
 
 **Requirements:**
+
 - Touch targets ≥ 44x44px (mobile)
 - Readable text without zoom (16px base font size)
 - No horizontal scrolling at any breakpoint
@@ -507,6 +347,7 @@ Last Generated: 2025-12-10
 ### Dark Mode
 
 **Implementation:**
+
 - System preference detection on first visit
 - Manual toggle persists in localStorage
 - All components support dark mode
@@ -515,6 +356,7 @@ Last Generated: 2025-12-10
 ### Accessibility (WCAG 2.1 AA)
 
 **Requirements:**
+
 - All images have alt text
 - Keyboard navigation works for all interactive elements
 - Focus indicators visible and styled
@@ -524,6 +366,7 @@ Last Generated: 2025-12-10
 ### Loading States
 
 **Guidelines:**
+
 - Skeleton screens for content loading
 - Spinners for async operations < 3s
 - Progress bars for operations > 3s
@@ -532,12 +375,14 @@ Last Generated: 2025-12-10
 ### Error Handling
 
 **User-Facing Errors:**
+
 - Clear, actionable error messages
 - i18n-compatible (English + Urdu)
 - Retry options where applicable
 - Contact support link for critical errors
 
 **Backend Errors:**
+
 - Logged with correlation IDs
 - Structured logging (JSON format)
 - Severity levels (INFO, WARN, ERROR, CRITICAL)
@@ -545,6 +390,7 @@ Last Generated: 2025-12-10
 ### RTL Support (Urdu)
 
 **Requirements:**
+
 - Text direction switches to RTL
 - Layout mirrors (sidebar, navigation)
 - Icons and buttons flip appropriately
@@ -557,12 +403,14 @@ Last Generated: 2025-12-10
 ### Frontend Performance
 
 **Metrics:**
+
 - Initial page load (First Contentful Paint): < 1.5s
 - Time to Interactive: < 3s
 - Largest Contentful Paint: < 2.5s
 - Cumulative Layout Shift: < 0.1
 
 **Optimization:**
+
 - Code splitting by route
 - Image lazy loading
 - Font subsetting
@@ -571,12 +419,14 @@ Last Generated: 2025-12-10
 ### Backend Performance
 
 **API Latency (p95):**
+
 - GET endpoints: < 200ms
 - POST endpoints: < 500ms
 - RAG query: < 3s (end-to-end)
 - Translation: < 5s per chapter
 
 **Optimization:**
+
 - Database query indexing
 - Redis caching for frequent queries
 - Connection pooling
@@ -585,12 +435,14 @@ Last Generated: 2025-12-10
 ### RAG Chatbot Performance
 
 **Detailed Budget:**
+
 - Embed user query (OpenAI API): < 500ms
 - Search Qdrant (top 10 chunks): < 1s
 - Generate answer (OpenAI Agents SDK): < 1.5s
 - **Total:** < 3s (p95)
 
 **Optimization:**
+
 - Batch embedding requests where possible
 - Qdrant HNSW index optimization (M=16, ef_construct=100)
 - Prompt caching for repeated queries
@@ -601,6 +453,7 @@ Last Generated: 2025-12-10
 **Target:** < 5s per chapter
 
 **Optimization:**
+
 - Stream translation (yield chunks as available)
 - Cache translated chapters
 - Background job for bulk translation
@@ -636,6 +489,7 @@ Last Generated: 2025-12-10
 **Relational Data:** Neon Serverless Postgres (Free Tier)
 
 **Schema:**
+
 - `users` table (auth, profile)
 - `chat_history` table (user queries, bot responses)
 - `user_preferences` table (learning level, bookmarks)
@@ -643,6 +497,7 @@ Last Generated: 2025-12-10
 **Vector Data:** Qdrant Cloud (Free Tier, 1GB)
 
 **Collections:**
+
 - `textbook_chunks` (chapter embeddings, metadata)
 
 ### AI/ML Architecture
@@ -667,6 +522,7 @@ Last Generated: 2025-12-10
 ### Free Tier Constraints
 
 **Respected Limits:**
+
 - Qdrant: 1GB storage (~100k chunks)
 - Neon: 0.5GB storage, 100 compute hours/month
 - OpenAI: Rate limits per API key tier
@@ -679,12 +535,14 @@ Last Generated: 2025-12-10
 ### Phase 1: Book Infrastructure (Owner: DocusaurusBuilder)
 
 **Deliverables:**
+
 - Docusaurus v3 initialized with TypeScript
 - Custom theme with dark mode
 - Responsive layout (mobile, tablet, desktop)
 - GitHub Pages deployment configured
 
 **Quality Gate:**
+
 - Site builds without errors
 - Deploys to GitHub Pages successfully
 - Lighthouse scores all > 85
@@ -695,12 +553,14 @@ Last Generated: 2025-12-10
 ### Phase 2: Content Creation (Owner: ContentWriter)
 
 **Deliverables:**
+
 - 10 sample chapters (MDX format)
 - Code examples tested and runnable
 - Learning objectives per chapter
 - Exercises with solutions
 
 **Quality Gate:**
+
 - All chapters render correctly in Docusaurus
 - Code examples execute without errors (tested in CI)
 - Peer review completed by domain expert
@@ -711,12 +571,14 @@ Last Generated: 2025-12-10
 ### Phase 3: RAG Chatbot Core (Owner: RAGArchitect)
 
 **Deliverables:**
+
 - Vector database populated with chapter chunks
 - FastAPI backend with `/query` endpoint
 - OpenAI Agents SDK integration
 - Basic chatbot UI (simplified)
 
 **Quality Gate:**
+
 - Retrieval NDCG@10 > 0.8 on test set
 - Response time p95 < 3s
 - No hallucinations on 50-question test set
@@ -727,12 +589,14 @@ Last Generated: 2025-12-10
 ### Phase 4A: Authentication (Owner: AuthEngineer)
 
 **Deliverables:**
+
 - Better Auth configured (email + Google)
 - User profile schema in Neon Postgres
 - Session management functional
 - Protected routes implemented
 
 **Quality Gate:**
+
 - Email signup, login, logout work (100% success)
 - Google OAuth flow functional
 - Tokens expire and refresh correctly
@@ -743,47 +607,405 @@ Last Generated: 2025-12-10
 ### Phase 4B: Personalization (Owner: PersonalizationEngine)
 
 **Deliverables:**
+
 - User skill level classification
 - Personalized chapter recommendations
 - Learning progress tracking
 - Adaptive content depth
 
 **Quality Gate:**
+
 - Personalization response time < 2s
 - Recommendation relevance > 0.75
 - User feedback survey shows > 70% satisfaction
 
 ---
 
-### Phase 5: Translation (Owner: TranslationService)
+### Phase 5: Translation
 
-**Deliverables:**
-- Urdu translation for all chapters
-- RTL layout components
-- Language toggle UI
-- Technical term glossary
+**Purpose:** Deliver multilingual learning experience with technical accuracy and proper RTL support for Urdu-speaking students.
 
-**Quality Gate:**
-- Translation time < 5s per chapter
-- 100% technical term preservation (automated check)
-- RTL layout renders without breaks (visual regression)
-- Native speaker review passes for sample chapters
+**Owner:** TranslationService Agent
+
+**Skills Used:** `urdu-translator`, `react-components`
 
 ---
 
-### Phase 6: Integration & Deployment (Owner: Orchestrator)
-
 **Deliverables:**
-- All features integrated into production
-- End-to-end testing complete
-- Documentation finalized
-- Deployment pipeline automated
+
+- Urdu translation for all chapters with technical term preservation
+
+- RTL (Right-to-Left) layout components and styles
+
+- Language toggle UI with persistent user preference
+
+- Technical term glossary (bilingual: English-Urdu)
+
+- Translation quality validation tooling
+
+- Cached translation storage for performance
+
+---
 
 **Quality Gate:**
-- All critical user journeys pass E2E tests
-- Performance requirements met (Lighthouse > 90)
-- Security audit passed
-- Production deployment successful
+
+- Translation generation time < 5s per chapter (end-to-end)
+
+- 100% technical term preservation (automated validation against glossary)
+
+- RTL layout renders without breaks (visual regression testing on 3 viewports)
+
+- Native speaker review passes for 3 sample chapters (grammar, technical accuracy, readability)
+
+- Language toggle persists across sessions (localStorage validation)
+
+- No layout shift when switching languages (CLS < 0.1)
+
+---
+
+**Implementation Requirements:**
+
+**1. Translation Service Architecture:**
+
+- Use `urdu-translator` skill for content translation
+
+- Preserve technical terms: ROS, Python, NVIDIA Isaac, Gazebo, URDF, etc.
+
+- Maintain code block syntax and variable names unchanged
+
+- Support MDX frontmatter and metadata translation
+
+- Cache translated chapters to reduce API calls and cost
+
+**2. RTL Layout Implementation:**
+
+- CSS logical properties: Use `margin-inline-start` instead of `margin-left`
+
+- Directional icons: Flip navigation arrows, breadcrumbs, and UI icons
+
+- Text alignment: Right-align for Urdu, left-align for English
+
+- Layout mirroring: Sidebar, navigation, and grid layouts flip for RTL
+
+- No hardcoded left/right values in component styles
+
+- Bidirectional (BiDi) text handling for mixed English-Urdu content
+
+**3. Language Toggle UI:**
+
+- Accessible toggle component (WCAG 2.1 AA compliant)
+
+- Keyboard navigable (Tab, Enter, Space support)
+
+- ARIA labels: `aria-label="Switch to Urdu"` / `aria-label="Switch to English"`
+
+- Visual indicator of current language (not color-only)
+
+- Mobile-friendly touch target (≥ 44x44px)
+
+- Persist language preference in localStorage
+
+- Sync language preference with user profile (if authenticated)
+
+**4. Technical Term Glossary:**
+
+- Bilingual glossary file: English term → Urdu transliteration + definition
+
+- Automated validation: Flag any translated term that differs from glossary
+
+- Hover tooltips: Show English term on hover for Urdu technical terms
+
+- Glossary page: Searchable, filterable, exportable reference
+
+- Version control: Track glossary updates in git
+
+**5. Translation Quality Validation:**
+
+- **Automated checks:**
+  - Technical term preservation: 100% match against glossary
+
+  - Code block integrity: No translation inside code fences
+
+  - MDX syntax preservation: No broken JSX components
+
+  - Link integrity: All internal/external links functional
+
+- **Manual review:**
+  - Native speaker review 3 sample chapters
+
+  - Grammar correctness: Flesch-Kincaid equivalent for Urdu readability
+
+  - Cultural appropriateness: Educational tone suitable for graduate students
+
+- **Visual regression:**
+  - Screenshot comparison: English vs Urdu layouts (3 viewports: 320px, 768px, 1024px)
+
+  - No text overflow, no layout breaks, no overlapping elements
+
+  - Proper font rendering: Use Noto Nastaliq Urdu or equivalent
+
+---
+
+**Performance Budget:**
+
+- Translation generation: < 3s per chapter (API call to urdu-translator)
+
+- Translation caching: First load 3s, subsequent loads < 500ms (from cache)
+
+- Language toggle response: < 200ms (instant UI switch)
+
+- Total time to switch language: < 1s (including font loading)
+
+- Font loading: Use `font-display: swap` to prevent FOIT (Flash of Invisible Text)
+
+---
+
+**Accessibility Requirements (WCAG 2.1 AA):**
+
+- Screen reader announces language switch: `<html lang="ur">` for Urdu
+
+- RTL reading order matches visual order
+
+- Focus indicators visible in both LTR and RTL modes
+
+- All interactive elements keyboard accessible
+
+- Color contrast ratios maintained: 4.5:1 (text), 3:1 (UI components)
+
+- No reliance on directional cues alone ("click the button on the right")
+
+---
+
+**Security Considerations:**
+
+- **Translation API Security:**
+  - No API keys in client-side code (use environment variables)
+
+  - Rate limiting: 10 translation requests per minute per user (prevent abuse)
+
+  - Input sanitization: Prevent XSS through translated content
+
+  - Validate translation output: Reject responses with script tags or malicious content
+
+- **Content Integrity:**
+  - Hash original content: Detect tampering or unauthorized modifications
+
+  - Store translations in secure database (Neon Postgres, encrypted at rest)
+
+  - Audit trail: Log who translated what and when
+
+---
+
+**Error Handling & Graceful Degradation:**
+
+- **Translation service unavailable:**
+  - Fallback: Display English version with banner "Translation temporarily unavailable"
+
+  - Cache previous translations: Serve stale cache if API fails
+
+  - Retry logic: 3 attempts with exponential backoff (2s, 4s, 8s)
+
+- **Partial translation failure:**
+  - Show translated sections + English for untranslated sections
+
+  - Highlight untranslated sections with visual indicator
+
+- **RTL rendering issues:**
+  - Fallback to LTR with Urdu text (readable but not optimal)
+
+  - Log error for developer investigation
+
+- **User-facing error messages:**
+  - Clear, actionable: "Translation failed. Showing English version. [Retry]"
+
+  - Bilingual error messages (English + Urdu) where applicable
+
+---
+
+**Testing Strategy:**
+
+**1. Unit Tests:**
+
+- Technical term preservation logic (100% glossary match)
+
+- RTL CSS class application (verify direction changes)
+
+- Language toggle state management (localStorage persistence)
+
+**2. Component Tests:**
+
+- Language toggle component (click, keyboard interaction)
+
+- RTL layout components (text direction, icon flipping)
+
+- Glossary tooltip component (hover, click, accessibility)
+
+**3. Integration Tests:**
+
+- End-to-end translation flow: Request → API → Cache → Render
+
+- Language switch flow: Toggle → Fetch translation → Update UI → Persist preference
+
+- Bilingual glossary search and filtering
+
+**4. Visual Regression Tests:**
+
+- Percy or Chromatic: Screenshot comparison for 10 chapters
+
+- Test 3 viewports: Mobile (320px), Tablet (768px), Desktop (1024px)
+
+- Compare English vs Urdu layouts: No layout breaks, proper alignment
+
+**5. Manual Testing:**
+
+- Native speaker review: 3 sample chapters (grammar, accuracy, readability)
+
+- Cross-browser testing: Chrome, Firefox, Safari, Edge
+
+- Cross-device testing: iOS, Android, Desktop
+
+- Screen reader testing: NVDA (Windows), VoiceOver (macOS/iOS)
+
+---
+
+**Free Tier Sustainability:**
+
+- **Translation API Costs:**
+  - Monitor API usage: Alert at 80% of monthly quota
+
+  - Aggressive caching: Cache all translations indefinitely
+
+  - Background translation: Pre-translate all chapters during deployment (not on-demand)
+
+  - Rate limiting: 10 translations per user per day (free tier), unlimited (authenticated)
+
+- **Storage Optimization:**
+  - Store translations in Neon Postgres (within 0.5GB limit)
+
+  - Compress translation payloads (gzip compression)
+
+  - Deduplicate common phrases and technical terms
+
+---
+
+**Success Criteria:**
+
+- All 10 chapters translated to Urdu (100% coverage)
+
+- Translation time < 5s per chapter (measured in production)
+
+- Technical term preservation 100% (automated validation passes)
+
+- RTL layout renders correctly (visual regression tests pass on 3 viewports)
+
+- Native speaker review passes for 3 sample chapters (score ≥ 80% on quality rubric)
+
+- Language toggle functional and accessible (WCAG AA audit passes)
+
+- Zero layout shift when switching languages (CLS < 0.1 measured)
+
+- PHR created documenting translation implementation approach
+
+---
+
+**Does NOT Include (Out of Scope for Phase 5):**
+
+- Machine translation for languages other than Urdu
+
+- Audio/video content translation
+
+- Real-time translation chat interface
+
+- User-contributed translations or crowdsourcing
+
+- Translation memory or CAT (Computer-Assisted Translation) tools
+
+---
+
+**Follow-Up Items (Post Phase 5):**
+
+- Monitor user feedback on translation quality
+
+- Iterate on glossary based on student questions
+
+- A/B test different Urdu fonts for readability
+
+- Add keyboard shortcuts for language switching (e.g., Alt+L)
+
+- Implement translation analytics (which chapters most viewed in Urdu)
+
+---
+
+**Risks & Mitigation:**
+
+**Risk 1: Translation Quality Issues**
+
+- **Impact:** Medium (poor UX for Urdu users, learning comprehension affected)
+
+- **Likelihood:** Medium
+
+- **Mitigation:**
+  - Mandatory native speaker review before deployment
+
+  - Technical term glossary enforced (100% automation)
+
+  - User feedback mechanism (report translation errors)
+
+  - Iterative improvement based on feedback
+
+- **Kill Switch:** Disable Urdu toggle, show English-only version
+
+**Risk 2: RTL Layout Breaks**
+
+- **Impact:** High (unusable UI for Urdu users)
+
+- **Likelihood:** Low (if visual regression tests pass)
+
+- **Mitigation:**
+  - Comprehensive visual regression testing (Percy/Chromatic)
+
+  - CSS logical properties from the start (no left/right hardcoding)
+
+  - Cross-browser and cross-device testing
+
+  - Fallback to LTR + Urdu text if critical RTL failure
+
+- **Kill Switch:** Fallback to English-only mode
+
+**Risk 3: Translation API Cost Overrun**
+
+- **Impact:** Medium (budget exhaustion)
+
+- **Likelihood:** Low (aggressive caching prevents repeated calls)
+
+- **Mitigation:**
+  - Pre-translate all chapters during deployment (one-time cost)
+
+  - Cache translations indefinitely (no re-translation)
+
+  - Monitor API spend daily, alert at threshold
+
+  - Rate limiting per user (10 requests/day free tier)
+
+- **Kill Switch:** Disable on-demand translation, serve cached only
+
+---
+
+**Constitution Alignment:**
+
+- ✅ Accessibility & Inclusivity (Principle VI): Full RTL support, WCAG 2.1 AA compliance
+
+- ✅ Free Tier Sustainability (Principle VII): Aggressive caching, rate limiting, monitoring
+
+- ✅ Security by Default (Principle IV): API key protection, input sanitization, audit trail
+
+- ✅ Quality Over Speed (Principle II): Native speaker review, automated validation, visual regression testing
+
+- ✅ Smallest Viable Change (Principle III): Only Urdu translation (not other languages), no advanced CAT tools
+
+- ✅ Observability & Measurability (Principle V): Translation time measured, term preservation tracked, API usage monitored
+
+---
 
 ---
 
@@ -792,12 +1014,14 @@ Last Generated: 2025-12-10
 ### API Error Handling
 
 **Requirements:**
+
 - All external API calls have timeout (default 30s)
 - Retry logic with exponential backoff (3 attempts)
 - Circuit breaker for repeated failures
 - Correlation IDs for request tracing
 
 **Error Response Format:**
+
 ```json
 {
   "error": {
@@ -812,18 +1036,21 @@ Last Generated: 2025-12-10
 ### User-Facing Errors
 
 **Guidelines:**
+
 - Clear, non-technical language
 - Actionable next steps
 - Avoid exposing internal details
 - i18n-compatible (English + Urdu)
 
 **Examples:**
+
 - ✅ "Unable to find relevant answers. Try rephrasing your question."
 - ❌ "Vector search returned empty results from Qdrant."
 
 ### Graceful Degradation
 
 **Strategies:**
+
 - RAG failure → Show static FAQ content
 - Translation unavailable → English fallback
 - Personalization error → Default recommendations
@@ -836,12 +1063,14 @@ Last Generated: 2025-12-10
 ### Secret Management
 
 **Rules:**
+
 - No API keys, passwords, or tokens in code
 - Use `.env` files for local development
 - Use GitHub Secrets for CI/CD
 - Rotate secrets quarterly (document in ADR)
 
 **Environment Variables:**
+
 ```
 OPENAI_API_KEY=sk-...
 QDRANT_API_KEY=...
@@ -852,6 +1081,7 @@ GITHUB_CLIENT_SECRET=...
 ### Input Sanitization
 
 **Requirements:**
+
 - Sanitize all user input before storage
 - Prevent SQL injection (use parameterized queries)
 - Prevent XSS (escape HTML in user content)
@@ -860,12 +1090,14 @@ GITHUB_CLIENT_SECRET=...
 ### Authentication Security
 
 **Requirements:**
+
 - Passwords hashed with bcrypt (cost factor 12)
 - JWT signed with RS256 (not HS256)
 - CSRF tokens for state-changing requests
 - Rate limiting on auth endpoints
 
 **Rate Limits:**
+
 - Login attempts: 10 per 15 minutes per IP
 - Signup: 5 per hour per IP
 - Password reset: 3 per hour per email
@@ -873,6 +1105,7 @@ GITHUB_CLIENT_SECRET=...
 ### Data Privacy
 
 **Principles:**
+
 - Collect minimum necessary user data
 - Store chat history for max 30 days (user-deletable)
 - No PII in vector database
@@ -887,6 +1120,7 @@ GITHUB_CLIENT_SECRET=...
 **Contents:** Textbook chapter chunks + metadata
 
 **Schema:**
+
 ```json
 {
   "id": "chapter-3-section-2-chunk-5",
@@ -907,6 +1141,7 @@ GITHUB_CLIENT_SECRET=...
 ### Relational Database (Neon Postgres)
 
 **Tables:**
+
 1. `users` - Auth info, encrypted email
 2. `user_profiles` - Learning preferences, skill level
 3. `chat_history` - User queries + bot responses (30-day retention)
@@ -918,6 +1153,7 @@ GITHUB_CLIENT_SECRET=...
 ### Embeddings Versioning
 
 **Strategy:**
+
 - Store embedding model name + version in metadata
 - On model upgrade, re-embed all content
 - Keep old embeddings for rollback (7 days)
@@ -997,16 +1233,19 @@ GITHUB_CLIENT_SECRET=...
 ### Decision Authority
 
 **Orchestrator Agent:**
+
 - Final authority on task prioritization
 - Resolves inter-agent conflicts
 - Approves phase transitions (quality gate checks)
 
 **Architecture Changes:**
+
 - Require ADR creation (via `/sp.adr`)
 - User approval required for major changes
 - Document in `history/adr/`
 
 **Spec Changes:**
+
 - Must pass constitution compliance check
 - Require Orchestrator approval
 - Update PHR with rationale
@@ -1014,23 +1253,27 @@ GITHUB_CLIENT_SECRET=...
 ### Escalation Paths
 
 **Agent Conflicts:**
+
 1. Agents attempt resolution via shared context
 2. If unresolved, escalate to Orchestrator
 3. Orchestrator decides and documents in PHR
 
 **Ambiguity in Requirements:**
+
 1. Agent identifies ambiguity
 2. Uses "Human as Tool" strategy (ask user 2-3 targeted questions)
 3. User provides clarification
 4. Update spec and document in PHR
 
 **Budget/Scope Exceeded:**
+
 1. Agent halts work
 2. Reports to Orchestrator with details
 3. Orchestrator escalates to user for decision
 4. Document decision in ADR if architectural
 
 **Technical Blocker:**
+
 1. Agent investigates and documents issue
 2. Proposes 2-3 solutions with tradeoffs
 3. Escalates to user for decision
@@ -1041,6 +1284,7 @@ GITHUB_CLIENT_SECRET=...
 **Requirement:** Skills MUST be invoked through designated agents
 
 **Enforcement:**
+
 - `mdx-writer` → Only via ContentWriter agent
 - `qdrant-vectorstore` → Only via RAGArchitect agent
 - `better-auth-setup` → Only via AuthEngineer agent
@@ -1050,6 +1294,7 @@ GITHUB_CLIENT_SECRET=...
 ### Priority Framework
 
 **Order of Priorities:**
+
 1. **Core Functionality** - Book rendering, RAG chatbot, authentication
 2. **Quality & Security** - Testing, OWASP compliance, performance
 3. **User Experience** - Responsive design, accessibility, dark mode
@@ -1067,6 +1312,7 @@ GITHUB_CLIENT_SECRET=...
 **Error Budget:** 1% downtime = ~7 hours/month
 
 **Degradation Strategy:**
+
 - RAG failure → Static FAQ fallback
 - Auth service down → Guest mode
 - Translation unavailable → English fallback
@@ -1074,40 +1320,47 @@ GITHUB_CLIENT_SECRET=...
 ### Observability
 
 **Logging:**
+
 - Structured JSON logs
 - Correlation IDs for request tracing
 - Log levels: DEBUG, INFO, WARN, ERROR, CRITICAL
 - Retention: 30 days
 
 **Metrics:**
+
 - API latency (p50, p95, p99)
 - Error rates (per endpoint)
 - RAG relevance scores (daily aggregate)
 - User engagement (sessions, queries)
 
 **Tracing:**
+
 - OpenTelemetry for distributed tracing
 - Trace RAG pipeline: embed → search → generate
 
 ### Alerting
 
 **Critical Alerts:**
+
 - API error rate > 5% (5-minute window) → Notify immediately
 - RAG response time p95 > 5s → Notify immediately
 - Database connection pool exhausted → Notify immediately
 
 **Warning Alerts:**
+
 - Lighthouse score drops below 85 → Notify daily digest
 - Translation cache hit rate < 70% → Notify weekly
 
 ### Cost Management
 
 **Free Tier Monitoring:**
+
 - Qdrant: Alert at 80% of 1GB storage
 - Neon: Alert at 80 compute hours (100h/month limit)
 - OpenAI: Track API spend, alert at $50/month
 
 **Unit Economics:**
+
 - Embedding cost: ~$0.0001 per query (OpenAI text-embedding-3-small)
 - LLM generation: ~$0.002 per query (GPT-4o-mini)
 - Target: < $0.01 per user per month (at 10 queries/user/month)
@@ -1144,6 +1397,7 @@ GITHUB_CLIENT_SECRET=...
 ### Deployment Strategy
 
 **CI/CD Pipeline:**
+
 1. Push to main branch → Trigger GitHub Actions
 2. Run linters (ESLint, Prettier, Black, Flake8)
 3. Run unit tests (Jest, Pytest)
@@ -1154,12 +1408,14 @@ GITHUB_CLIENT_SECRET=...
 8. Deploy to Railway/Render
 
 **Rollback Procedure:**
+
 - Frontend: Revert GitHub Pages deployment (via Actions)
 - Backend: Redeploy previous Docker image tag
 
 ### Feature Flags
 
 **Use Cases:**
+
 - Gradual rollout of personalization (A/B test)
 - Emergency disable of translation service
 - Beta features for select users
@@ -1169,6 +1425,7 @@ GITHUB_CLIENT_SECRET=...
 ### Backward Compatibility
 
 **API Versioning:**
+
 - Version in URL path: `/api/v1/query`
 - Maintain v1 for 6 months after v2 release
 - Document deprecation in OpenAPI spec
@@ -1184,6 +1441,7 @@ GITHUB_CLIENT_SECRET=...
 **Blast Radius:** All RAG functionality
 
 **Mitigation:**
+
 - Implement rate limiting per user (10 queries/hour free, 50 queries/hour authenticated)
 - Cache frequent queries (Redis, 1-hour TTL)
 - Monitor spend daily, alert at $50/month threshold
@@ -1200,6 +1458,7 @@ GITHUB_CLIENT_SECRET=...
 **Blast Radius:** Vector search fails
 
 **Mitigation:**
+
 - Monitor storage usage (alert at 80%)
 - Compress embeddings (dimensionality reduction if needed)
 - Prune old/unused chunks
@@ -1216,6 +1475,7 @@ GITHUB_CLIENT_SECRET=...
 **Blast Radius:** Urdu translation feature
 
 **Mitigation:**
+
 - Manual review by native speaker (sample chapters)
 - Technical term glossary (100% preservation enforced)
 - User feedback mechanism (report translation errors)
@@ -1230,6 +1490,7 @@ GITHUB_CLIENT_SECRET=...
 ### Definition of Done (Per Phase)
 
 **Criteria:**
+
 1. All acceptance criteria met (from spec)
 2. Tests pass (unit, integration, E2E as applicable)
 3. Code review completed (peer or agent review)
@@ -1240,16 +1501,19 @@ GITHUB_CLIENT_SECRET=...
 ### Output Validation
 
 **Format Validation:**
+
 - PHRs follow template structure (no missing fields)
 - ADRs use standard format (Context, Decision, Consequences)
 - Code passes linters (ESLint, Prettier, Black, Flake8)
 
 **Requirements Validation:**
+
 - Unit tests validate business logic
 - Integration tests validate system interactions
 - E2E tests validate user journeys
 
 **Safety Validation:**
+
 - OWASP Top 10 checklist passed
 - Dependency scanning (no critical vulnerabilities)
 - Input sanitization verified
@@ -1261,11 +1525,13 @@ GITHUB_CLIENT_SECRET=...
 ### ADR Creation Criteria
 
 **Three-Part Test (ALL must be true):**
+
 1. **Impact:** Long-term consequences? Affects framework, data model, API, security, or platform?
 2. **Alternatives:** Multiple viable options were considered?
 3. **Scope:** Cross-cutting and influences system design?
 
 **If ALL true → Suggest ADR:**
+
 ```
 📋 Architectural decision detected: [brief-description]
    Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
@@ -1274,6 +1540,7 @@ GITHUB_CLIENT_SECRET=...
 ### ADR Examples for This Project
 
 **Expected ADRs:**
+
 1. "Use Docusaurus v3 over Next.js for static site generation"
 2. "Use Qdrant Cloud instead of self-hosted vector database"
 3. "Use OpenAI Agents SDK instead of LangChain for RAG"
@@ -1295,6 +1562,7 @@ GITHUB_CLIENT_SECRET=...
 ### Invocation Triggers
 
 **Agent MUST ask user when:**
+
 1. **Ambiguous Requirements:** User intent unclear → Ask 2-3 targeted clarifying questions
 2. **Unforeseen Dependencies:** Discovered dependencies not in spec → Surface and ask for prioritization
 3. **Architectural Uncertainty:** Multiple valid approaches with significant tradeoffs → Present options
@@ -1303,12 +1571,14 @@ GITHUB_CLIENT_SECRET=...
 ### Question Guidelines
 
 **Best Practices:**
+
 - Ask 2-3 focused questions (not 10+)
 - Provide context for why you're asking
 - Offer 2-3 options with tradeoffs (when applicable)
 - State your recommendation (if you have one)
 
 **Example:**
+
 ```
 I'm implementing the RAG chatbot and need to decide on chunk size:
 
@@ -1357,12 +1627,14 @@ What's your preference?
 ## MINIMUM ACCEPTANCE CRITERIA (Per Deliverable)
 
 **Every Deliverable Must Have:**
+
 - Clear, testable acceptance criteria
 - Explicit error paths and constraints stated
 - Smallest viable change (no unrelated edits)
 - Code references to modified/inspected files (format: `path:line_start-line_end`)
 
 **Example:**
+
 ```
 Deliverable: RAG query endpoint
 
@@ -1424,6 +1696,7 @@ Non-Goals:
 ## REFERENCES
 
 **Documentation Locations:**
+
 - Constitution: `.specify/memory/constitution.md`
 - Feature Specs: `specs/<feature>/spec.md`
 - Architecture Plans: `specs/<feature>/plan.md`
@@ -1433,6 +1706,7 @@ Non-Goals:
 - Templates: `.specify/templates/`
 
 **Key Contacts:**
+
 - Orchestrator Agent: Primary coordination
 - User: Human as Tool for clarifications
 

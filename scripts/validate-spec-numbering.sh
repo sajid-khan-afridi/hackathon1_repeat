@@ -6,6 +6,7 @@
 set -e
 
 # Phase to number mapping based on constitution
+# Note: Phase 4 has sub-phases (4A=004, 4B=005), so Phase 5=006, Phase 6=007
 declare -A PHASE_NUMBERS=(
     ["Book Infrastructure"]="001"
     ["Content Creation"]="002"
@@ -14,6 +15,19 @@ declare -A PHASE_NUMBERS=(
     ["Personalization"]="005"
     ["Translation"]="006"
     ["Integration & Deployment"]="007"
+)
+
+# Phase number to spec prefix mapping (handles sub-phases)
+# Note: "4B" maps to 005, "4A" or "4" maps to 004
+declare -A PHASE_TO_PREFIX=(
+    ["1"]="001"
+    ["2"]="002"
+    ["3"]="003"
+    ["4"]="004"   # Phase 4 or 4A (Authentication)
+    ["4A"]="004"  # Phase 4A (Authentication)
+    ["4B"]="005"  # Phase 4B (Personalization)
+    ["5"]="006"   # Phase 5 (Translation) - offset due to Phase 4A/4B split
+    ["6"]="007"   # Phase 6 (Integration)
 )
 
 # Colors for output
@@ -41,23 +55,36 @@ for spec_dir in specs/*/; do
             # Check if spec has spec.md file
             spec_file="${spec_dir}spec.md"
             if [ -f "$spec_file" ]; then
-                # Extract phase from spec content (look for "Phase X" or "Phase X of Y")
-                phase_line=$(grep -i "phase [0-9]" "$spec_file" | head -1 || echo "")
-                # Extract just "Phase X" from patterns like "Phase 1" or "Phase 1 of 6"
-                phase=$(echo "$phase_line" | sed -E 's/.*(phase [0-9]+).*/\1/i' | tr '[:lower:]' '[:upper:]' || echo "")
+                # Extract phase from spec content (look for "Phase X", "Phase XA", "Phase XB")
+                phase_line=$(grep -i "phase [0-9][AB]*" "$spec_file" | head -1 || echo "")
+                # Extract "Phase X" or "Phase XA/XB" from patterns
+                phase=$(echo "$phase_line" | sed -E 's/.*(phase [0-9]+[AB]?).*/\1/i' | tr '[:lower:]' '[:upper:]' || echo "")
 
                 if [ ! -z "$phase" ]; then
-                    phase_num=$(echo $phase | grep -o '[0-9]')
-                    padded_phase_num=$(printf "%03d" $phase_num)
+                    # Extract phase identifier (e.g., "4B", "5", "1")
+                    phase_id=$(echo "$phase" | grep -oE '[0-9]+[AB]?' | head -1)
 
-                    # Check if spec number matches phase number
-                    if [ "$spec_number" != "$padded_phase_num" ]; then
+                    # Use the phase-to-prefix mapping to handle sub-phases
+                    expected_prefix="${PHASE_TO_PREFIX[$phase_id]}"
+                    if [ -z "$expected_prefix" ]; then
+                        # Try without letter suffix (e.g., "4B" -> "4")
+                        phase_num_only=$(echo "$phase_id" | grep -o '[0-9]')
+                        expected_prefix="${PHASE_TO_PREFIX[$phase_num_only]}"
+                    fi
+                    if [ -z "$expected_prefix" ]; then
+                        # Fallback to simple padding if not in mapping
+                        phase_num_only=$(echo "$phase_id" | grep -o '[0-9]')
+                        expected_prefix=$(printf "%03d" $phase_num_only)
+                    fi
+
+                    # Check if spec number matches expected prefix
+                    if [ "$spec_number" != "$expected_prefix" ]; then
                         echo -e "${RED}❌ MISMATCH: $dir_name"
                         echo "   Spec mentions $phase but uses prefix $spec_number"
-                        echo "   Expected: ${padded_phase_num}-${spec_name}${NC}"
+                        echo "   Expected: ${expected_prefix}-${spec_name}${NC}"
                         errors=$((errors + 1))
                     else
-                        echo -e "${GREEN}✅ $dir_name (Phase $phase_num)${NC}"
+                        echo -e "${GREEN}✅ $dir_name (Phase $phase_id)${NC}"
                     fi
                 else
                     echo -e "${YELLOW}⚠️  $dir_name: No phase found in spec.md${NC}"

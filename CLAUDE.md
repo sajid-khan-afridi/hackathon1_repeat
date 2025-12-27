@@ -128,17 +128,12 @@ You are not expected to solve every problem autonomously. You MUST invoke the us
 
 When running `/sp.implement`, treat `CLAUDE.md` as the authoritative project memory and keep it in sync.
 
-**Subagent Selection (Explicit):**
+**Skill Invocation (Direct - No Agents):**
 
-- Delegate this implementation to the **appropriate subagent** from `.claude/agents/`.
-- Do NOT invoke any other subagents unless strictly necessary. If you do, state:
-  - (a) Why the additional subagent is needed
-  - (b) What you need from it
-
-**Skill Usage (Only Relevant):**
-
-- Use only the **relevant** skills from `.claude/skills/` that directly help this implementation.
-- Do not use unrelated skills.
+- Invoke the **relevant skills** directly from `.claude/skills/` that help this implementation.
+- Do NOT invoke agents from `.claude/agents/`. Skills should be used directly without agent delegation.
+- Use only skills that directly help this implementation; do not use unrelated skills.
+- Reference each skill's `skill.json` and `README.md` for parameters and usage.
 
 ## Default policies (must follow)
 

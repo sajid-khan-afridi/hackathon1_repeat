@@ -121,7 +121,7 @@ Based on plan.md structure:
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Expand glossary.json to 50+ technical terms in src/data/glossary.json
+- [X] T036 [US3] Expand glossary.json to 50+ technical terms in src/data/glossary.json
 - [X] T037 [P] [US3] Create useGlossary hook with search and filter in src/hooks/useGlossary.ts
 - [X] T038 [US3] Create GlossaryTooltip component with hover behavior in src/components/GlossaryTooltip/index.tsx
 - [X] T039 [P] [US3] Create GlossaryTooltip styles in src/components/GlossaryTooltip/GlossaryTooltip.module.css
@@ -164,7 +164,7 @@ Based on plan.md structure:
 - [X] T054 Measure language toggle response time (< 200ms per SC-006) and document results
 - [X] T055 [P] Run WCAG 2.1 AA accessibility audit on LanguageToggle (SC-009)
 - [X] T056 Measure CLS for language switch (< 0.1 per SC-007) and document results
-- [ ] T057 [P] Generate remaining Urdu translations for all 10 chapters (SC-001)
+- [X] T057 [P] Generate remaining Urdu translations for all 10 chapters (SC-001)
 - [ ] T058 Native speaker review for 3 sample chapters (SC-008)
 - [X] T059 [P] Update quickstart.md with actual command outputs and verification steps
 - [X] T060 Run full build and verify deployment to GitHub Pages

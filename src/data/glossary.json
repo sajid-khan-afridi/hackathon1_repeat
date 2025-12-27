@@ -54,7 +54,7 @@
       "definition": "NVIDIA's physics-based robot simulation platform built on Omniverse for developing, testing, and training AI-based robots.",
       "definitionUrdu": "این ویڈیا کا فزکس بیسڈ روبوٹ سیمولیشن پلیٹ فارم جو Omniverse پر بنایا گیا ہے، AI پر مبنی روبوٹس کی تیاری، جانچ اور تربیت کے لیے",
       "category": "Simulation",
-      "relatedTerms": ["urdf", "gazebo"]
+      "relatedTerms": ["urdf", "gazebo", "omniverse"]
     },
     {
       "id": "urdf",
@@ -91,6 +91,456 @@
       "definitionUrdu": "ROS 2 کے لیے پائتھون کلائنٹ لائبریری، ROS 2 API کے لیے پائتھون بائنڈنگز فراہم کرتی ہے",
       "category": "Robotics Frameworks",
       "relatedTerms": ["ros-2", "python", "rclcpp"]
+    },
+    {
+      "id": "rclcpp",
+      "english": "rclcpp",
+      "urduTransliteration": "آر سی ایل سی پی پی",
+      "definition": "The C++ client library for ROS 2, providing C++ bindings for the ROS 2 API with high performance.",
+      "definitionUrdu": "ROS 2 کے لیے C++ کلائنٹ لائبریری، اعلیٰ کارکردگی کے ساتھ ROS 2 API کے لیے C++ بائنڈنگز فراہم کرتی ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "rclpy"]
+    },
+    {
+      "id": "service",
+      "english": "Service",
+      "urduTransliteration": "سروس",
+      "definition": "A synchronous request-response communication pattern in ROS 2 for one-time queries between nodes.",
+      "definitionUrdu": "ROS 2 میں ایک ہم وقتی درخواست-جواب مواصلاتی پیٹرن جو نوڈز کے درمیان ایک بار کی کوئیریز کے لیے ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "topic", "action"]
+    },
+    {
+      "id": "action",
+      "english": "Action",
+      "urduTransliteration": "ایکشن",
+      "definition": "An asynchronous communication pattern in ROS 2 for long-running tasks with feedback and cancellation support.",
+      "definitionUrdu": "ROS 2 میں ایک غیر ہم وقتی مواصلاتی پیٹرن جو طویل مدتی کاموں کے لیے فیڈبیک اور منسوخی کی سپورٹ کے ساتھ ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "service", "topic"]
+    },
+    {
+      "id": "message",
+      "english": "Message",
+      "urduTransliteration": "میسج",
+      "definition": "A structured data type in ROS 2 used for communication between nodes via topics.",
+      "definitionUrdu": "ROS 2 میں ایک ساختہ ڈیٹا ٹائپ جو ٹاپکس کے ذریعے نوڈز کے درمیان مواصلات کے لیے استعمال ہوتا ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["topic", "publisher", "subscriber"]
+    },
+    {
+      "id": "parameter",
+      "english": "Parameter",
+      "urduTransliteration": "پیرامیٹر",
+      "definition": "A configuration value in ROS 2 nodes that can be set and retrieved at runtime.",
+      "definitionUrdu": "ROS 2 نوڈز میں ایک کنفیگریشن ویلیو جو رن ٹائم پر سیٹ اور حاصل کی جا سکتی ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["node", "ros-2"]
+    },
+    {
+      "id": "launch-file",
+      "english": "Launch File",
+      "urduTransliteration": "لانچ فائل",
+      "definition": "A Python script in ROS 2 that starts multiple nodes with specific configurations and parameters.",
+      "definitionUrdu": "ROS 2 میں ایک پائتھون اسکرپٹ جو مخصوص کنفیگریشنز اور پیرامیٹرز کے ساتھ متعدد نوڈز شروع کرتا ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["node", "parameter", "ros-2"]
+    },
+    {
+      "id": "dds",
+      "english": "DDS",
+      "urduTransliteration": "ڈی ڈی ایس",
+      "definition": "Data Distribution Service - the middleware standard used by ROS 2 for real-time publish-subscribe communication.",
+      "definitionUrdu": "ڈیٹا ڈسٹری بیوشن سروس - وہ مڈل ویئر معیار جو ROS 2 ریئل ٹائم پبلش-سبسکرائب مواصلات کے لیے استعمال کرتا ہے",
+      "category": "Middleware",
+      "relatedTerms": ["ros-2", "qos"]
+    },
+    {
+      "id": "qos",
+      "english": "QoS",
+      "urduTransliteration": "کیو او ایس",
+      "definition": "Quality of Service - policies in ROS 2 that control reliability, durability, and other aspects of message delivery.",
+      "definitionUrdu": "کوالٹی آف سروس - ROS 2 میں پالیسیاں جو قابل اعتمادی، پائیداری اور پیغام کی ترسیل کے دیگر پہلوؤں کو کنٹرول کرتی ہیں",
+      "category": "Middleware",
+      "relatedTerms": ["dds", "ros-2", "topic"]
+    },
+    {
+      "id": "omniverse",
+      "english": "Omniverse",
+      "urduTransliteration": "اومنی ورس",
+      "definition": "NVIDIA's 3D design collaboration and simulation platform that powers Isaac Sim.",
+      "definitionUrdu": "این ویڈیا کا 3D ڈیزائن تعاون اور سیمولیشن پلیٹ فارم جو Isaac Sim کو طاقت دیتا ہے",
+      "category": "Simulation",
+      "relatedTerms": ["isaac-sim", "physx"]
+    },
+    {
+      "id": "physx",
+      "english": "PhysX",
+      "urduTransliteration": "فزکس ایکس",
+      "definition": "NVIDIA's physics simulation engine used in Isaac Sim for realistic physics behavior.",
+      "definitionUrdu": "این ویڈیا کا فزکس سیمولیشن انجن جو Isaac Sim میں حقیقت پسندانہ فزکس رویے کے لیے استعمال ہوتا ہے",
+      "category": "Simulation",
+      "relatedTerms": ["isaac-sim", "omniverse"]
+    },
+    {
+      "id": "forward-kinematics",
+      "english": "Forward Kinematics",
+      "urduTransliteration": "فارورڈ کائنیمیٹکس",
+      "definition": "The calculation of end-effector position and orientation given the joint angles of a robot arm.",
+      "definitionUrdu": "روبوٹ بازو کے جوائنٹ اینگلز دیے گئے ہوں تو اینڈ ایفیکٹر کی پوزیشن اور اورینٹیشن کا حساب",
+      "category": "Mathematics",
+      "relatedTerms": ["inverse-kinematics", "dh-parameters", "end-effector"]
+    },
+    {
+      "id": "inverse-kinematics",
+      "english": "Inverse Kinematics",
+      "urduTransliteration": "انورس کائنیمیٹکس",
+      "definition": "The calculation of joint angles required to achieve a desired end-effector position and orientation.",
+      "definitionUrdu": "مطلوبہ اینڈ ایفیکٹر پوزیشن اور اورینٹیشن حاصل کرنے کے لیے درکار جوائنٹ اینگلز کا حساب",
+      "category": "Mathematics",
+      "relatedTerms": ["forward-kinematics", "jacobian", "end-effector"]
+    },
+    {
+      "id": "dh-parameters",
+      "english": "DH Parameters",
+      "urduTransliteration": "ڈی ایچ پیرامیٹرز",
+      "definition": "Denavit-Hartenberg parameters - a set of four values (theta, d, a, alpha) that describe each link in a robot manipulator.",
+      "definitionUrdu": "ڈیناویٹ-ہارٹنبرگ پیرامیٹرز - چار اقدار کا ایک سیٹ جو روبوٹ مینیپولیٹر میں ہر لنک کی وضاحت کرتا ہے",
+      "category": "Mathematics",
+      "relatedTerms": ["forward-kinematics", "joint", "link"]
+    },
+    {
+      "id": "jacobian",
+      "english": "Jacobian",
+      "urduTransliteration": "جیکوبین",
+      "definition": "A matrix relating joint velocities to end-effector velocities in a robot manipulator.",
+      "definitionUrdu": "ایک میٹرکس جو روبوٹ مینیپولیٹر میں جوائنٹ ویلوسٹیز کو اینڈ ایفیکٹر ویلوسٹیز سے جوڑتی ہے",
+      "category": "Mathematics",
+      "relatedTerms": ["inverse-kinematics", "velocity-control"]
+    },
+    {
+      "id": "end-effector",
+      "english": "End-Effector",
+      "urduTransliteration": "اینڈ ایفیکٹر",
+      "definition": "The device at the end of a robotic arm that interacts with the environment, such as a gripper or tool.",
+      "definitionUrdu": "روبوٹک بازو کے آخر میں وہ آلہ جو ماحول کے ساتھ تعامل کرتا ہے، جیسے گرپر یا ٹول",
+      "category": "Hardware Components",
+      "relatedTerms": ["manipulator", "gripper"]
+    },
+    {
+      "id": "joint",
+      "english": "Joint",
+      "urduTransliteration": "جوائنٹ",
+      "definition": "A connection between two links in a robot that allows relative motion, either rotational or translational.",
+      "definitionUrdu": "روبوٹ میں دو لنکس کے درمیان ایک کنکشن جو نسبتی حرکت کی اجازت دیتا ہے، یا تو گھماؤ یا ترجمہ",
+      "category": "Hardware Components",
+      "relatedTerms": ["link", "actuator", "dh-parameters"]
+    },
+    {
+      "id": "link",
+      "english": "Link",
+      "urduTransliteration": "لنک",
+      "definition": "A rigid body segment of a robot that connects joints together.",
+      "definitionUrdu": "روبوٹ کا ایک سخت جسمانی حصہ جو جوائنٹس کو آپس میں جوڑتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["joint", "urdf"]
+    },
+    {
+      "id": "slam",
+      "english": "SLAM",
+      "urduTransliteration": "سلام",
+      "definition": "Simultaneous Localization and Mapping - the process of building a map while tracking the robot's location within it.",
+      "definitionUrdu": "سیملٹینیئس لوکلائزیشن اینڈ میپنگ - نقشہ بناتے ہوئے اس میں روبوٹ کے مقام کو ٹریک کرنے کا عمل",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["localization", "mapping", "nav2"]
+    },
+    {
+      "id": "localization",
+      "english": "Localization",
+      "urduTransliteration": "لوکلائزیشن",
+      "definition": "The process of determining a robot's position and orientation within a known map.",
+      "definitionUrdu": "ایک معلوم نقشے میں روبوٹ کی پوزیشن اور اورینٹیشن کا تعین کرنے کا عمل",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["slam", "amcl", "nav2"]
+    },
+    {
+      "id": "mapping",
+      "english": "Mapping",
+      "urduTransliteration": "میپنگ",
+      "definition": "The process of creating a representation of the environment using sensor data.",
+      "definitionUrdu": "سینسر ڈیٹا کا استعمال کرتے ہوئے ماحول کی نمائندگی بنانے کا عمل",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["slam", "lidar", "costmap"]
+    },
+    {
+      "id": "nav2",
+      "english": "Nav2",
+      "urduTransliteration": "نیو ٹو",
+      "definition": "Navigation2 - the ROS 2 navigation stack for autonomous mobile robot navigation.",
+      "definitionUrdu": "نیویگیشن 2 - خود مختار موبائل روبوٹ نیویگیشن کے لیے ROS 2 نیویگیشن اسٹیک",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "slam", "path-planning"]
+    },
+    {
+      "id": "path-planning",
+      "english": "Path Planning",
+      "urduTransliteration": "پاتھ پلاننگ",
+      "definition": "The process of finding a collision-free path from a start to a goal position.",
+      "definitionUrdu": "شروع سے منزل کی پوزیشن تک تصادم سے پاک راستہ تلاش کرنے کا عمل",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["nav2", "costmap", "a-star"]
+    },
+    {
+      "id": "costmap",
+      "english": "Costmap",
+      "urduTransliteration": "کاسٹ میپ",
+      "definition": "A 2D grid map representing traversal costs used for navigation and obstacle avoidance.",
+      "definitionUrdu": "ایک 2D گرڈ میپ جو نیویگیشن اور رکاوٹ سے بچاؤ کے لیے استعمال ہونے والی ٹراورسل کاسٹ کی نمائندگی کرتا ہے",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["nav2", "path-planning", "mapping"]
+    },
+    {
+      "id": "lidar",
+      "english": "LiDAR",
+      "urduTransliteration": "لیڈار",
+      "definition": "Light Detection and Ranging - a sensor that measures distances using laser pulses.",
+      "definitionUrdu": "لائٹ ڈیٹیکشن اینڈ رینجنگ - ایک سینسر جو لیزر پلسز کا استعمال کرتے ہوئے فاصلے ناپتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["point-cloud", "slam", "mapping"]
+    },
+    {
+      "id": "point-cloud",
+      "english": "Point Cloud",
+      "urduTransliteration": "پوائنٹ کلاؤڈ",
+      "definition": "A set of 3D points representing the surface of objects in the environment, typically from LiDAR or depth cameras.",
+      "definitionUrdu": "ماحول میں اشیاء کی سطح کی نمائندگی کرنے والے 3D پوائنٹس کا ایک سیٹ، عام طور پر LiDAR یا ڈیپتھ کیمروں سے",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["lidar", "depth-camera", "perception"]
+    },
+    {
+      "id": "depth-camera",
+      "english": "Depth Camera",
+      "urduTransliteration": "ڈیپتھ کیمرہ",
+      "definition": "A camera that captures depth information in addition to color, enabling 3D perception.",
+      "definitionUrdu": "ایک کیمرہ جو رنگ کے علاوہ گہرائی کی معلومات حاصل کرتا ہے، جو 3D پرسیپشن کو ممکن بناتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["point-cloud", "rgb-d", "perception"]
+    },
+    {
+      "id": "imu",
+      "english": "IMU",
+      "urduTransliteration": "آئی ایم یو",
+      "definition": "Inertial Measurement Unit - a sensor that measures acceleration and angular velocity.",
+      "definitionUrdu": "انرشل میژرمنٹ یونٹ - ایک سینسر جو ایکسلریشن اور اینگولر ویلوسٹی ناپتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["localization", "odometry"]
+    },
+    {
+      "id": "odometry",
+      "english": "Odometry",
+      "urduTransliteration": "اوڈومیٹری",
+      "definition": "The estimation of a robot's position over time using sensor data from wheel encoders or IMU.",
+      "definitionUrdu": "وہیل انکوڈرز یا IMU سے سینسر ڈیٹا کا استعمال کرتے ہوئے وقت کے ساتھ روبوٹ کی پوزیشن کا اندازہ",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["imu", "encoder", "localization"]
+    },
+    {
+      "id": "encoder",
+      "english": "Encoder",
+      "urduTransliteration": "انکوڈر",
+      "definition": "A sensor that measures rotational position or speed of a motor or wheel.",
+      "definitionUrdu": "ایک سینسر جو موٹر یا وہیل کی گھماؤ کی پوزیشن یا رفتار ناپتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["motor", "odometry", "actuator"]
+    },
+    {
+      "id": "actuator",
+      "english": "Actuator",
+      "urduTransliteration": "ایکچویٹر",
+      "definition": "A device that converts energy into motion, such as a motor or hydraulic cylinder.",
+      "definitionUrdu": "ایک آلہ جو توانائی کو حرکت میں تبدیل کرتا ہے، جیسے موٹر یا ہائیڈرولک سلنڈر",
+      "category": "Hardware Components",
+      "relatedTerms": ["motor", "joint", "servo"]
+    },
+    {
+      "id": "motor",
+      "english": "Motor",
+      "urduTransliteration": "موٹر",
+      "definition": "An electric device that converts electrical energy into mechanical rotation.",
+      "definitionUrdu": "ایک برقی آلہ جو برقی توانائی کو مکینیکل گھماؤ میں تبدیل کرتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["actuator", "encoder", "servo"]
+    },
+    {
+      "id": "servo",
+      "english": "Servo",
+      "urduTransliteration": "سروو",
+      "definition": "A motor with integrated position control, commonly used in robot joints.",
+      "definitionUrdu": "مربوط پوزیشن کنٹرول والی موٹر، عام طور پر روبوٹ جوائنٹس میں استعمال ہوتی ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["motor", "actuator", "joint"]
+    },
+    {
+      "id": "gripper",
+      "english": "Gripper",
+      "urduTransliteration": "گرپر",
+      "definition": "An end-effector designed to grasp and hold objects.",
+      "definitionUrdu": "ایک اینڈ ایفیکٹر جو اشیاء کو پکڑنے اور تھامنے کے لیے ڈیزائن کیا گیا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["end-effector", "manipulator"]
+    },
+    {
+      "id": "manipulator",
+      "english": "Manipulator",
+      "urduTransliteration": "مینیپولیٹر",
+      "definition": "A robot arm consisting of a series of links and joints used to move objects in space.",
+      "definitionUrdu": "لنکس اور جوائنٹس کی ایک سیریز پر مشتمل روبوٹ بازو جو خلا میں اشیاء کو منتقل کرنے کے لیے استعمال ہوتا ہے",
+      "category": "Hardware Components",
+      "relatedTerms": ["joint", "link", "end-effector"]
+    },
+    {
+      "id": "transformation-matrix",
+      "english": "Transformation Matrix",
+      "urduTransliteration": "ٹرانسفارمیشن میٹرکس",
+      "definition": "A 4x4 matrix representing rotation and translation in 3D space.",
+      "definitionUrdu": "ایک 4x4 میٹرکس جو 3D خلا میں گھماؤ اور ترجمہ کی نمائندگی کرتی ہے",
+      "category": "Mathematics",
+      "relatedTerms": ["rotation-matrix", "homogeneous-coordinates"]
+    },
+    {
+      "id": "quaternion",
+      "english": "Quaternion",
+      "urduTransliteration": "کواٹرنین",
+      "definition": "A four-component mathematical representation of 3D rotation that avoids gimbal lock.",
+      "definitionUrdu": "3D گھماؤ کی چار اجزاء والی ریاضیاتی نمائندگی جو گمبل لاک سے بچاتی ہے",
+      "category": "Mathematics",
+      "relatedTerms": ["rotation-matrix", "euler-angles"]
+    },
+    {
+      "id": "euler-angles",
+      "english": "Euler Angles",
+      "urduTransliteration": "یولر اینگلز",
+      "definition": "Three angles (roll, pitch, yaw) representing rotation about the X, Y, and Z axes.",
+      "definitionUrdu": "تین زاویے (رول، پچ، یا) جو X، Y اور Z محوروں کے گرد گھماؤ کی نمائندگی کرتے ہیں",
+      "category": "Mathematics",
+      "relatedTerms": ["quaternion", "rotation-matrix"]
+    },
+    {
+      "id": "tf2",
+      "english": "TF2",
+      "urduTransliteration": "ٹی ایف ٹو",
+      "definition": "The transform library in ROS 2 for tracking coordinate frames over time.",
+      "definitionUrdu": "ROS 2 میں ٹرانسفارم لائبریری جو وقت کے ساتھ کوآرڈینیٹ فریمز کو ٹریک کرتی ہے",
+      "category": "Robotics Frameworks",
+      "relatedTerms": ["ros-2", "transformation-matrix", "frame"]
+    },
+    {
+      "id": "frame",
+      "english": "Frame",
+      "urduTransliteration": "فریم",
+      "definition": "A coordinate system attached to a part of the robot or environment.",
+      "definitionUrdu": "روبوٹ یا ماحول کے کسی حصے سے منسلک ایک کوآرڈینیٹ سسٹم",
+      "category": "Mathematics",
+      "relatedTerms": ["tf2", "transformation-matrix"]
+    },
+    {
+      "id": "bipedal",
+      "english": "Bipedal",
+      "urduTransliteration": "دو پیروں والا",
+      "definition": "Walking on two legs, the locomotion method used by humanoid robots.",
+      "definitionUrdu": "دو ٹانگوں پر چلنا، ہیومنائیڈ روبوٹس کا استعمال کردہ حرکت کا طریقہ",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["humanoid", "gait", "balance"]
+    },
+    {
+      "id": "humanoid",
+      "english": "Humanoid",
+      "urduTransliteration": "ہیومنائیڈ",
+      "definition": "A robot with a body structure resembling the human form.",
+      "definitionUrdu": "انسانی شکل سے مشابہ جسمانی ساخت والا روبوٹ",
+      "category": "Hardware Components",
+      "relatedTerms": ["bipedal", "gait"]
+    },
+    {
+      "id": "gait",
+      "english": "Gait",
+      "urduTransliteration": "چال",
+      "definition": "The pattern of leg movements used by a robot to walk or run.",
+      "definitionUrdu": "ٹانگوں کی حرکات کا پیٹرن جو روبوٹ چلنے یا دوڑنے کے لیے استعمال کرتا ہے",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["bipedal", "balance", "humanoid"]
+    },
+    {
+      "id": "balance",
+      "english": "Balance",
+      "urduTransliteration": "توازن",
+      "definition": "The ability of a robot to maintain stability during motion.",
+      "definitionUrdu": "حرکت کے دوران استحکام برقرار رکھنے کی روبوٹ کی صلاحیت",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["gait", "imu", "zmp"]
+    },
+    {
+      "id": "zmp",
+      "english": "ZMP",
+      "urduTransliteration": "زیڈ ایم پی",
+      "definition": "Zero Moment Point - a concept used in bipedal balance control.",
+      "definitionUrdu": "زیرو مومنٹ پوائنٹ - دو پیروں والے توازن کنٹرول میں استعمال ہونے والا تصور",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["balance", "bipedal", "humanoid"]
+    },
+    {
+      "id": "reinforcement-learning",
+      "english": "Reinforcement Learning",
+      "urduTransliteration": "ری انفورسمنٹ لرننگ",
+      "definition": "A machine learning paradigm where agents learn through trial and error to maximize rewards.",
+      "definitionUrdu": "مشین لرننگ کا ایک طریقہ جہاں ایجنٹس آزمائش اور غلطی کے ذریعے انعامات کو زیادہ سے زیادہ کرنا سیکھتے ہیں",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["neural-network", "isaac-sim"]
+    },
+    {
+      "id": "neural-network",
+      "english": "Neural Network",
+      "urduTransliteration": "نیورل نیٹ ورک",
+      "definition": "A computational model inspired by biological neural networks, used for pattern recognition and learning.",
+      "definitionUrdu": "حیاتیاتی نیورل نیٹ ورکس سے متاثر ایک کمپیوٹیشنل ماڈل، پیٹرن پہچان اور سیکھنے کے لیے استعمال ہوتا ہے",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["reinforcement-learning", "perception"]
+    },
+    {
+      "id": "perception",
+      "english": "Perception",
+      "urduTransliteration": "پرسیپشن",
+      "definition": "The ability of a robot to sense and interpret its environment using sensors.",
+      "definitionUrdu": "سینسرز کا استعمال کرتے ہوئے اپنے ماحول کو محسوس کرنے اور سمجھنے کی روبوٹ کی صلاحیت",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["lidar", "depth-camera", "object-detection"]
+    },
+    {
+      "id": "object-detection",
+      "english": "Object Detection",
+      "urduTransliteration": "آبجیکٹ ڈیٹیکشن",
+      "definition": "The task of identifying and locating objects in images or sensor data.",
+      "definitionUrdu": "تصاویر یا سینسر ڈیٹا میں اشیاء کی شناخت اور ان کا مقام تلاش کرنے کا کام",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["perception", "neural-network", "segmentation"]
+    },
+    {
+      "id": "segmentation",
+      "english": "Segmentation",
+      "urduTransliteration": "سیگمنٹیشن",
+      "definition": "The process of partitioning an image into meaningful regions or objects.",
+      "definitionUrdu": "تصویر کو معنی خیز علاقوں یا اشیاء میں تقسیم کرنے کا عمل",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["object-detection", "perception", "point-cloud"]
+    },
+    {
+      "id": "amcl",
+      "english": "AMCL",
+      "urduTransliteration": "اے ایم سی ایل",
+      "definition": "Adaptive Monte Carlo Localization - a probabilistic localization algorithm used in ROS.",
+      "definitionUrdu": "اڈاپٹیو مونٹی کارلو لوکلائزیشن - ROS میں استعمال ہونے والا ایک امکانی لوکلائزیشن الگورتھم",
+      "category": "AI/ML Concepts",
+      "relatedTerms": ["localization", "nav2", "mapping"]
     }
   ]
 }

@@ -293,6 +293,13 @@ html {
   /* Mobile sidebar backdrop styling */
   .navbar-sidebar__backdrop {
     background-color: rgba(0, 0, 0, 0.5);
+    /* CRITICAL: Prevent backdrop from intercepting clicks when sidebar is closed */
+    pointer-events: none;
+  }
+
+  /* Enable backdrop clicks only when sidebar is shown */
+  .navbar-sidebar--show .navbar-sidebar__backdrop {
+    pointer-events: auto;
   }
 
   /* Mobile sidebar header - fix alignment of logo, toggle, and close button */

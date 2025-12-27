@@ -1,0 +1,212 @@
+/**
+ * MobileDrawer Styles
+ *
+ * Slide-out navigation drawer with animations.
+ * Focus indicators meet WCAG 2.2 AA (3:1 contrast).
+ */
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: overlayFadeIn 200ms ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Drawer */
+.drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 201;
+  width: min(320px, 85vw);
+  background-color: var(--ifm-background-color);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: drawerSlideIn 300ms ease-out;
+  overflow-y: auto;
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* RTL: Slide from right */
+[dir='rtl'] .drawer {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+  animation: drawerSlideInRTL 300ms ease-out;
+}
+
+@keyframes drawerSlideInRTL {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Dark mode */
+[data-theme='dark'] .drawer {
+  background-color: var(--ifm-background-surface-color);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'][dir='rtl'] .drawer {
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-block-end: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.closeButton:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-900);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Navigation */
+.nav {
+  flex: 1;
+  padding: 0.5rem 0;
+}
+
+.navList,
+.subNav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  margin: 0;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  text-align: start;
+  text-decoration: none;
+  color: var(--ifm-color-emphasis-800);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.navLink:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-primary);
+}
+
+.navLink:focus-visible {
+  outline: none;
+  background-color: var(--ifm-color-emphasis-100);
+  box-shadow: inset 3px 0 0 var(--ifm-color-primary);
+}
+
+[dir='rtl'] .navLink:focus-visible {
+  box-shadow: inset -3px 0 0 var(--ifm-color-primary);
+}
+
+.navLink.active {
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+  background-color: var(--ifm-color-primary-contrast-background);
+}
+
+.navLink.nested {
+  font-size: 0.9375rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.navIcon {
+  flex-shrink: 0;
+  color: currentColor;
+  opacity: 0.8;
+}
+
+/* Sub navigation */
+.subNav {
+  background-color: var(--ifm-color-emphasis-50);
+}
+
+[data-theme='dark'] .subNav {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .drawer {
+    animation: none;
+  }
+}
+
+/* Touch targets - ensure 44x44px minimum */
+@media (pointer: coarse) {
+  .navLink {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+  }
+}

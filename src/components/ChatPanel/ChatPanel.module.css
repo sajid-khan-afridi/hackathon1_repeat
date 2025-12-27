@@ -1,0 +1,236 @@
+/**
+ * ChatPanel Styles
+ *
+ * Docked chat panel component styles with RTL support.
+ * Uses logical properties for bidirectional layout.
+ *
+ * @see specs/007-enhance-ui/research.md for design decisions
+ */
+
+/* ============================================
+   PANEL CONTAINER
+   ============================================ */
+
+.panel {
+  position: fixed;
+  inset-block-start: var(--ifm-navbar-height, 64px);
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  width: var(--panel-width, 400px);
+  max-width: 100vw;
+
+  background-color: var(--ifm-background-color);
+  border-inline-start: 1px solid var(--ifm-color-emphasis-300);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+
+  /* Animation setup */
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform var(--animation-duration-base, 300ms) var(--animation-easing-decelerate, ease),
+    opacity var(--animation-duration-base, 300ms) var(--animation-easing-decelerate, ease);
+}
+
+/* Panel entering animation */
+.panel.entering {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Panel entered state */
+.panel.entered {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Panel exiting animation */
+.panel.exiting {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* RTL: Slide from left */
+[dir='rtl'] .panel {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  border-inline-start: none;
+  border-inline-end: 1px solid var(--ifm-color-emphasis-300);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+}
+
+[dir='rtl'] .panel.entering {
+  transform: translateX(-100%);
+}
+
+[dir='rtl'] .panel.exiting {
+  transform: translateX(-100%);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .panel {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-300);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'][dir='rtl'] .panel {
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   MINIMIZED STATE
+   ============================================ */
+
+.panelMinimized {
+  height: 48px;
+  inset-block-start: auto;
+  inset-block-end: 0;
+  width: 200px;
+  border-radius: 8px 8px 0 0;
+  border-inline-start: 1px solid var(--ifm-color-emphasis-300);
+  border-block-start: 1px solid var(--ifm-color-emphasis-300);
+  cursor: pointer;
+  transition:
+    width var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    box-shadow var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease);
+}
+
+.panelMinimized:hover {
+  box-shadow: -4px -4px 16px rgba(0, 0, 0, 0.15);
+}
+
+[dir='rtl'] .panelMinimized {
+  border-inline-start: none;
+  border-inline-end: 1px solid var(--ifm-color-emphasis-300);
+}
+
+[dir='rtl'] .panelMinimized:hover {
+  box-shadow: 4px -4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   PANEL CONTENT
+   ============================================ */
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messageArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  scroll-behavior: smooth;
+}
+
+/* Message fade-in animation */
+.message {
+  animation: messageSlideUp 300ms ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes messageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   INPUT AREA
+   ============================================ */
+
+.inputArea {
+  padding: 0.75rem 1rem;
+  border-block-start: 1px solid var(--ifm-color-emphasis-200);
+  background-color: var(--ifm-background-color);
+}
+
+[data-theme='dark'] .inputArea {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+/* ============================================
+   MOBILE OVERLAY (< 768px)
+   ============================================ */
+
+@media (max-width: 767px) {
+  .panel {
+    inset: 0;
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .panel.entering,
+  .panel.exiting {
+    transform: translateY(100%);
+  }
+
+  .panel.entered {
+    transform: translateY(0);
+  }
+
+  [dir='rtl'] .panel.entering,
+  [dir='rtl'] .panel.exiting {
+    transform: translateY(100%);
+  }
+
+  .panelMinimized {
+    width: calc(100% - 2rem);
+    margin-inline: 1rem;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panelMinimized,
+  .message {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .panel.entering,
+  .panel.exiting {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   FOCUS MANAGEMENT
+   ============================================ */
+
+.panel:focus-visible {
+  outline: none;
+}
+
+.panel.focusVisible {
+  box-shadow:
+    inset 0 0 0 2px var(--ifm-color-primary),
+    -4px 0 16px rgba(0, 0, 0, 0.1);
+}
+
+[dir='rtl'] .panel.focusVisible {
+  box-shadow:
+    inset 0 0 0 2px var(--ifm-color-primary),
+    4px 0 16px rgba(0, 0, 0, 0.1);
+}

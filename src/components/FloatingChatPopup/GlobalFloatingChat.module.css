@@ -1,0 +1,56 @@
+/**
+ * GlobalFloatingChat Styles
+ *
+ * Styles for the enhanced floating chat with docked panel.
+ */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Button wrapper for positioning unread badge */
+.buttonWrapper {
+  position: fixed;
+  inset-block-end: 24px;
+  inset-inline-end: 24px;
+  z-index: 90;
+}
+
+.unreadBadge {
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-end: -4px;
+}
+
+/* Chat content inside panel */
+.chatContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.875rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .buttonWrapper {
+    inset-block-end: 16px;
+    inset-inline-end: 16px;
+  }
+}

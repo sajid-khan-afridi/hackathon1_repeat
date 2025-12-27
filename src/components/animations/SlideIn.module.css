@@ -1,0 +1,105 @@
+/**
+ * SlideIn Animation Styles
+ *
+ * CSS Module for SlideIn component animations.
+ * Uses GPU-accelerated properties only (transform, opacity).
+ */
+
+/* Base slide-in styles */
+.slideIn {
+  will-change: transform, opacity;
+  transition-property: transform, opacity;
+  transition-timing-function: ease-out;
+}
+
+/* === Direction: right (slide in from right) === */
+.direction_right {
+  transform: translateX(100%);
+}
+
+.direction_right.phase_entering,
+.direction_right.phase_entered {
+  transform: translateX(0);
+}
+
+.direction_right.phase_exiting {
+  transform: translateX(100%);
+}
+
+/* === Direction: left (slide in from left) === */
+.direction_left {
+  transform: translateX(-100%);
+}
+
+.direction_left.phase_entering,
+.direction_left.phase_entered {
+  transform: translateX(0);
+}
+
+.direction_left.phase_exiting {
+  transform: translateX(-100%);
+}
+
+/* === Direction: top (slide in from top) === */
+.direction_top {
+  transform: translateY(-100%);
+}
+
+.direction_top.phase_entering,
+.direction_top.phase_entered {
+  transform: translateY(0);
+}
+
+.direction_top.phase_exiting {
+  transform: translateY(-100%);
+}
+
+/* === Direction: bottom (slide in from bottom) === */
+.direction_bottom {
+  transform: translateY(100%);
+}
+
+.direction_bottom.phase_entering,
+.direction_bottom.phase_entered {
+  transform: translateY(0);
+}
+
+.direction_bottom.phase_exiting {
+  transform: translateY(100%);
+}
+
+/* === Phase styling === */
+.phase_initial,
+.phase_exited {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.phase_entering {
+  opacity: 1;
+}
+
+.phase_entered {
+  opacity: 1;
+  will-change: auto;
+}
+
+.phase_exiting {
+  opacity: 0;
+}
+
+/* === Reduced motion override === */
+.reducedMotion {
+  transform: none !important;
+  transition: none !important;
+}
+
+.reducedMotion.phase_initial,
+.reducedMotion.phase_exited {
+  opacity: 0;
+}
+
+.reducedMotion.phase_entering,
+.reducedMotion.phase_entered {
+  opacity: 1;
+}

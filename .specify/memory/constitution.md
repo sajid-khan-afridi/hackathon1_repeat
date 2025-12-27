@@ -1,8 +1,8 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: Initial → 1.0.0
-Constitution Type: MAJOR - Comprehensive project constitution created
+Version Change: 1.0.0 → 1.1.0
+Constitution Type: MINOR - Phase 6 enhanced with comprehensive UI specifications
 
 Modified/Added Sections:
 - ✅ PROJECT IDENTITY (new comprehensive section)
@@ -26,6 +26,27 @@ Modified/Added Sections:
 - ✅ HUMAN AS TOOL STRATEGY (new - Invocation triggers, Question guidelines)
 - ✅ EXECUTION CONTRACT (new - Per request requirements)
 - ✅ MINIMUM ACCEPTANCE CRITERIA (new - Per deliverable requirements)
+- ✅ PHASE 6 ENHANCED (v1.1.0 - Comprehensive UI Enhancement specification):
+  - Zoom-style chatbot panel with docking, resizing, search, unread badges
+  - High-quality animations (micro-interactions, page transitions, scroll-based)
+  - Navbar icon system with accessibility
+  - Home page animations (hero, section reveals, parallax)
+  - Core Web Vitals targets (LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1)
+  - WCAG 2.2 AA compliance with reduced motion support
+  - Performance budgets (15KB animation bundle limit, 60fps)
+  - Comprehensive testing strategy
+  - Risk analysis with kill switches
+  - 10 detailed E2E user journeys with Playwright test skeletons:
+    1. First-Time Visitor Discovery Flow
+    2. Chatbot Panel Full Interaction Cycle
+    3. Navbar Navigation with Animations
+    4. Chapter Reading with Dark Mode and RTL
+    5. Reduced Motion Accessibility
+    6. Responsive Breakpoint Transitions
+    7. Full Learning Session (Happy Path)
+    8. Error Recovery and Graceful Degradation
+    9. Keyboard-Only Navigation (Accessibility)
+    10. Performance Under Load (Stress Test)
 
 Templates Requiring Updates:
 - ✅ plan-template.md - Constitution Check section aligns with new principles
@@ -37,6 +58,7 @@ Follow-up Items:
 - None - All placeholders filled with concrete project values
 
 Last Generated: 2025-12-10
+Last Amended: 2025-12-27 (Phase 6 comprehensive enhancement)
 -->
 
 # Physical AI & Humanoid Robotics Textbook - Project Constitution
@@ -95,7 +117,7 @@ Last Generated: 2025-12-10
 - Phase 4A: 100% auth success rate, OWASP Top 10 passed
 - Phase 4B: Personalization < 2s, recommendation relevance > 0.75
 - Phase 5: Translation < 5s/chapter, 100% technical term preservation
-- Phase 6: All E2E tests pass, Lighthouse > 90, production deployment successful
+- Phase 6: Core Web Vitals (LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1), WCAG 2.2 AA, chatbot panel functional, animations polished
 
 ### III. Smallest Viable Change (YAGNI)
 
@@ -146,7 +168,7 @@ Last Generated: 2025-12-10
 - ✅ "RAG response time p95 < 3s" → ❌ "Fast RAG responses"
 - ✅ "80% test coverage" → ❌ "Well-tested code"
 
-### VI. Accessibility & Inclusivity (WCAG 2.1 AA)
+### VI. Accessibility & Inclusivity (WCAG 2.2 AA)
 
 **Rules:**
 
@@ -1217,14 +1239,1112 @@ GITHUB_CLIENT_SECRET=...
 - [ ] Native speaker review passes for 3 sample chapters
 - [ ] PHR created documenting translation approach
 
-### Phase 6 Exit Criteria (Integration & Deployment)
+### Phase 6: Enhancing the UI
 
-- [ ] All critical user journeys pass E2E tests (Playwright)
+**Purpose:** Deliver a polished, delightful user experience with high-quality animations, an upgraded chatbot interface, improved navigation, and enhanced visual feedback across all interactions.
+
+**Owner:** DocusaurusBuilder Agent + UI Enhancement Specialist
+
+**Skills Used:** `react-components`, `docusaurus-init`, animation libraries (Framer Motion or CSS-based)
+
+---
+
+**Deliverables:**
+
+1. **High-Quality Animations Across the App**
+   - Micro-interactions (button presses, input focus, form validation feedback)
+   - Page transitions (route changes, tab switches)
+   - Hover and press states with visual feedback
+   - Loading state animations (skeleton screens, spinners, progress indicators)
+   - Success/error state animations (checkmarks, shake effects)
+
+2. **Upgraded Chatbot Experience ("Zoom-Style Chat Panel")**
+   - Docked right-side panel with fixed positioning
+   - Collapsible/minimize functionality with smooth transitions
+   - Resizable width (drag handle, min/max constraints)
+   - Unread message badge with count indicator
+   - Quick jump to latest message button
+   - Search functionality within chat history
+   - Smooth open/close transitions (no layout jank)
+   - Beautiful loading animation during content generation
+   - Message bubble animations (fade-in, slide-up)
+   - Typing indicator with animated dots
+
+3. **Navbar Icon Set Enhancement**
+   - Clear, consistent icons (use established icon library: Lucide, Heroicons, or Phosphor)
+   - Consistent sizing (24x24px default, 20x20px compact)
+   - Accessible labels and tooltips for all icons
+   - Hover states with subtle scale/opacity transitions
+   - Active state indicators for current section
+   - Mobile hamburger menu with smooth drawer animation
+
+4. **Index (Home) Page Animations**
+   - Hero section entrance animation (fade-in + slide-up, staggered elements)
+   - Section reveal animations on scroll (intersection observer based)
+   - Subtle parallax effects for visual depth (performance-optimized)
+   - Feature cards with hover lift effects
+   - Call-to-action button animations (pulse, glow effects)
+   - Statistics/counter animations (number count-up effect)
+
+---
+
+**Quality Gate:**
+
+**Performance Targets (Core Web Vitals):**
+- Largest Contentful Paint (LCP): ≤ 2.5s
+- Interaction to Next Paint (INP): ≤ 200ms
+- Cumulative Layout Shift (CLS): ≤ 0.1
+
+**Accessibility (WCAG 2.2 AA Compliance):**
+- All animations respect `prefers-reduced-motion` user preference
+- Keyboard navigation works for all interactive elements
+- Focus indicators visible and styled (3:1 contrast ratio)
+- No focus obstruction (overlays don't trap focus unexpectedly)
+- Animated content doesn't auto-play for more than 5 seconds
+- Readable color contrast maintained (4.5:1 text, 3:1 UI components)
+- Screen reader announces chatbot state changes (opened, closed, new messages)
+
+**Reduced Motion Support:**
+- Detect `prefers-reduced-motion: reduce` media query
+- Provide alternative static states for all animations
+- Critical animations (loading indicators) simplified but not removed
+- Transitions reduced to opacity-only (no movement)
+
+**Responsive UX:**
+- Navbar works cleanly on mobile, tablet, and desktop
+- Chatbot panel adapts to screen size (full-screen on mobile, docked on desktop)
+- No horizontal overflow at any breakpoint (320px - 2560px)
+- Touch targets ≥ 44x44px on mobile
+- No broken layouts during animation playback
+
+---
+
+**Implementation Requirements:**
+
+**1. Animation Library Strategy:**
+
+- **Preferred:** CSS animations and transitions (native, zero bundle cost)
+- **When CSS insufficient:** Framer Motion (React-optimized, tree-shakeable)
+- **Avoid:** GSAP, Anime.js, or similar heavy libraries unless justified
+- **Bundle budget:** Animation libraries must not add > 15KB gzipped
+
+**2. Animation Design Principles:**
+
+- **Duration:** 150-300ms for micro-interactions, 300-500ms for page transitions
+- **Easing:** Use natural easing curves (`ease-out` for entrances, `ease-in` for exits)
+- **Stagger:** Delay child elements by 50-100ms for lists/grids
+- **Purpose:** Every animation must serve UX purpose (feedback, orientation, delight)
+- **Subtlety:** Prefer subtle over flashy (educational platform, not marketing site)
+
+**3. Chatbot Panel Architecture:**
+
+```typescript
+interface ChatPanelProps {
+  isOpen: boolean;
+  isMinimized: boolean;
+  width: number; // 320-600px range
+  unreadCount: number;
+  onToggle: () => void;
+  onMinimize: () => void;
+  onResize: (width: number) => void;
+}
+
+// State persistence
+- Panel open/closed state: localStorage
+- Panel width preference: localStorage
+- Minimize state: sessionStorage (reset on refresh)
+```
+
+**4. Chat Panel Features:**
+
+- **Docked Position:** Fixed to right viewport edge, below navbar
+- **Z-index:** Below modals, above page content (z-index: 100)
+- **Resize Handle:** Left edge, cursor: `ew-resize`, visual indicator on hover
+- **Width Constraints:** Min 320px, Max 600px, Default 400px
+- **Minimize Mode:** Collapse to icon-only bar (64px height)
+- **Unread Badge:** Red dot with count, positioned top-right of toggle button
+- **Jump to Latest:** Floating button appears when scrolled up > 200px
+- **Search:** Input field at top, highlights matching messages, keyboard shortcut (Ctrl+F in panel)
+
+**5. Loading Animation Requirements:**
+
+- **Skeleton Screens:** For content areas taking > 200ms to load
+- **Chatbot Typing Indicator:** 3-dot animation during AI response generation
+- **Progress Bar:** For operations > 3s (translation, file uploads)
+- **Spinner:** For quick async operations (< 3s)
+- **Content Shimmer:** Gradient animation on skeleton elements
+
+**6. Scroll-Based Animations:**
+
+- Use `IntersectionObserver` API (not scroll event listeners)
+- Threshold: Trigger when 20% of element visible
+- Once-only: Most animations play once (no repeat on scroll up)
+- Performance: Use `will-change` sparingly, prefer `transform` and `opacity`
+
+**7. Icon System:**
+
+- **Library:** Lucide React (tree-shakeable, consistent design)
+- **Sizes:** 16px (inline), 20px (compact UI), 24px (standard), 32px (hero)
+- **Stroke Width:** 1.5px (default), 2px (bold/emphasis)
+- **Colors:** Inherit from parent (no hardcoded colors)
+- **Accessibility:** `aria-hidden="true"` for decorative, `aria-label` for functional
+
+---
+
+**Performance Budget:**
+
+- **Animation Frame Rate:** Maintain 60fps during all animations
+- **JavaScript Execution:** < 50ms for animation triggers
+- **Layout Thrashing:** Zero forced synchronous layouts
+- **Paint Operations:** Minimize repaints, prefer compositor-only animations
+- **Bundle Impact:** Animation code ≤ 15KB gzipped total
+- **First Input Delay:** < 100ms (animations don't block input)
+- **Time to Interactive:** No regression from Phase 5 baseline
+
+**Animation Performance Checklist:**
+- Use `transform` and `opacity` only (GPU accelerated)
+- Avoid animating `width`, `height`, `top`, `left`, `margin`, `padding`
+- Use `will-change` only during active animation (remove after)
+- Debounce scroll handlers (if any) to 16ms minimum
+- Use `requestAnimationFrame` for JavaScript animations
+
+---
+
+**Accessibility Requirements (WCAG 2.2 AA):**
+
+**1. Reduced Motion:**
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+- Critical animations (loading spinners) use opacity-only alternative
+- Page transitions become instant fade (no slide)
+- Scroll animations disabled, elements render immediately
+
+**2. Keyboard Navigation:**
+
+- All animated interactive elements focusable
+- Focus order follows visual order (no disruption from animations)
+- Escape key closes chatbot panel
+- Arrow keys navigate within chatbot messages
+- Tab cycles through chatbot input, send button, minimize, close
+
+**3. Screen Reader Announcements:**
+
+- Chatbot open: "Chat panel opened"
+- Chatbot close: "Chat panel closed"
+- New message: "New message from assistant" (live region)
+- Unread count: "3 unread messages" (badge has aria-label)
+- Loading state: "Generating response, please wait"
+
+**4. Focus Management:**
+
+- Opening chatbot moves focus to input field
+- Closing chatbot returns focus to toggle button
+- Focus trap within open modal overlays
+- Focus visible indicator on all interactive elements
+
+---
+
+**Error Handling & Graceful Degradation:**
+
+**1. Animation Failures:**
+
+- CSS animations fail gracefully (element simply appears)
+- JavaScript animation errors caught, logged, element rendered without animation
+- No blank screens or broken layouts from animation errors
+
+**2. Chatbot Panel Failures:**
+
+- Panel fails to open: Show error toast, fallback to inline chat (if available)
+- Resize breaks: Reset to default width, log error
+- State persistence fails: Use defaults, warn in console
+
+**3. Icon Loading Failures:**
+
+- Missing icons: Fall back to text label
+- Icon library fails to load: Critical icons have inline SVG fallbacks
+
+**4. Performance Degradation:**
+
+- Detect low frame rate (< 30fps sustained): Disable non-essential animations
+- Detect low memory: Reduce animation complexity
+- Detect slow network: Skip loading animations, show instant states
+
+---
+
+**Testing Strategy:**
+
+**1. Unit Tests:**
+
+- Animation hook logic (useReducedMotion, useScrollAnimation)
+- Chatbot panel state management (open, close, minimize, resize)
+- Icon rendering with various props
+- Animation utility functions (easing, timing calculations)
+
+**2. Component Tests:**
+
+- Chatbot panel interactions (open, close, minimize, resize, scroll)
+- Navbar icon tooltips and hover states
+- Loading animation components (skeleton, spinner, progress)
+- Scroll-reveal components trigger correctly
+
+**3. Visual Regression Tests:**
+
+- Screenshot animations at keyframes (start, middle, end)
+- Compare reduced-motion vs full-motion states
+- Test across 3 viewports: 320px, 768px, 1440px
+- Dark mode + light mode visual consistency
+
+**4. Performance Tests:**
+
+- Lighthouse CI on every PR (Performance > 90)
+- Core Web Vitals monitoring (LCP, INP, CLS thresholds)
+- Animation frame rate testing (Chrome DevTools Performance)
+- Bundle size monitoring (fail CI if animations add > 15KB)
+
+**5. Accessibility Tests:**
+
+- axe-core automated scans on all pages
+- Manual keyboard navigation testing
+- Screen reader testing (NVDA, VoiceOver)
+- Reduced motion preference testing
+- Focus indicator visibility testing
+
+**6. E2E Tests (Playwright) - Critical User Journeys:**
+
+The following user journeys MUST pass before Phase 6 exit. Each journey includes specific assertions, viewport requirements, and acceptance criteria.
+
+---
+
+**Journey 1: First-Time Visitor Discovery Flow**
+
+**Persona:** New student discovering the textbook
+**Viewport:** Desktop (1440px), Tablet (768px), Mobile (375px)
+**Duration:** ~2 minutes per viewport
+
+**Steps:**
+1. Navigate to home page (`/`)
+2. **Assert:** Hero section animates in (fade-up, staggered text)
+3. **Assert:** LCP ≤ 2.5s (measure with Performance API)
+4. Scroll down slowly (100px increments)
+5. **Assert:** Section reveal animations trigger at 20% visibility
+6. **Assert:** Feature cards have hover lift effect on desktop
+7. **Assert:** No horizontal overflow at any scroll position
+8. **Assert:** CLS ≤ 0.1 during scroll animations
+9. Click "Get Started" CTA button
+10. **Assert:** Button has press animation (scale down)
+11. **Assert:** Page transition is smooth (no flash/jank)
+12. **Assert:** Navigation completes within 500ms
+
+**Playwright Test Skeleton:**
+```typescript
+test('first-time visitor discovery flow', async ({ page }) => {
+  await page.goto('/');
+
+  // Hero animation
+  await expect(page.locator('[data-testid="hero-title"]')).toBeVisible();
+  await expect(page.locator('[data-testid="hero-title"]')).toHaveCSS('opacity', '1');
+
+  // Scroll and check section reveals
+  for (let i = 0; i < 5; i++) {
+    await page.mouse.wheel(0, 300);
+    await page.waitForTimeout(100);
+  }
+
+  // Check CLS
+  const cls = await page.evaluate(() => {
+    return new Promise(resolve => {
+      new PerformanceObserver(list => {
+        const entries = list.getEntries();
+        resolve(entries.reduce((sum, e) => sum + e.value, 0));
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+  });
+  expect(cls).toBeLessThan(0.1);
+
+  // CTA interaction
+  await page.click('[data-testid="cta-get-started"]');
+  await expect(page).toHaveURL(/docs|getting-started/);
+});
+```
+
+---
+
+**Journey 2: Chatbot Panel Full Interaction Cycle**
+
+**Persona:** Student seeking help with ROS concepts
+**Viewport:** Desktop (1440px), Tablet (768px)
+**Duration:** ~3 minutes per viewport
+
+**Steps:**
+1. Navigate to any chapter page (`/docs/module-1/introduction`)
+2. **Assert:** Chatbot toggle button visible in bottom-right corner
+3. **Assert:** Toggle button has accessible label (`aria-label="Open chat"`)
+4. Click chatbot toggle button
+5. **Assert:** Panel slides in from right with smooth animation (300ms)
+6. **Assert:** Panel width is 400px (default) on desktop
+7. **Assert:** Focus moves to chat input field automatically
+8. **Assert:** No layout shift on main content (CLS = 0)
+9. Type question: "What is a ROS publisher?"
+10. **Assert:** Input field accepts text, has focus indicator
+11. Press Enter or click Send button
+12. **Assert:** User message appears with fade-in animation
+13. **Assert:** Typing indicator (3-dot animation) appears
+14. **Assert:** `aria-live` region announces "Generating response"
+15. Wait for AI response (mock in test, max 5s timeout)
+16. **Assert:** Response message animates in (slide-up + fade)
+17. **Assert:** Typing indicator disappears
+18. Scroll up in chat history (if multiple messages)
+19. **Assert:** "Jump to latest" button appears when scrolled > 200px
+20. Click "Jump to latest" button
+21. **Assert:** Smooth scroll to bottom of chat
+22. Click search icon in chat panel header
+23. **Assert:** Search input field appears with focus
+24. Type "publisher" in search
+25. **Assert:** Matching messages are highlighted
+26. Press Escape key
+27. **Assert:** Search closes, returns to normal view
+28. Click minimize button
+29. **Assert:** Panel collapses to 64px height bar with icon
+30. **Assert:** Unread badge appears if new messages arrive
+31. Click minimized bar to expand
+32. **Assert:** Panel expands with smooth animation
+33. Drag resize handle on left edge
+34. **Assert:** Panel resizes (min 320px, max 600px)
+35. **Assert:** Resize is smooth (no jank)
+36. Click close button (X)
+37. **Assert:** Panel slides out with animation
+38. **Assert:** Focus returns to toggle button
+39. **Assert:** Toggle button now shows unread count badge if applicable
+
+**Playwright Test Skeleton:**
+```typescript
+test('chatbot panel full interaction cycle', async ({ page }) => {
+  await page.goto('/docs/module-1/introduction');
+
+  // Open panel
+  const toggleBtn = page.locator('[data-testid="chat-toggle"]');
+  await expect(toggleBtn).toHaveAttribute('aria-label', 'Open chat');
+  await toggleBtn.click();
+
+  // Panel animation complete
+  const panel = page.locator('[data-testid="chat-panel"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveCSS('transform', 'none'); // animation complete
+
+  // Focus management
+  const input = page.locator('[data-testid="chat-input"]');
+  await expect(input).toBeFocused();
+
+  // Send message
+  await input.fill('What is a ROS publisher?');
+  await input.press('Enter');
+
+  // User message visible
+  await expect(page.locator('[data-testid="user-message"]').last()).toContainText('ROS publisher');
+
+  // Typing indicator
+  await expect(page.locator('[data-testid="typing-indicator"]')).toBeVisible();
+
+  // Wait for response (mocked in test environment)
+  await expect(page.locator('[data-testid="assistant-message"]').last()).toBeVisible({ timeout: 10000 });
+
+  // Minimize
+  await page.click('[data-testid="chat-minimize"]');
+  await expect(panel).toHaveCSS('height', '64px');
+
+  // Close
+  await page.click('[data-testid="chat-close"]');
+  await expect(panel).not.toBeVisible();
+  await expect(toggleBtn).toBeFocused();
+});
+```
+
+---
+
+**Journey 3: Navbar Navigation with Animations**
+
+**Persona:** Returning student navigating between modules
+**Viewport:** Desktop (1440px), Tablet (768px), Mobile (375px)
+**Duration:** ~2 minutes per viewport
+
+**Steps:**
+1. Navigate to home page (`/`)
+2. **Assert:** Navbar is visible and fixed at top
+3. **Assert:** All navbar icons have consistent size (24x24px)
+4. Hover over navbar icon (desktop only)
+5. **Assert:** Tooltip appears with accessible label
+6. **Assert:** Icon has subtle scale/opacity transition
+7. Click module dropdown/link
+8. **Assert:** Dropdown animates open (fade + slide)
+9. **Assert:** Dropdown items have staggered entrance
+10. Navigate keyboard: Tab through navbar items
+11. **Assert:** Focus indicators visible on each item
+12. **Assert:** Focus order matches visual order
+13. Press Enter on focused nav item
+14. **Assert:** Page transition animates smoothly
+15. **Assert:** New page content animates in
+16. On mobile (375px): Click hamburger menu icon
+17. **Assert:** Mobile drawer slides in from right
+18. **Assert:** Overlay appears with fade animation
+19. **Assert:** Focus trapped within drawer
+20. Press Escape key
+21. **Assert:** Drawer closes, focus returns to hamburger
+
+**Playwright Test Skeleton:**
+```typescript
+test('navbar navigation with animations', async ({ page }) => {
+  await page.goto('/');
+
+  // Desktop tooltip
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const navIcon = page.locator('[data-testid="nav-icon-docs"]');
+  await navIcon.hover();
+  await expect(page.locator('[role="tooltip"]')).toBeVisible();
+
+  // Keyboard navigation
+  await page.keyboard.press('Tab');
+  await expect(page.locator(':focus')).toHaveCSS('outline-style', /solid|auto/);
+
+  // Mobile hamburger
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.click('[data-testid="hamburger-menu"]');
+  await expect(page.locator('[data-testid="mobile-drawer"]')).toBeVisible();
+
+  // Escape closes drawer
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-testid="mobile-drawer"]')).not.toBeVisible();
+});
+```
+
+---
+
+**Journey 4: Chapter Reading with Dark Mode and RTL**
+
+**Persona:** Urdu-speaking student reading in dark mode
+**Viewport:** Desktop (1440px), Tablet (768px)
+**Duration:** ~2 minutes per viewport
+
+**Steps:**
+1. Navigate to any chapter (`/docs/module-2/ros-publishers`)
+2. Toggle dark mode via navbar button
+3. **Assert:** Theme transition is smooth (no flash)
+4. **Assert:** All animations maintain correct colors in dark mode
+5. **Assert:** Chatbot toggle button visible in dark mode
+6. Toggle language to Urdu
+7. **Assert:** Page direction changes to RTL
+8. **Assert:** Animations work correctly in RTL (icons flip, slide directions reverse)
+9. **Assert:** Chatbot panel docks to LEFT side in RTL mode
+10. **Assert:** Navbar layout mirrors correctly
+11. Open chatbot panel
+12. **Assert:** Panel opens from LEFT in RTL mode
+13. **Assert:** Text input is right-aligned
+14. **Assert:** Message bubbles align correctly for RTL
+15. Close panel, toggle back to English
+16. **Assert:** Smooth transition back to LTR
+
+**Playwright Test Skeleton:**
+```typescript
+test('chapter reading with dark mode and RTL', async ({ page }) => {
+  await page.goto('/docs/module-2/ros-publishers');
+
+  // Dark mode toggle
+  await page.click('[data-testid="theme-toggle"]');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  // Language switch to Urdu
+  await page.click('[data-testid="language-selector"]');
+  await page.click('[data-testid="lang-ur"]');
+
+  // RTL verification
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+
+  // Chatbot in RTL
+  await page.click('[data-testid="chat-toggle"]');
+  const panel = page.locator('[data-testid="chat-panel"]');
+  // In RTL, panel should be on left side
+  const panelBox = await panel.boundingBox();
+  expect(panelBox.x).toBeLessThan(100); // Near left edge
+});
+```
+
+---
+
+**Journey 5: Reduced Motion Accessibility**
+
+**Persona:** User with motion sensitivity (vestibular disorder)
+**Viewport:** Desktop (1440px)
+**Duration:** ~2 minutes
+
+**Steps:**
+1. Enable `prefers-reduced-motion: reduce` in browser/OS settings
+2. Navigate to home page (`/`)
+3. **Assert:** Hero section appears instantly (no animation)
+4. **Assert:** OR hero section uses opacity-only fade (no movement)
+5. Scroll down
+6. **Assert:** Section reveals are instant (no scroll animations)
+7. **Assert:** OR sections use simple opacity transitions
+8. Click CTA button
+9. **Assert:** Button feedback is instant or opacity-only
+10. **Assert:** Page transitions are instant or cross-fade only
+11. Open chatbot panel
+12. **Assert:** Panel appears instantly (no slide animation)
+13. **Assert:** OR panel uses opacity fade only
+14. Send a message
+15. **Assert:** Messages appear instantly (no slide-up)
+16. **Assert:** Typing indicator uses opacity pulse, not bouncing dots
+17. **Assert:** All UI remains fully functional without motion
+18. **Assert:** No user-initiated animation runs for > 5 seconds
+
+**Playwright Test Skeleton:**
+```typescript
+test('reduced motion accessibility', async ({ page }) => {
+  // Emulate reduced motion preference
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+
+  await page.goto('/');
+
+  // Hero should be visible immediately
+  await expect(page.locator('[data-testid="hero-title"]')).toBeVisible();
+
+  // Check no transform animations
+  const heroStyle = await page.locator('[data-testid="hero-title"]').evaluate(el => {
+    return window.getComputedStyle(el).transform;
+  });
+  expect(heroStyle).toBe('none');
+
+  // Chatbot opens instantly
+  await page.click('[data-testid="chat-toggle"]');
+  const panel = page.locator('[data-testid="chat-panel"]');
+  await expect(panel).toBeVisible();
+
+  // Verify no transition duration
+  const panelTransition = await panel.evaluate(el => {
+    return window.getComputedStyle(el).transitionDuration;
+  });
+  expect(parseFloat(panelTransition)).toBeLessThan(0.1);
+});
+```
+
+---
+
+**Journey 6: Responsive Breakpoint Transitions**
+
+**Persona:** User switching between devices or resizing browser
+**Viewport:** Dynamic (1440px → 768px → 375px → 768px → 1440px)
+**Duration:** ~2 minutes
+
+**Steps:**
+1. Navigate to chapter page at 1440px desktop
+2. Open chatbot panel
+3. **Assert:** Panel is docked, width 400px
+4. Resize viewport to 768px (tablet)
+5. **Assert:** Panel adapts smoothly (no jank)
+6. **Assert:** Panel may reduce max-width or stay fixed
+7. Resize viewport to 375px (mobile)
+8. **Assert:** Panel becomes full-screen overlay
+9. **Assert:** OR panel minimizes automatically
+10. **Assert:** No horizontal overflow
+11. **Assert:** Touch targets remain ≥ 44x44px
+12. Close panel on mobile
+13. Resize back to 1440px
+14. **Assert:** Layout restores correctly
+15. **Assert:** Chatbot toggle returns to corner position
+16. Check navbar at each breakpoint
+17. **Assert:** Desktop: Full navbar with icons
+18. **Assert:** Tablet: May condense or show hamburger
+19. **Assert:** Mobile: Hamburger menu only
+20. **Assert:** No content cut off at any breakpoint
+
+**Playwright Test Skeleton:**
+```typescript
+test('responsive breakpoint transitions', async ({ page }) => {
+  await page.goto('/docs/module-1/introduction');
+
+  const viewports = [
+    { width: 1440, height: 900, name: 'desktop' },
+    { width: 768, height: 1024, name: 'tablet' },
+    { width: 375, height: 667, name: 'mobile' },
+  ];
+
+  for (const vp of viewports) {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+
+    // No horizontal overflow
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+
+    // Touch targets on mobile
+    if (vp.name === 'mobile') {
+      const buttons = await page.locator('button, a, [role="button"]').all();
+      for (const btn of buttons.slice(0, 10)) { // Check first 10
+        const box = await btn.boundingBox();
+        if (box) {
+          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+    }
+  }
+});
+```
+
+---
+
+**Journey 7: Full Learning Session (End-to-End Happy Path)**
+
+**Persona:** Graduate student completing a study session
+**Viewport:** Desktop (1440px)
+**Duration:** ~5 minutes
+
+**Steps:**
+1. Navigate to home page (`/`)
+2. **Assert:** Hero animation completes
+3. Click "Browse Modules" in navbar
+4. **Assert:** Dropdown animates open
+5. Select "Module 3: NVIDIA Isaac"
+6. **Assert:** Page transitions smoothly to module page
+7. Click first chapter in sidebar
+8. **Assert:** Chapter content loads with skeleton/shimmer
+9. **Assert:** Content fades in when ready
+10. Scroll through chapter content
+11. **Assert:** Images lazy load with fade-in
+12. **Assert:** Code blocks have syntax highlighting
+13. Open chatbot panel
+14. **Assert:** Panel opens with slide animation
+15. Ask: "Explain this code example"
+16. **Assert:** Message sent, typing indicator shows
+17. **Assert:** Response received and displayed
+18. Click "Bookmark" button on chapter
+19. **Assert:** Bookmark icon animates (heart fill, star pop, etc.)
+20. Navigate to next chapter via "Next" button
+21. **Assert:** Page transition with content animation
+22. Toggle dark mode
+23. **Assert:** Smooth theme transition, chatbot adapts
+24. Close chatbot panel
+25. **Assert:** Panel slides out
+26. Navigate to bookmarks page (if exists)
+27. **Assert:** Bookmarked chapter appears in list
+28. Log out (if authenticated)
+29. **Assert:** Logout confirmation with animation
+
+**Playwright Test Skeleton:**
+```typescript
+test('full learning session happy path', async ({ page }) => {
+  await page.goto('/');
+
+  // Navigate to module
+  await page.click('[data-testid="nav-modules"]');
+  await page.click('[data-testid="module-3-link"]');
+  await expect(page).toHaveURL(/module-3/);
+
+  // Read chapter
+  await page.click('[data-testid="chapter-1-link"]');
+  await expect(page.locator('[data-testid="chapter-content"]')).toBeVisible();
+
+  // Chatbot interaction
+  await page.click('[data-testid="chat-toggle"]');
+  await page.fill('[data-testid="chat-input"]', 'Explain this code example');
+  await page.press('[data-testid="chat-input"]', 'Enter');
+  await expect(page.locator('[data-testid="assistant-message"]')).toBeVisible({ timeout: 15000 });
+
+  // Bookmark
+  await page.click('[data-testid="bookmark-btn"]');
+  await expect(page.locator('[data-testid="bookmark-btn"]')).toHaveAttribute('aria-pressed', 'true');
+
+  // Dark mode
+  await page.click('[data-testid="theme-toggle"]');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  // Close chat
+  await page.click('[data-testid="chat-close"]');
+  await expect(page.locator('[data-testid="chat-panel"]')).not.toBeVisible();
+});
+```
+
+---
+
+**Journey 8: Error Recovery and Graceful Degradation**
+
+**Persona:** User experiencing network issues or service errors
+**Viewport:** Desktop (1440px)
+**Duration:** ~2 minutes
+
+**Steps:**
+1. Navigate to chapter page
+2. Open chatbot panel
+3. Simulate network offline (`page.route` to block API)
+4. Send a message
+5. **Assert:** Loading indicator shows
+6. **Assert:** After timeout, error message displays
+7. **Assert:** Error message is user-friendly, not technical
+8. **Assert:** Retry button is available
+9. **Assert:** Error state has appropriate animation (subtle shake or fade)
+10. Restore network connection
+11. Click Retry
+12. **Assert:** Message sends successfully
+13. Simulate slow network (3G throttling)
+14. Navigate to new chapter
+15. **Assert:** Skeleton loading states appear
+16. **Assert:** Content loads progressively
+17. **Assert:** No blank screens during loading
+18. Simulate chatbot API 500 error
+19. **Assert:** Error toast/message appears
+20. **Assert:** Fallback content or retry option shown
+21. **Assert:** Rest of page remains functional
+
+**Playwright Test Skeleton:**
+```typescript
+test('error recovery and graceful degradation', async ({ page }) => {
+  await page.goto('/docs/module-1/introduction');
+  await page.click('[data-testid="chat-toggle"]');
+
+  // Block API requests to simulate offline
+  await page.route('**/api/chat/**', route => route.abort());
+
+  await page.fill('[data-testid="chat-input"]', 'Test message');
+  await page.press('[data-testid="chat-input"]', 'Enter');
+
+  // Error state
+  await expect(page.locator('[data-testid="chat-error"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-testid="retry-btn"]')).toBeVisible();
+
+  // Restore and retry
+  await page.unroute('**/api/chat/**');
+  await page.click('[data-testid="retry-btn"]');
+  await expect(page.locator('[data-testid="assistant-message"]')).toBeVisible({ timeout: 15000 });
+});
+```
+
+---
+
+**Journey 9: Keyboard-Only Navigation (Accessibility)**
+
+**Persona:** User relying on keyboard navigation (motor disability or preference)
+**Viewport:** Desktop (1440px)
+**Duration:** ~3 minutes
+
+**Steps:**
+1. Navigate to home page, use keyboard only (no mouse)
+2. Press Tab repeatedly
+3. **Assert:** Focus moves through all interactive elements
+4. **Assert:** Focus indicators visible on each element (3:1 contrast)
+5. **Assert:** Skip link available and functional ("Skip to content")
+6. Navigate to chapter page
+7. Tab to chatbot toggle button
+8. Press Enter to open panel
+9. **Assert:** Panel opens, focus moves to input
+10. Type message, press Enter to send
+11. **Assert:** Message sent successfully
+12. Press Tab to navigate within chat panel
+13. **Assert:** Tab order: input → send → search → minimize → close
+14. Press Arrow keys in message list
+15. **Assert:** Can navigate between messages
+16. Press Escape
+17. **Assert:** Panel closes, focus returns to toggle
+18. Tab to navbar items
+19. Press Enter/Space to activate dropdown
+20. **Assert:** Dropdown opens, arrow keys navigate options
+21. Press Escape to close dropdown
+22. Tab to theme toggle, press Enter
+23. **Assert:** Theme changes via keyboard
+24. Tab to language selector, change language
+25. **Assert:** Language changes via keyboard
+
+**Playwright Test Skeleton:**
+```typescript
+test('keyboard-only navigation', async ({ page }) => {
+  await page.goto('/');
+
+  // Skip link
+  await page.keyboard.press('Tab');
+  const skipLink = page.locator('[data-testid="skip-link"]');
+  await expect(skipLink).toBeFocused();
+
+  // Navigate to chatbot
+  for (let i = 0; i < 20; i++) {
+    await page.keyboard.press('Tab');
+    const focused = await page.locator(':focus').getAttribute('data-testid');
+    if (focused === 'chat-toggle') break;
+  }
+
+  // Open with Enter
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-testid="chat-panel"]')).toBeVisible();
+  await expect(page.locator('[data-testid="chat-input"]')).toBeFocused();
+
+  // Type and send
+  await page.keyboard.type('Hello from keyboard');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-testid="user-message"]').last()).toContainText('Hello from keyboard');
+
+  // Escape to close
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-testid="chat-panel"]')).not.toBeVisible();
+  await expect(page.locator('[data-testid="chat-toggle"]')).toBeFocused();
+});
+```
+
+---
+
+**Journey 10: Performance Under Load (Stress Test)**
+
+**Persona:** Power user with many interactions
+**Viewport:** Desktop (1440px)
+**Duration:** ~3 minutes
+
+**Steps:**
+1. Navigate to home page
+2. Rapidly scroll up and down (10 times)
+3. **Assert:** Animations remain smooth (no dropped frames logged)
+4. **Assert:** No memory leaks (heap size stable)
+5. Open and close chatbot panel rapidly (5 times)
+6. **Assert:** Panel opens/closes correctly each time
+7. **Assert:** No zombie animations or stuck states
+8. Send 10 messages in quick succession
+9. **Assert:** All messages queued and sent correctly
+10. **Assert:** UI remains responsive (INP < 200ms)
+11. Toggle dark mode rapidly (5 times)
+12. **Assert:** Theme switches correctly each time
+13. Resize browser rapidly between breakpoints
+14. **Assert:** Layout adapts without breaking
+15. Open 3 browser tabs with same page
+16. **Assert:** Each tab functions independently
+17. **Assert:** LocalStorage state syncs correctly across tabs
+18. **Measure:** Total JavaScript heap < 100MB after test
+19. **Measure:** No console errors during test
+
+**Playwright Test Skeleton:**
+```typescript
+test('performance under load', async ({ page }) => {
+  await page.goto('/');
+
+  // Rapid scroll
+  for (let i = 0; i < 10; i++) {
+    await page.mouse.wheel(0, 500);
+    await page.waitForTimeout(50);
+    await page.mouse.wheel(0, -500);
+    await page.waitForTimeout(50);
+  }
+
+  // Rapid panel toggle
+  for (let i = 0; i < 5; i++) {
+    await page.click('[data-testid="chat-toggle"]');
+    await page.waitForTimeout(100);
+    await page.click('[data-testid="chat-close"]');
+    await page.waitForTimeout(100);
+  }
+
+  // Check for console errors
+  const errors = [];
+  page.on('console', msg => {
+    if (msg.type() === 'error') errors.push(msg.text());
+  });
+
+  expect(errors).toHaveLength(0);
+
+  // Memory check
+  const metrics = await page.evaluate(() => performance.memory?.usedJSHeapSize);
+  if (metrics) {
+    expect(metrics).toBeLessThan(100 * 1024 * 1024); // 100MB
+  }
+});
+```
+
+---
+
+**E2E Test Configuration Requirements:**
+
+```typescript
+// playwright.config.ts additions for Phase 6
+{
+  projects: [
+    { name: 'Desktop Chrome', use: { viewport: { width: 1440, height: 900 } } },
+    { name: 'Tablet Safari', use: { viewport: { width: 768, height: 1024 } } },
+    { name: 'Mobile Chrome', use: { viewport: { width: 375, height: 667 } } },
+    { name: 'Desktop Firefox', use: { viewport: { width: 1440, height: 900 } } },
+    { name: 'Reduced Motion', use: {
+      viewport: { width: 1440, height: 900 },
+      reducedMotion: 'reduce'
+    }},
+  ],
+  expect: {
+    timeout: 10000, // Animations may take time
+  },
+  use: {
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+  },
+}
+```
+
+**CI Integration:**
+- All 10 journeys must pass on every PR
+- Fail fast on first critical journey failure
+- Generate HTML report with screenshots at each step
+- Record video for failed tests
+- Performance metrics logged to dashboard
+
+---
+
+**Free Tier Sustainability:**
+
+- **No additional API costs:** Animations are client-side only
+- **Bundle size impact:** Stay within Docusaurus defaults (no heavy libraries)
+- **CDN bandwidth:** Animation assets are inline (no external requests)
+- **Build time:** Animation compilation adds < 10s to build
+
+---
+
+**Success Criteria:**
+
+- [ ] All micro-interactions implemented (buttons, inputs, form validation)
+- [ ] Page transitions smooth and consistent across routes
+- [ ] Chatbot panel fully functional with all specified features
+- [ ] Navbar icons consistent, accessible, with tooltips
+- [ ] Home page animations polished and performant
+- [ ] Core Web Vitals pass: LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1
+- [ ] WCAG 2.2 AA accessibility audit passes
+- [ ] Reduced motion support verified (manual testing)
+- [ ] Responsive UX verified on mobile, tablet, desktop (no overflow)
+- [ ] Visual regression tests pass (no unintended layout changes)
+- [ ] Performance tests pass (Lighthouse > 90, no frame drops)
+- [ ] Bundle size increase ≤ 15KB gzipped
+- [ ] All E2E tests pass
+- [ ] PHR created documenting UI enhancement decisions
+
+---
+
+**Does NOT Include (Out of Scope for Phase 6):**
+
+- No redesign of information architecture (sidebar structure, page hierarchy)
+- No heavy animation libraries (GSAP, Anime.js) unless clearly justified and approved
+- No functional changes:
+  - No backend logic modifications
+  - No database schema changes
+  - No API contract modifications
+  - No authentication flow changes
+  - No RAG pipeline modifications
+  - No translation service changes
+- No new features (only UI/UX polish for existing features)
+- No significant color palette or typography changes
+- No rebranding or logo changes
+
+---
+
+**Follow-Up Items (Post Phase 6):**
+
+- Monitor user feedback on animation preferences
+- A/B test chatbot panel default width
+- Add animation toggle in user settings (beyond reduced-motion)
+- Implement advanced micro-interactions based on user patterns
+- Create animation design system documentation
+
+---
+
+**Risks & Mitigation:**
+
+**Risk 1: Performance Degradation from Animations**
+
+- **Impact:** High (poor user experience, failed Core Web Vitals)
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Strict bundle size budget (15KB max)
+  - Performance testing on every PR
+  - Use only GPU-accelerated properties (transform, opacity)
+  - Implement frame rate monitoring in development
+- **Kill Switch:** Feature flag `ENABLE_ANIMATIONS=false` to disable all non-essential animations
+
+**Risk 2: Accessibility Regressions**
+
+- **Impact:** High (WCAG compliance failure, excluded users)
+- **Likelihood:** Low (if testing is thorough)
+- **Mitigation:**
+  - Automated axe-core testing on every PR
+  - Manual screen reader testing for chatbot
+  - Reduced motion support mandatory for all animations
+  - Focus management testing checklist
+- **Kill Switch:** Animations respect reduced-motion by default
+
+**Risk 3: Cross-Browser Animation Inconsistencies**
+
+- **Impact:** Medium (inconsistent experience)
+- **Likelihood:** Medium
+- **Mitigation:**
+  - Test on Chrome, Firefox, Safari, Edge
+  - Use autoprefixer for CSS
+  - Feature detection before using modern APIs
+  - Graceful degradation to static states
+- **Kill Switch:** CSS-only fallbacks for all animations
+
+**Risk 4: Chatbot Panel Layout Conflicts**
+
+- **Impact:** Medium (overlapping content, unusable UI)
+- **Likelihood:** Low
+- **Mitigation:**
+  - Fixed positioning with proper z-index layering
+  - Responsive width constraints
+  - Mobile full-screen mode to avoid conflicts
+  - Comprehensive E2E testing across viewports
+- **Kill Switch:** Disable docked panel, fall back to modal overlay
+
+---
+
+**Constitution Alignment:**
+
+- ✅ Quality Over Speed (Principle II): Comprehensive testing, performance budgets, accessibility audits
+- ✅ Smallest Viable Change (Principle III): Only UI polish, no functional changes, no over-engineering
+- ✅ Accessibility & Inclusivity (Principle VI): WCAG 2.2 AA compliance, reduced motion support, keyboard navigation
+- ✅ Observability & Measurability (Principle V): Core Web Vitals tracking, performance monitoring, bundle size limits
+- ✅ Free Tier Sustainability (Principle VII): No additional API costs, minimal bundle impact
+- ✅ Security by Default (Principle IV): No new attack surfaces, client-side only changes
+
+---
+
+### Phase 6 Exit Criteria (UI Enhancement & Polish)
+
+- [ ] All micro-interactions implemented (buttons, inputs, form states)
+- [ ] Page transitions smooth across all routes
+- [ ] Chatbot panel fully functional:
+  - [ ] Docked right-side positioning
+  - [ ] Collapsible/minimize with smooth transitions
+  - [ ] Resizable width (320-600px)
+  - [ ] Unread badge with count
+  - [ ] Jump to latest button
+  - [ ] Search in chat history
+  - [ ] Loading animation during response generation
+- [ ] Navbar icons consistent with accessible tooltips
+- [ ] Home page animations polished (hero, sections, scroll-based)
+- [ ] Core Web Vitals pass: LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1
+- [ ] WCAG 2.2 AA accessibility audit passes
+- [ ] Reduced motion support verified
+- [ ] Responsive UX verified (mobile, tablet, desktop)
+- [ ] Visual regression tests pass
 - [ ] Lighthouse scores: Performance > 90, Accessibility > 90
+- [ ] Bundle size increase ≤ 15KB gzipped
+- [ ] All 10 E2E user journeys pass (Playwright):
+  - [ ] Journey 1: First-Time Visitor Discovery Flow
+  - [ ] Journey 2: Chatbot Panel Full Interaction Cycle
+  - [ ] Journey 3: Navbar Navigation with Animations
+  - [ ] Journey 4: Chapter Reading with Dark Mode and RTL
+  - [ ] Journey 5: Reduced Motion Accessibility
+  - [ ] Journey 6: Responsive Breakpoint Transitions
+  - [ ] Journey 7: Full Learning Session (Happy Path)
+  - [ ] Journey 8: Error Recovery and Graceful Degradation
+  - [ ] Journey 9: Keyboard-Only Navigation (Accessibility)
+  - [ ] Journey 10: Performance Under Load (Stress Test)
 - [ ] Production deployment successful
-- [ ] Monitoring and alerting configured
-- [ ] Documentation complete (README, API docs, ADRs)
-- [ ] PHR created documenting final integration
+- [ ] Documentation complete (animation guidelines, component docs)
+- [ ] PHR created documenting UI enhancement implementation
 
 ---
 
@@ -1712,6 +2832,6 @@ Non-Goals:
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Ratified:** 2025-12-10
-**Last Amended:** 2025-12-10
+**Last Amended:** 2025-12-27

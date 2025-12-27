@@ -1,0 +1,172 @@
+/**
+ * Reduced Motion Overrides
+ *
+ * Respects the prefers-reduced-motion media query for users who have
+ * requested reduced motion in their operating system settings.
+ *
+ * WCAG 2.2 AA Compliance:
+ * - SC 2.3.3: Animation from Interactions (AAA, but we meet it)
+ * - Users can disable animations via system preference
+ *
+ * @see specs/007-enhance-ui/research.md for reduced motion strategy
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* ============================================
+     GLOBAL ANIMATION DISABLE
+     ============================================ */
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* ============================================
+     CHAT PANEL OVERRIDES
+     ============================================ */
+
+  .panel-animate-enter,
+  .panel-animate-exit {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .message-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* ============================================
+     HOME PAGE OVERRIDES
+     ============================================ */
+
+  .hero-animate,
+  .section-reveal,
+  .feature-card-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable CountUp animation - show final value instantly */
+  .count-up-animate {
+    transition: none !important;
+  }
+
+  /* ============================================
+     NAVBAR OVERRIDES
+     ============================================ */
+
+  .dropdown-animate,
+  .tooltip-animate,
+  .mobile-drawer-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* ============================================
+     LOADING STATE OVERRIDES
+     Keep loading indicators visible but use
+     opacity-only animation (subtle pulse)
+     ============================================ */
+
+  /* Skeleton shimmer becomes static */
+  .animate-shimmer {
+    animation: none !important;
+    background: var(--ifm-color-emphasis-200) !important;
+  }
+
+  /* Typing indicator uses opacity pulse only (no bouncing) */
+  .typing-dot {
+    animation: reducedMotionPulse 1.5s ease-in-out infinite !important;
+    transform: none !important;
+  }
+
+  @keyframes reducedMotionPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /* Spinner uses opacity pulse instead of rotation */
+  .animate-spin {
+    animation: reducedMotionPulse 1.5s ease-in-out infinite !important;
+  }
+
+  /* Progress bar still animates but with reduced duration */
+  .progress-bar-animate {
+    transition-duration: 100ms !important;
+  }
+
+  /* ============================================
+     HOVER EFFECT OVERRIDES
+     Disable transform-based hover effects
+     Keep color/background changes
+     ============================================ */
+
+  .hover-lift:hover,
+  .hover-scale:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ============================================
+     FOCUS EFFECT OVERRIDES
+     Keep focus indicators for accessibility
+     but make them instant
+     ============================================ */
+
+  .focus-ring:focus-visible {
+    transition: none !important;
+  }
+
+  /* ============================================
+     SCROLL REVEAL OVERRIDES
+     Show content immediately without animation
+     ============================================ */
+
+  .scroll-reveal,
+  .scroll-reveal-hidden {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
+  /* ============================================
+     WILL-CHANGE CLEANUP
+     Remove will-change hints since no animation
+     ============================================ */
+
+  .will-animate {
+    will-change: auto !important;
+  }
+}
+
+/* ============================================
+   OPTIONAL: RESPECT UPDATE PREFERENCE
+   For users who prefer reduced updates
+   (less common but good to support)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  /* Reduce auto-playing or looping animations */
+  [data-animation='loop'] {
+    animation-iteration-count: 1 !important;
+  }
+
+  /* Pause video backgrounds if any */
+  video[autoplay] {
+    animation-play-state: paused !important;
+  }
+}

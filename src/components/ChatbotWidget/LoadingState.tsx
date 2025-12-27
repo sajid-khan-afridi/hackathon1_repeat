@@ -2,13 +2,18 @@
  * LoadingState Component
  *
  * Displays loading and streaming indicators for the chatbot widget.
+ * Uses the unified TypingIndicator component from SkeletonLoader.
  * Features:
  * - Animated typing indicator for non-streaming loading
  * - Streaming indicator with pulsing dots
  * - WCAG 2.1 AA compliant with aria-live regions
+ * - Respects prefers-reduced-motion
+ *
+ * @see specs/007-enhance-ui/plan.md for architecture
  */
 
 import React from 'react';
+import { TypingIndicator } from '../SkeletonLoader';
 import styles from './ChatbotWidget.module.css';
 
 interface LoadingStateProps {
@@ -34,25 +39,17 @@ export default function LoadingState({
       aria-label={message || defaultMessage}
     >
       <div className={styles.loadingContent}>
-        {/* Animated dots indicator */}
-        <div className={styles.loadingDots}>
-          <span className={styles.dot} aria-hidden="true" />
-          <span className={styles.dot} aria-hidden="true" />
-          <span className={styles.dot} aria-hidden="true" />
-        </div>
+        {/* Typing indicator - uses TypingIndicator from SkeletonLoader */}
+        <TypingIndicator
+          size="small"
+          label={message || defaultMessage}
+        />
 
         {/* Loading text */}
         <span className={styles.loadingText}>
           {message || defaultMessage}
         </span>
       </div>
-
-      {/* Screen reader only text */}
-      <span className={styles.srOnly}>
-        {isStreaming
-          ? 'Response is streaming, please wait'
-          : 'Generating response, please wait'}
-      </span>
     </div>
   );
 }

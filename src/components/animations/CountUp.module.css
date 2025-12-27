@@ -1,0 +1,14 @@
+/**
+ * CountUp Animation Styles
+ */
+
+.countUp {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.value {
+  font-weight: inherit;
+  font-size: inherit;
+}

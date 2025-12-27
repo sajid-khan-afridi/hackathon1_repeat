@@ -5,3 +5,74 @@
 .navbarHidden {
   transform: translate3d(0, calc(-100% - 2px), 0);
 }
+
+/* ============================================
+   DROPDOWN ANIMATIONS
+   ============================================ */
+
+:global(.navbar__item.dropdown) :global(.dropdown__menu) {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition:
+    opacity var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    transform var(--animation-duration-fast, 150ms) var(--animation-easing-decelerate, ease),
+    visibility 0s linear var(--animation-duration-fast, 150ms);
+}
+
+:global(.navbar__item.dropdown):hover :global(.dropdown__menu),
+:global(.navbar__item.dropdown.dropdown--show) :global(.dropdown__menu) {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity var(--animation-duration-fast, 150ms) var(--animation-easing-standard, ease),
+    transform var(--animation-duration-fast, 150ms) var(--animation-easing-decelerate, ease),
+    visibility 0s linear 0s;
+}
+
+/* ============================================
+   FOCUS INDICATORS (WCAG 2.2 AA - 3:1 contrast)
+   ============================================ */
+
+:global(.navbar__link):focus-visible,
+:global(.navbar__item):focus-visible,
+:global(.navbar__toggle):focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:global(.dropdown__link):focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+  background-color: var(--ifm-color-primary-contrast-background);
+}
+
+/* Mobile sidebar focus indicators */
+:global(.navbar-sidebar__close):focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+:global(.menu__link):focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+  background-color: var(--ifm-color-primary-contrast-background);
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.navbar__item.dropdown) :global(.dropdown__menu) {
+    transition: none;
+    transform: none;
+  }
+
+  :global(.navbar__item.dropdown):hover :global(.dropdown__menu),
+  :global(.navbar__item.dropdown.dropdown--show) :global(.dropdown__menu) {
+    transform: none;
+  }
+}

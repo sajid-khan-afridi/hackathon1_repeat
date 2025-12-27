@@ -99,3 +99,15 @@ See https://github.com/facebook/docusaurus/pull/11142
     display: none;
   }
 }
+
+/* Language toggle styles */
+.languageToggle {
+  margin-inline-end: 0.5rem;
+}
+
+@media (max-width: 996px) {
+  .languageToggle {
+    /* Keep language toggle visible on mobile but make it compact */
+    margin-inline-end: 0.25rem;
+  }
+}

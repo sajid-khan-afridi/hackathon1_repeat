@@ -1,0 +1,214 @@
+/**
+ * GlossaryTooltip Component Styles
+ * Phase 5: Translation Feature - T039
+ */
+
+.container {
+  position: relative;
+  display: inline;
+}
+
+.term {
+  /* Visual distinction for technical terms */
+  color: var(--ifm-color-primary, #2563eb);
+  font-weight: 500;
+  cursor: help;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  transition: color 150ms ease;
+}
+
+.term:hover,
+.term:focus {
+  color: var(--ifm-color-primary-dark, #1d4ed8);
+}
+
+.term:focus-visible {
+  outline: 2px solid var(--ifm-color-primary, #2563eb);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+[data-theme='dark'] .term {
+  color: var(--ifm-color-primary-light, #60a5fa);
+}
+
+[data-theme='dark'] .term:hover,
+[data-theme='dark'] .term:focus {
+  color: var(--ifm-color-primary-lighter, #93bbfc);
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  min-width: 250px;
+  max-width: 350px;
+  padding: 0.75rem 1rem;
+
+  background: var(--ifm-background-color, white);
+  border: 1px solid var(--ifm-color-emphasis-300, #e2e8f0);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* Animation */
+  animation: fadeIn 150ms ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+[data-theme='dark'] .tooltip {
+  background: var(--ifm-background-surface-color, #1e293b);
+  border-color: var(--ifm-color-emphasis-400, #475569);
+}
+
+.tooltipHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.englishTerm {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ifm-color-content, #1e293b);
+}
+
+[data-theme='dark'] .englishTerm {
+  color: var(--ifm-color-content, #f1f5f9);
+}
+
+.urduTerm {
+  font-size: 0.9375rem;
+  color: var(--ifm-color-content-secondary, #64748b);
+  font-family: 'Noto Nastaliq Urdu', sans-serif;
+}
+
+[data-theme='dark'] .urduTerm {
+  color: var(--ifm-color-content-secondary, #94a3b8);
+}
+
+.definition {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ifm-color-content, #1e293b);
+}
+
+[data-theme='dark'] .definition {
+  color: var(--ifm-color-content, #e2e8f0);
+}
+
+.category {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary, #2563eb);
+  background: var(--ifm-color-primary-lightest, rgba(37, 99, 235, 0.1));
+  border-radius: 9999px;
+  margin-block-end: 0.5rem;
+}
+
+[data-theme='dark'] .category {
+  color: var(--ifm-color-primary-light, #60a5fa);
+  background: rgba(96, 165, 250, 0.15);
+}
+
+.relatedTerms {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200, #f1f5f9);
+  font-size: 0.75rem;
+}
+
+[data-theme='dark'] .relatedTerms {
+  border-top-color: var(--ifm-color-emphasis-300, #475569);
+}
+
+.relatedLabel {
+  font-weight: 500;
+  color: var(--ifm-color-content-secondary, #64748b);
+  margin-inline-end: 0.25rem;
+}
+
+[data-theme='dark'] .relatedLabel {
+  color: var(--ifm-color-content-secondary, #94a3b8);
+}
+
+.relatedTerm {
+  color: var(--ifm-color-primary, #2563eb);
+}
+
+[data-theme='dark'] .relatedTerm {
+  color: var(--ifm-color-primary-light, #60a5fa);
+}
+
+.tooltipArrow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+
+  width: 12px;
+  height: 12px;
+
+  background: var(--ifm-background-color, white);
+  border-right: 1px solid var(--ifm-color-emphasis-300, #e2e8f0);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300, #e2e8f0);
+}
+
+[data-theme='dark'] .tooltipArrow {
+  background: var(--ifm-background-surface-color, #1e293b);
+  border-color: var(--ifm-color-emphasis-400, #475569);
+}
+
+/* RTL support */
+[dir='rtl'] .tooltip {
+  text-align: start;
+}
+
+[dir='rtl'] .tooltipHeader {
+  flex-direction: row-reverse;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+
+  .term {
+    transition: none;
+  }
+}
+
+/* Mobile - position tooltip above with more space */
+@media (max-width: 768px) {
+  .tooltip {
+    min-width: 200px;
+    max-width: 280px;
+    font-size: 0.8125rem;
+  }
+
+  .definition {
+    font-size: 0.8125rem;
+  }
+}

@@ -36,7 +36,19 @@ const config: Config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'ur'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+        direction: 'ltr',
+        htmlLang: 'en-US',
+      },
+      ur: {
+        label: 'اردو',
+        direction: 'rtl',
+        htmlLang: 'ur-PK',
+      },
+    },
   },
 
   // Custom fields accessible in client-side code (T076)
@@ -97,6 +109,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: '/glossary',
+          label: '📖 Glossary',
+          position: 'left',
+        },
+        {
           to: '/login',
           label: 'Login',
           position: 'right',
@@ -126,6 +143,10 @@ const config: Config = {
             {
               label: 'NVIDIA Isaac Sim',
               to: '/docs/module-2-isaac-sim/chapter-1-introduction',
+            },
+            {
+              label: 'Technical Glossary',
+              to: '/glossary',
             },
           ],
         },

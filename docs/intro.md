@@ -20,9 +20,17 @@ This textbook is organized into modules that build upon each other:
 - **Module 4: Motion Planning** - Path planning and control
 - **Module 5: Machine Learning for Robotics** - AI-powered robot behaviors
 
+## Technical Terminology
+
+Throughout this textbook, technical terms like <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>, <GlossaryTooltip termId="python">Python</GlossaryTooltip>, <GlossaryTooltip termId="urdf">URDF</GlossaryTooltip>, and <GlossaryTooltip termId="gazebo">Gazebo</GlossaryTooltip> are highlighted. Hover over them to see definitions in both English and Urdu.
+
+:::tip Glossary
+Visit the [Technical Glossary](/glossary) for a complete list of robotics and AI terminology with bilingual definitions.
+:::
+
 ## Getting Started
 
-Each module includes hands-on examples, code samples, and practical exercises. All code is provided in Python and C++ to accommodate different programming backgrounds.
+Each module includes hands-on examples, code samples, and practical exercises. All code is provided in <GlossaryTooltip termId="python">Python</GlossaryTooltip> and C++ to accommodate different programming backgrounds.
 
 ### Prerequisites
 

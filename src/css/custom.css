@@ -3,6 +3,9 @@
  * Using logical properties for RTL readiness
  */
 
+/* Noto Nastaliq Urdu font for RTL Urdu content */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
+
 /* Light theme colors - robotics-inspired palette */
 :root {
   --ifm-color-primary: #2563eb; /* Blue for technology */

@@ -11,12 +11,12 @@ Deliver Urdu translation for all 10 textbook chapters with RTL layout support, t
 
 **Language/Version**: TypeScript 5.x (frontend), Python 3.11+ (build scripts/translation)
 **Primary Dependencies**: Docusaurus v3, React 18+, `urdu-translator` skill, `react-components` skill
-**Storage**: Neon Postgres (glossary, user preferences), Static files (pre-built translations)
+**Storage**: Static files only (pre-built translations + .meta.json cache files), localStorage (user language preference)
 **Testing**: Jest + React Testing Library (components), Playwright (E2E/visual regression), pytest (translation scripts)
 **Target Platform**: Web (GitHub Pages static hosting), Modern browsers with RTL support
 **Project Type**: Web application (static frontend with build-time translation generation)
 **Performance Goals**: Translation < 5s/chapter (build), cached load < 500ms, toggle response < 200ms
-**Constraints**: CLS < 0.1, WCAG 2.1 AA compliance, free tier limits (Neon 0.5GB, translation API quotas)
+**Constraints**: CLS < 0.1, WCAG 2.1 AA compliance, free tier limits (translation API quotas only - no Neon usage for this phase)
 **Scale/Scope**: 10 chapters, 50+ glossary terms, 2 languages (English, Urdu)
 
 ## Constitution Check
@@ -39,7 +39,7 @@ Deliver Urdu translation for all 10 textbook chapters with RTL layout support, t
 **✅ Security by Default**: No API keys in client code (build-time only), input sanitization on glossary data, no user-generated translations
 **✅ Observability & Measurability**: SC-001 to SC-010 provide specific metrics (< 5s, 100%, CLS < 0.1), translation timing measured in CI
 **✅ Accessibility & Inclusivity**: WCAG 2.1 AA compliant toggle, aria-live regions for language changes, RTL screen reader support, 44x44px touch targets
-**✅ Free Tier Sustainability**: Build-time translation (one-time API cost), indefinite caching, glossary stored in Neon (< 0.5GB)
+**✅ Free Tier Sustainability**: Build-time translation (one-time API cost), file-based caching (no Neon usage), localStorage for preferences
 
 ### Agent Ownership
 **Primary**: TranslationService Agent (owns: `urdu-translator`, `react-components`)

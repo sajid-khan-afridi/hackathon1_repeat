@@ -1,0 +1,279 @@
+---
+title: "باب 1: ROS 2 Nodes اور Lifecycle"
+sidebar_position: 1
+description: "ROS 2 nodes بنانا، node lifecycle states کو سمجھنا، اور robust robotics applications کے لیے lifecycle callbacks کا نفاذ سیکھیں"
+keywords:
+  - ROS2
+  - nodes
+  - lifecycle
+  - rclpy
+  - rclcpp
+  - managed nodes
+  - callbacks
+tags:
+  - ros2
+  - fundamentals
+  - nodes
+  - lifecycle
+difficulty_level: beginner
+ros_version: humble
+---
+
+# باب 1: ROS 2 Nodes اور Lifecycle
+
+## تعارف
+
+<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip> میں، **node** کسی بھی robotics application کا بنیادی جزو ہے۔ یہ ایک process ہے جو computation کرتا ہے اور ROS 2 communication infrastructure کا استعمال کرتے ہوئے دوسرے nodes کے ساتھ رابطہ کرتا ہے۔
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Node کو ایک چھوٹے پروگرام کے طور پر سمجھیں جو آپ کے روبوٹ سسٹم میں ایک مخصوص کام کرتا ہے۔ مثال کے طور پر، ایک node سینسر ڈیٹا handle کر سکتا ہے، دوسرا موٹرز کو کنٹرول کر سکتا ہے، اور تیسرا صارف کی commands پر کارروائی کر سکتا ہے۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+ROS 2 میں، nodes صرف processes نہیں ہیں - یہ computation کے containers ہیں جو data flow کے distributed graph میں حصہ لیتے ہیں۔ یہ ROS 2 DDS-based communication middleware کو implement کرتے ہیں اور sophisticated dependency management کے ساتھ complex systems میں compose ہو سکتے ہیں۔
+</PersonalizedSection>
+
+## 1.1 اپنا پہلا Node بنانا
+
+آئیے ایک سادہ "hello world" node بنا کر شروع کریں جو بنیادی ڈھانچے کو ظاہر کرتا ہے۔
+
+### Python Implementation
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy
+#!/usr/bin/env python3
+
+import rclpy
+from rclpy.node import Node
+
+class HelloWorldNode(Node):
+    """ایک سادہ ROS 2 node جو hello world پیغامات print کرتا ہے۔"""
+
+    def __init__(self):
+        # 'hello_world_node' نام سے node کو initialize کریں
+        super().__init__('hello_world_node')
+
+        # Node شروع ہونے کا پیغام log کریں
+        self.get_logger().info('Hello World Node شروع ہو گیا!')
+
+        # ہر سیکنڈ timer_callback کال کرنے کے لیے timer بنائیں
+        self.timer = self.create_timer(1.0, self.timer_callback)
+        self.counter = 0
+
+    def timer_callback(self):
+        """Timer callback جو ہر سیکنڈ پیغام print کرتا ہے۔"""
+        self.counter += 1
+        msg = f'Hello World! شمار: {self.counter}'
+        self.get_logger().info(msg)
+
+def main(args=None):
+    """Node چلانے کا main function۔"""
+    rclpy.init(args=args)
+
+    # Node instance بنائیں
+    node = HelloWorldNode()
+
+    try:
+        # Node کو spin کریں تاکہ callbacks کال ہوں
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # صفائی
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 1.2 Node Lifecycle States
+
+ROS 2 nodes کے پاس کئی states کے ساتھ ایک well-defined lifecycle ہے۔ Resources کا انتظام کرنے اور مناسب startup/shutdown procedures کو یقینی بنانے کے لیے ان states کو سمجھنا ضروری ہے۔
+
+<PersonalizedSection level="beginner">
+Node lifecycle ایک جاندار کی زندگی کے چکر کی طرح ہے - یہ شروع ہوتا ہے (configure)، فعال ہو جاتا ہے (activate)، سو سکتا ہے (deactivate)، اور آخر میں صاف طور پر بند ہو جاتا ہے۔
+</PersonalizedSection>
+
+### بنیادی Lifecycle States
+
+1. **Unconfigured**: Node creation کے بعد ابتدائی حالت
+2. **Inactive**: Configured لیکن فعال طور پر processing نہیں
+3. **Active**: فعال طور پر data کی processing اور computations کر رہا ہے
+4. **Finalized**: صاف اور destruction کے لیے تیار
+
+### Managed Node مثال
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, lifecycle_msgs
+import rclpy
+from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
+from rclpy.lifecycle import State, Transition
+
+class ManagedNode(LifecycleNode):
+    """ایک managed ROS 2 node جو lifecycle states ظاہر کرتا ہے۔"""
+
+    def __init__(self):
+        super().__init__('managed_node')
+        self.get_logger().info('ManagedNode بنایا گیا')
+
+    def on_configure(self, state: State) -> TransitionCallbackReturn:
+        """'unconfigured' سے 'inactive' میں منتقلی پر کال ہوتا ہے۔"""
+        self.get_logger().info('Node کو configure کیا جا رہا ہے...')
+        # یہاں resources initialize کریں
+        self.counter = 0
+        self.get_logger().info('Node کامیابی سے configured')
+        return TransitionCallbackReturn.SUCCESS
+
+    def on_activate(self, state: State) -> TransitionCallbackReturn:
+        """'inactive' سے 'active' میں منتقلی پر کال ہوتا ہے۔"""
+        self.get_logger().info('Node کو activate کیا جا رہا ہے...')
+        self.get_logger().info('Node کامیابی سے activated')
+        return TransitionCallbackReturn.SUCCESS
+
+    def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        """'active' سے 'inactive' میں منتقلی پر کال ہوتا ہے۔"""
+        self.get_logger().info('Node کو deactivate کیا جا رہا ہے...')
+        self.get_logger().info('Node کامیابی سے deactivated')
+        return TransitionCallbackReturn.SUCCESS
+
+    def on_cleanup(self, state: State) -> TransitionCallbackReturn:
+        """'inactive' سے 'unconfigured' میں منتقلی پر کال ہوتا ہے۔"""
+        self.get_logger().info('Node کی صفائی ہو رہی ہے...')
+        del self.counter
+        self.get_logger().info('Node کی صفائی مکمل')
+        return TransitionCallbackReturn.SUCCESS
+
+def main(args=None):
+    rclpy.init(args=args)
+    managed_node = ManagedNode()
+    try:
+        rclpy.spin(managed_node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        managed_node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 1.3 عام Node Patterns
+
+### Parameter Node
+
+Nodes کو اکثر parameters کا استعمال کرتے ہوئے configurable ہونے کی ضرورت ہوتی ہے:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy
+import rclpy
+from rclpy.node import Node
+
+class ParameterNode(Node):
+    """ایک node جو parameter handling ظاہر کرتا ہے۔"""
+
+    def __init__(self):
+        super().__init__('parameter_node')
+
+        # Default values کے ساتھ parameters declare کریں
+        self.declare_parameter('update_frequency', 10.0)
+        self.declare_parameter('message_prefix', 'ROS 2')
+        self.declare_parameter('debug_mode', False)
+
+        # Parameter values حاصل کریں
+        self.frequency = self.get_parameter('update_frequency').value
+        self.prefix = self.get_parameter('message_prefix').value
+        self.debug = self.get_parameter('debug_mode').value
+
+        # Frequency parameter کی بنیاد پر timer بنائیں
+        self.timer = self.create_timer(1.0 / self.frequency, self.timer_callback)
+
+        self.get_logger().info(f'Node شروع ہوا frequency: {self.frequency} Hz کے ساتھ')
+
+    def timer_callback(self):
+        """Periodic callback۔"""
+        if self.debug:
+            self.get_logger().debug(f'Timer callback at {self.frequency} Hz')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ParameterNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## مشقیں
+
+### مشق 1.1: Sensor Node بنائیں (ابتدائی)
+
+**سیکھنے کا مقصد**: Node creation کے تصورات کو simulated sensor node بنانے میں لاگو کریں
+
+#### مسئلہ
+ایک ROS 2 node بنائیں جو temperature sensor کی نقل کرے:
+- ہر 2 سیکنڈ میں temperature readings publish کرے
+- Temperature 20-25°C کے درمیان vary کرے
+- منفرد node نام شامل ہو
+
+#### حل
+```python
+# test: true
+import rclpy
+from rclpy.node import Node
+import random
+
+class TemperatureSensorNode(Node):
+    def __init__(self):
+        super().__init__('temperature_sensor_' + str(random.randint(1000, 9999)))
+        self.get_logger().info(f'Temperature sensor node شروع: {self.get_name()}')
+        self.timer = self.create_timer(2.0, self.timer_callback)
+
+    def timer_callback(self):
+        temp = round(random.uniform(20.0, 25.0), 1)
+        self.get_logger().info(f'Temperature: {temp}°C')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = TemperatureSensorNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- Python میں بنیادی ROS 2 nodes کیسے بنائیں
+- چار بنیادی lifecycle states اور transitions کا انتظام
+- Parameter handling اور configuration کے بہترین طریقے
+- Managed nodes اور error handling سمیت عام node patterns
+
+اہم نکات:
+- Nodes ROS 2 میں بنیادی building blocks ہیں
+- مناسب lifecycle management صاف resource handling کو یقینی بناتا ہے
+- Parameters nodes کو configurable اور reusable بناتے ہیں
+
+:::info اگلا باب
+[باب 2: Topics اور Services](/docs/module-1-ros2-fundamentals/chapter-2-topics-services) میں ہم inter-node communication سیکھیں گے۔
+:::

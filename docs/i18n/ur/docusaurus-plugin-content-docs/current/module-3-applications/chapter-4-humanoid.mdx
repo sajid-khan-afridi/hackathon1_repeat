@@ -1,0 +1,427 @@
+---
+title: "باب 4: Humanoid Robot Control"
+sidebar_position: 4
+description: "Humanoid robot control سیکھیں - bipedal locomotion، balance control، اور whole-body motion planning"
+keywords:
+  - humanoid robots
+  - bipedal locomotion
+  - balance control
+  - inverse kinematics
+  - gait planning
+  - ZMP
+tags:
+  - humanoid
+  - bipedal
+  - control
+  - locomotion
+difficulty_level: advanced
+ros_version: humble
+---
+
+# باب 4: Humanoid Robot Control
+
+## تعارف
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Humanoid robots ایسے روبوٹ ہیں جو انسانوں کی طرح دکھائی دیتے اور حرکت کرتے ہیں۔ انہیں ایسی پیچیدہ مشینوں کے طور پر سمجھیں جو چل سکتی ہیں، توازن رکھ سکتی ہیں، اور دنیا کے ساتھ تعامل کر سکتی ہیں - دو ٹانگوں، بازوؤں، اور دھڑ کے ساتھ۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Humanoid robot control میں complex dynamics کے ساتھ high-dimensional systems کا انتظام شامل ہے۔ یہ باب ZMP-based balance control، bipedal gait generation، hierarchical control کے ذریعے whole-body coordination، اور stability برقرار رکھتے ہوئے motion planning کا احاطہ کرتا ہے۔
+</PersonalizedSection>
+
+## 4.1 Bipedal Locomotion کی بنیادیں
+
+### Zero Moment Point (ZMP)
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, scipy
+import numpy as np
+
+class ZMPController:
+    """Bipedal balance کے لیے Zero Moment Point based controller"""
+
+    def __init__(self, robot_height=1.0, gravity=9.81):
+        self.h = robot_height  # Center of mass کی اونچائی
+        self.g = gravity
+        self.omega = np.sqrt(gravity / robot_height)  # Natural frequency
+
+    def compute_zmp(self, com_pos, com_acc):
+        """Center of mass position اور acceleration سے ZMP حساب کریں"""
+        # ZMP = COM - (h/g) * COM_ddot
+        zmp_x = com_pos[0] - (self.h / self.g) * com_acc[0]
+        zmp_y = com_pos[1] - (self.h / self.g) * com_acc[1]
+
+        return np.array([zmp_x, zmp_y])
+
+    def compute_capture_point(self, com_pos, com_vel):
+        """Balance recovery کے لیے capture point حساب کریں"""
+        # Capture point = COM + sqrt(h/g) * COM_velocity
+        capture_point = com_pos + com_vel / self.omega
+
+        return capture_point
+```
+
+### Footstep Planning
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class FootstepPlanner:
+    """Bipedal walking کے لیے footsteps بنائیں"""
+
+    def __init__(self, step_length=0.2, step_width=0.1):
+        self.step_length = step_length
+        self.step_width = step_width
+
+    def plan_linear_path(self, start_pose, goal_pose, num_steps=None):
+        """Linear path کے ساتھ footsteps بنائیں"""
+        # ضروری قدموں کا حساب کریں
+        dx = goal_pose[0] - start_pose[0]
+        dy = goal_pose[1] - start_pose[1]
+        distance = np.sqrt(dx**2 + dy**2)
+
+        if num_steps is None:
+            num_steps = int(distance / self.step_length)
+
+        # Footsteps بنائیں
+        footsteps = []
+        current_pose = start_pose.copy()
+
+        # شروعاتی پاؤں کی پوزیشنیں
+        footsteps.append({
+            'position': current_pose[:2],
+            'orientation': current_pose[2],
+            'side': 'left',
+            'time': 0.0
+        })
+
+        # Intermediate steps بنائیں
+        for i in range(1, num_steps):
+            progress = i / num_steps
+            next_x = start_pose[0] + progress * dx
+            next_y = start_pose[1] + progress * dy
+
+            # بدلتے ہوئے پاؤں
+            side = 'left' if i % 2 == 0 else 'right'
+            offset = self.step_width/2 if side == 'left' else -self.step_width/2
+
+            # Lateral offset لگائیں
+            next_x += offset * np.sin(goal_pose[2])
+            next_y -= offset * np.cos(goal_pose[2])
+
+            footsteps.append({
+                'position': np.array([next_x, next_y]),
+                'orientation': goal_pose[2],
+                'side': side,
+                'time': 0.5 + i * 0.5
+            })
+
+        return footsteps
+
+    def generate_foot_trajectory(self, footstep, swing_time=0.5, height=0.05):
+        """Swing foot trajectory بنائیں"""
+        t = np.linspace(0, swing_time, 50)
+        trajectory = []
+
+        for ti in t:
+            s = ti / swing_time
+
+            # Smooth motion کے لیے cubic polynomial
+            if s < 0.5:
+                x = footstep['position'][0] * (2 * s**2)
+                y = footstep['position'][1] * (2 * s**2)
+                z = 4 * height * s * (1 - s)
+            else:
+                x = footstep['position'][0] * (1 - 2 * (1-s)**2)
+                y = footstep['position'][1] * (1 - 2 * (1-s)**2)
+                z = 4 * height * s * (1 - s)
+
+            trajectory.append([x, y, z])
+
+        return np.array(trajectory)
+```
+
+## 4.2 Whole Body Control
+
+### Hierarchical Control
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class WholeBodyController:
+    """Humanoid robots کے لیے Hierarchical whole body controller"""
+
+    def __init__(self, robot_model):
+        self.robot = robot_model
+        self.num_joints = robot_model.nq
+
+        # Control hierarchy
+        self.tasks = []
+
+    def add_task(self, task, priority):
+        """Hierarchy میں control task شامل کریں"""
+        self.tasks.append({
+            'task': task,
+            'priority': priority,
+            'active': True
+        })
+
+        # Priority کے مطابق ترتیب دیں
+        self.tasks.sort(key=lambda x: x['priority'])
+
+    def compute_joint_velocities(self, q, dq, dt=0.01):
+        """Hierarchical control استعمال کرتے ہوئے joint velocities حساب کریں"""
+        q_dot = np.zeros(self.num_joints)
+
+        # Nullspace projector initialize کریں
+        N = np.eye(self.num_joints)
+
+        for task_dict in self.tasks:
+            if not task_dict['active']:
+                continue
+
+            task = task_dict['task']
+
+            # Task jacobian اور desired velocity حاصل کریں
+            J = task.compute_jacobian(q)
+            x_dot_des = task.compute_desired_velocity(q, dq)
+
+            # Task کو higher priority tasks کے nullspace میں project کریں
+            J_proj = J @ N
+
+            if J_proj.shape[0] > 0:
+                # Weighted pseudoinverse
+                J_pinv = np.linalg.pinv(J_proj)
+
+                # Joint contribution حساب کریں
+                dq_task = J_pinv @ (x_dot_des - J @ q_dot)
+
+                # Joint velocities update کریں
+                q_dot += dq_task
+
+                # Nullspace projector update کریں
+                N = N - J_pinv @ J_proj
+
+        return q_dot
+
+class COMTask:
+    """Center of Mass tracking task"""
+
+    def __init__(self, com_desired, weight=10.0):
+        self.com_desired = com_desired
+        self.weight = weight
+
+    def compute_jacobian(self, q):
+        """COM Jacobian حساب کریں"""
+        # Robot model استعمال کریں
+        return self.robot.compute_com_jacobian(q)
+
+    def compute_desired_velocity(self, q, dq):
+        """مطلوبہ position تک پہنچنے کے لیے COM velocity"""
+        com_current = self.robot.compute_com(q)
+        error = self.com_desired - com_current
+
+        kp = 5.0
+        x_dot_des = kp * error
+
+        return x_dot_des
+```
+
+## 4.3 Dynamic Balance Controller
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class DynamicBalanceController:
+    """Dynamic balance برقرار رکھنے کا controller"""
+
+    def __init__(self, robot_model):
+        self.robot = robot_model
+        self.zmp_controller = ZMPController(robot_height=0.8)
+        self.wbc = WholeBodyController(robot_model)
+
+    def update_balance(self, q, dq, support_feet, desired_com=None):
+        """Support configuration کی بنیاد پر balance control update کریں"""
+        # Support feet کے لیے tasks activate کریں
+        for foot_name in support_feet:
+            # Foot task بنائیں اگر موجود نہیں
+            foot_pos = self.robot.get_foot_position(q, foot_name)
+            # WBC میں شامل کریں
+
+        # COM reference update کریں اگر دیا گیا ہو
+        if desired_com is not None:
+            self.com_task.com_desired = desired_com
+
+        # Joint velocities حساب کریں
+        q_dot = self.wbc.compute_joint_velocities(q, dq)
+
+        return q_dot
+
+    def balance_recovery_step(self, q, dq, com_desired):
+        """Balance recovery step بنائیں"""
+        # موجودہ حالت
+        com_pos = self.robot.compute_com(q)
+        com_vel = self.robot.compute_com_velocity(q, dq)
+
+        # Capture point حساب کریں
+        capture_point = self.zmp_controller.compute_capture_point(com_pos, com_vel)
+
+        # چیک کریں کہ step کی ضرورت ہے
+        support_polygon = self.robot.get_support_polygon(q)
+
+        if not self.point_in_polygon(capture_point[:2], support_polygon):
+            # Step لینا ضروری ہے
+            step_location = self.plan_recovery_step(capture_point, support_polygon)
+
+            footstep = {
+                'position': step_location,
+                'orientation': 0,
+                'side': 'right' if dq[2] > 0 else 'left',
+                'time': 0.5
+            }
+
+            return footstep
+
+        return None
+
+    def point_in_polygon(self, point, polygon):
+        """چیک کریں کہ point polygon کے اندر ہے"""
+        n = len(polygon)
+        inside = False
+
+        p1x, p1y = polygon[0]
+        for i in range(1, n + 1):
+            p2x, p2y = polygon[i % n]
+            if point[1] > min(p1y, p2y):
+                if point[1] <= max(p1y, p2y):
+                    if point[0] <= max(p1x, p2x):
+                        if p1y != p2y:
+                            xinters = (point[1] - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                        if p1x == p2x or point[0] <= xinters:
+                            inside = not inside
+            p1x, p1y = p2x, p2y
+
+        return inside
+```
+
+## 4.4 ROS 2 Integration
+
+### Humanoid Control Node
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy, sensor_msgs, geometry_msgs, trajectory_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import JointState, Imu
+from geometry_msgs.msg import Twist
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+
+class HumanoidControlNode(Node):
+    """Humanoid robot کے لیے main control node"""
+
+    def __init__(self):
+        super().__init__('humanoid_control_node')
+
+        # Controllers initialize کریں
+        self.balance_controller = DynamicBalanceController(self.robot_model)
+
+        # State variables
+        self.q = np.zeros(self.robot_model.nq)
+        self.dq = np.zeros(self.robot_model.nq)
+        self.current_state = 'idle'
+
+        # Subscribers
+        self.joint_state_sub = self.create_subscription(
+            JointState, '/joint_states', self.joint_state_callback, 10)
+        self.imu_sub = self.create_subscription(
+            Imu, '/imu/data', self.imu_callback, 10)
+        self.cmd_vel_sub = self.create_subscription(
+            Twist, '/cmd_vel', self.cmd_vel_callback, 10)
+
+        # Publishers
+        self.joint_cmd_pub = self.create_publisher(
+            JointTrajectory, '/joint_trajectory_controller/command', 10)
+
+        # Control timer
+        self.control_timer = self.create_timer(0.01, self.control_loop)
+
+        # Walking parameters
+        self.support_foot = 'left'
+        self.step_queue = []
+
+    def control_loop(self):
+        """Main control loop"""
+        # موجودہ حالت update کریں
+        self.update_state()
+
+        # State machine
+        if self.current_state == 'idle':
+            self.idle_control()
+        elif self.current_state == 'walking':
+            self.walking_control()
+        elif self.current_state == 'balance':
+            self.balance_control()
+
+        # Joint commands publish کریں
+        self.publish_joint_commands()
+
+    def walking_control(self):
+        """Walking state کے لیے control"""
+        if not self.step_queue:
+            self.current_state = 'idle'
+            return
+
+        # Balance control update کریں
+        support_feet = [self.support_foot]
+        q_dot = self.balance_controller.update_balance(
+            self.q, self.dq, support_feet)
+
+        # Velocity commands بھیجیں
+        self.send_joint_velocities(q_dot)
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = HumanoidControlNode()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- Zero Moment Point (ZMP) based balance control
+- Bipedal gait generation اور footstep planning
+- Hierarchical whole-body control
+- Capture points کے ساتھ dynamic balance
+- Balance constraints کے ساتھ motion planning
+- Humanoid control کے لیے ROS 2 integration
+
+اہم نکات:
+- ZMP bipedal walking میں dynamic balance کے لیے crucial ہے
+- Hierarchical control task priorities کا انتظام کرتا ہے
+- Whole-body control متعدد objectives کو coordinate کرتا ہے
+- Balance recovery کے لیے strategic foot placement ضروری ہے
+
+:::success مبارک ہو!
+آپ نے مکمل robotics textbook ختم کر لیا ہے جس میں ROS 2 fundamentals، Isaac Sim simulation، kinematics، navigation، perception، اور humanoid control شامل ہے۔ یہ ابواب sophisticated robotic systems بنانے کے لیے مضبوط بنیاد فراہم کرتے ہیں۔
+:::

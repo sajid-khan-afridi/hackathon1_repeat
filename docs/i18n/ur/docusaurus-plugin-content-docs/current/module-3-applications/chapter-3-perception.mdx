@@ -1,0 +1,397 @@
+---
+title: "باب 3: Perception اور Sensor Fusion"
+sidebar_position: 3
+description: "Perception algorithms اور sensor fusion techniques سیکھیں - object detection، tracking، اور state estimation"
+keywords:
+  - perception
+  - sensor fusion
+  - Kalman filter
+  - object detection
+  - computer vision
+  - point cloud
+tags:
+  - perception
+  - sensor-fusion
+  - computer-vision
+  - autonomous-systems
+difficulty_level: advanced
+ros_version: humble
+---
+
+# باب 3: Perception اور Sensor Fusion
+
+## تعارف
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Perception یہ ہے کہ روبوٹ اپنے ماحول کو سینسرز کے ذریعے کیسے سمجھتے ہیں۔ اسے ایسے سمجھیں جیسے آپ کی آنکھوں، کانوں، اور چھونے کی معلومات کو ملا کر ارد گرد کی مکمل تصویر بنانا۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Robot perception میں multi-modal sensor data کی processing شامل ہے تاکہ ماحول کی state کا اندازہ لگایا جا سکے۔ یہ باب Bayesian filtering for state estimation، sensor fusion architectures، computer vision techniques، اور robust perception pipelines کا احاطہ کرتا ہے۔
+</PersonalizedSection>
+
+## 3.1 Bayesian State Estimation
+
+### Kalman Filter
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, scipy
+import numpy as np
+
+class KalmanFilter:
+    """State estimation کے لیے Kalman Filter"""
+
+    def __init__(self, state_dim, measurement_dim):
+        self.state_dim = state_dim
+        self.measurement_dim = measurement_dim
+
+        # State vector اور covariance
+        self.x = np.zeros(state_dim)  # State estimate
+        self.P = np.eye(state_dim)    # State covariance
+
+        # Process model
+        self.F = np.eye(state_dim)    # State transition matrix
+        self.Q = np.eye(state_dim)    # Process noise covariance
+
+        # Measurement model
+        self.H = np.zeros((measurement_dim, state_dim))
+        self.R = np.eye(measurement_dim)  # Measurement noise
+
+    def predict(self, u=None, dt=1.0):
+        """State کو آگے predict کریں"""
+        if u is not None:
+            self.x = self.F @ self.x + u
+        else:
+            self.x = self.F @ self.x
+
+        # Covariance predict کریں
+        self.P = self.F @ self.P @ self.F.T + self.Q
+        return self.x, self.P
+
+    def update(self, z):
+        """Measurement کے ساتھ state update کریں"""
+        # Innovation
+        y = z - self.H @ self.x
+
+        # Innovation covariance
+        S = self.H @ self.P @ self.H.T + self.R
+
+        # Kalman gain
+        K = self.P @ self.H.T @ np.linalg.inv(S)
+
+        # State update
+        self.x = self.x + K @ y
+
+        # Covariance update
+        I_KH = np.eye(self.state_dim) - K @ self.H
+        self.P = I_KH @ self.P @ I_KH.T + K @ self.R @ K.T
+
+        return self.x, self.P
+```
+
+### Multi-Sensor Fusion
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy
+
+class MultiSensorFusion:
+    """Kalman filtering استعمال کرتے ہوئے متعدد سینسرز کو fuse کریں"""
+
+    def __init__(self):
+        # State: [x, y, vx, vy]
+        self.kf = KalmanFilter(state_dim=4, measurement_dim=2)
+
+        # Process model
+        dt = 0.1
+        self.kf.F = np.array([
+            [1, 0, dt, 0],
+            [0, 1, 0, dt],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ])
+
+        # Measurement matrix (صرف position)
+        self.kf.H = np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0]
+        ])
+
+    def fuse_gps_imu(self, gps_data, imu_data, dt):
+        """GPS position اور IMU velocity کو fuse کریں"""
+        # IMU acceleration کے ساتھ predict کریں
+        acc = np.array([imu_data['ax'], imu_data['ay'], 0, 0])
+        self.kf.predict(u=acc * dt, dt=dt)
+
+        # GPS position کے ساتھ update کریں
+        if gps_data is not None:
+            z = np.array([gps_data['x'], gps_data['y']])
+            self.kf.update(z)
+
+        return self.kf.x  # [x, y, vx, vy]
+```
+
+## 3.2 Computer Vision
+
+### Object Detection with YOLO
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: cv2, numpy, ultralytics
+import cv2
+import numpy as np
+from ultralytics import YOLO
+
+class RobotObjectDetector:
+    """Robotics applications کے لیے object detection"""
+
+    def __init__(self, model_path="yolov8n.pt", confidence=0.5):
+        self.model = YOLO(model_path)
+        self.confidence = confidence
+
+        # Robotics کے لیے متعلقہ classes
+        self.robot_classes = ['person', 'car', 'truck', 'bicycle',
+                             'traffic light', 'stop sign', 'chair']
+
+    def detect_objects(self, image):
+        """Image میں objects detect کریں"""
+        results = self.model(image, conf=self.confidence)
+
+        detections = []
+        for result in results:
+            boxes = result.boxes
+            if boxes is not None:
+                for box in boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    conf = box.conf[0].cpu().numpy()
+                    cls = int(box.cls[0].cpu().numpy())
+
+                    class_name = self.model.names[cls]
+
+                    if class_name in self.robot_classes:
+                        detection = {
+                            'class': class_name,
+                            'confidence': float(conf),
+                            'bbox': [int(x1), int(y1), int(x2), int(y2)],
+                            'center': [(x1 + x2) / 2, (y1 + y2) / 2]
+                        }
+                        detections.append(detection)
+
+        return detections
+
+    def track_objects(self, detections, previous_tracks):
+        """Frames میں objects کو track کریں"""
+        if not previous_tracks:
+            tracks = []
+            for i, det in enumerate(detections):
+                track = {
+                    'id': i,
+                    'positions': [det['center']],
+                    'classes': [det['class']],
+                    'confidence': det['confidence'],
+                    'last_seen': 0
+                }
+                tracks.append(track)
+            return tracks
+
+        # Nearest neighbor matching
+        tracks = previous_tracks.copy()
+        for det in detections:
+            best_track = None
+            best_dist = float('inf')
+
+            for track in tracks:
+                prev_pos = track['positions'][-1]
+                dist = np.linalg.norm(
+                    np.array(det['center']) - np.array(prev_pos)
+                )
+                if dist < best_dist and dist < 50:
+                    best_dist = dist
+                    best_track = track
+
+            if best_track is not None:
+                best_track['positions'].append(det['center'])
+                best_track['confidence'] = det['confidence']
+                best_track['last_seen'] = 0
+
+        return tracks
+```
+
+## 3.3 Point Cloud Processing
+
+### Point Cloud Filtering
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: numpy, open3d
+import numpy as np
+import open3d as o3d
+from sklearn.cluster import DBSCAN
+
+class PointCloudProcessor:
+    """3D point cloud data کی processing"""
+
+    def __init__(self, voxel_size=0.05):
+        self.voxel_size = voxel_size
+
+    def filter_points(self, points, min_range=0.5, max_range=50.0):
+        """فاصلے کی بنیاد پر points filter کریں"""
+        distances = np.linalg.norm(points, axis=1)
+        mask = (distances >= min_range) & (distances <= max_range)
+        return points[mask]
+
+    def remove_ground(self, points, height_threshold=0.2):
+        """Ground points ہٹائیں"""
+        ground_mask = points[:, 2] < height_threshold
+        non_ground = points[~ground_mask]
+        ground = points[ground_mask]
+        return non_ground, ground
+
+    def voxel_downsample(self, points):
+        """Voxel grid استعمال کرتے ہوئے downsample کریں"""
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+        pcd_down = pcd.voxel_down_sample(voxel_size=self.voxel_size)
+        return np.asarray(pcd_down.points)
+
+    def cluster_objects(self, points, eps=0.5, min_samples=10):
+        """الگ الگ objects کی شناخت کے لیے points کو cluster کریں"""
+        clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(points)
+        labels = clustering.labels_
+        unique_labels = set(labels)
+
+        clusters = []
+        for label in unique_labels:
+            if label != -1:  # Noise کو نظرانداز کریں
+                cluster_points = points[labels == label]
+                clusters.append({
+                    'label': label,
+                    'points': cluster_points,
+                    'size': len(cluster_points)
+                })
+
+        return clusters
+
+    def extract_features(self, cluster_points):
+        """Point cluster سے geometric features نکالیں"""
+        if len(cluster_points) < 3:
+            return None
+
+        # Bounding box
+        min_bounds = np.min(cluster_points, axis=0)
+        max_bounds = np.max(cluster_points, axis=0)
+        dimensions = max_bounds - min_bounds
+
+        # Centroid
+        centroid = np.mean(cluster_points, axis=0)
+
+        features = {
+            'position': centroid,
+            'dimensions': dimensions,
+            'volume': np.prod(dimensions),
+            'num_points': len(cluster_points)
+        }
+
+        return features
+```
+
+## 3.4 ROS 2 Integration
+
+### Perception Node
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy, sensor_msgs, geometry_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image, PointCloud2
+from geometry_msgs.msg import PoseArray, Pose
+
+class PerceptionNode(Node):
+    """Autonomous robot کے لیے main perception node"""
+
+    def __init__(self):
+        super().__init__('perception_node')
+
+        # Components initialize کریں
+        self.object_detector = RobotObjectDetector()
+        self.point_processor = PointCloudProcessor()
+        self.sensor_fusion = MultiSensorFusion()
+
+        # Subscribers
+        self.image_sub = self.create_subscription(
+            Image, '/camera/image_raw', self.image_callback, 10)
+        self.pointcloud_sub = self.create_subscription(
+            PointCloud2, '/lidar/points', self.pointcloud_callback, 10)
+
+        # Publishers
+        self.object_pose_pub = self.create_publisher(
+            PoseArray, '/detected_objects', 10)
+
+        # Tracking
+        self.camera_tracks = []
+        self.point_tracks = []
+
+    def image_callback(self, msg):
+        """Camera images handle کریں"""
+        # ROS image کو OpenCV میں تبدیل کریں
+        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+
+        # Objects detect کریں
+        detections = self.object_detector.detect_objects(cv_image)
+
+        # Objects track کریں
+        self.camera_tracks = self.object_detector.track_objects(
+            detections, self.camera_tracks)
+
+        # نتائج publish کریں
+        self.publish_object_poses(self.camera_tracks, msg.header.frame_id)
+
+    def pointcloud_callback(self, msg):
+        """Point cloud messages handle کریں"""
+        # Point cloud کو numpy میں تبدیل کریں
+        points = self.pointcloud_to_numpy(msg)
+
+        # Ground ہٹائیں
+        non_ground, ground = self.point_processor.remove_ground(points)
+
+        # Objects cluster کریں
+        clusters = self.point_processor.cluster_objects(non_ground)
+
+        self.get_logger().info(f'{len(clusters)} objects detect ہوئے')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = PerceptionNode()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- Kalman filters کے ساتھ Bayesian state estimation
+- Multi-modal perception کے لیے Sensor fusion
+- Object detection اور tracking کے لیے Computer vision
+- 3D perception کے لیے Point cloud processing
+- Perception systems کے لیے ROS 2 integration
+
+اہم نکات:
+- Sensor fusion complementary sensor information کو جوڑتا ہے
+- Kalman filters Gaussian assumptions کے تحت optimal state estimation فراہم کرتے ہیں
+- Computer vision امیر 2D perception enable کرتا ہے
+- Point clouds درست 3D spatial معلومات فراہم کرتے ہیں
+
+:::info اگلا باب
+[باب 4: Humanoid Robots](/docs/module-3-applications/chapter-4-humanoid) میں ہم bipedal locomotion اور balance control سیکھیں گے۔
+:::

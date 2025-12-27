@@ -1,0 +1,320 @@
+---
+title: "باب 3: Parameters اور Launch Files"
+sidebar_position: 3
+description: "ROS 2 parameters کے ساتھ کام کرنا اور launch files کا استعمال کرتے ہوئے complex multi-node systems شروع کرنا سیکھیں"
+keywords:
+  - ROS2
+  - parameters
+  - launch files
+  - configuration
+  - YAML
+  - multi-node
+tags:
+  - ros2
+  - parameters
+  - launch
+  - configuration
+difficulty_level: intermediate
+ros_version: humble
+---
+
+# باب 3: Parameters اور Launch Files
+
+## تعارف
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Parameters آپ کے روبوٹ nodes کے لیے settings کی طرح ہیں - جیسے آپ اپنے فون کی brightness یا volume adjust کرتے ہیں۔ Launch files ایک script کی طرح ہیں جو ایک ساتھ کئی programs شروع کرتی ہے۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+ROS 2 parameters runtime پر node configuration کی اجازت دیتے ہیں، جبکہ launch files declarative طریقے سے complex multi-node systems کو orchestrate کرتے ہیں۔ یہ باب YAML configuration، parameter namespaces، اور Python-based launch files کا احاطہ کرتا ہے۔
+</PersonalizedSection>
+
+## 3.1 Parameters کے ساتھ کام کرنا
+
+### Parameter Declaration
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10
+# Dependencies: rclpy
+import rclpy
+from rclpy.node import Node
+from rcl_interfaces.msg import ParameterDescriptor
+
+class ConfigurableNode(Node):
+    """Parameters کے ساتھ configurable node"""
+
+    def __init__(self):
+        super().__init__('configurable_node')
+
+        # Description کے ساتھ parameters declare کریں
+        self.declare_parameter(
+            'robot_name',
+            'default_robot',
+            ParameterDescriptor(description='روبوٹ کا نام')
+        )
+
+        self.declare_parameter(
+            'max_speed',
+            1.0,
+            ParameterDescriptor(description='زیادہ سے زیادہ رفتار m/s میں')
+        )
+
+        self.declare_parameter(
+            'enable_logging',
+            True,
+            ParameterDescriptor(description='Logging فعال/غیر فعال')
+        )
+
+        # Parameter values حاصل کریں
+        self.robot_name = self.get_parameter('robot_name').value
+        self.max_speed = self.get_parameter('max_speed').value
+        self.logging_enabled = self.get_parameter('enable_logging').value
+
+        self.get_logger().info(f'روبوٹ: {self.robot_name}')
+        self.get_logger().info(f'زیادہ سے زیادہ رفتار: {self.max_speed} m/s')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ConfigurableNode()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### YAML Configuration
+
+Parameters کو YAML file میں store کیا جا سکتا ہے:
+
+```yaml
+# config/robot_params.yaml
+configurable_node:
+  ros__parameters:
+    robot_name: "my_robot"
+    max_speed: 2.0
+    enable_logging: true
+    sensor_config:
+      lidar_enabled: true
+      camera_resolution: [640, 480]
+```
+
+### Dynamic Parameter Updates
+
+```python
+# test: true
+from rclpy.parameter import Parameter
+from rcl_interfaces.msg import SetParametersResult
+
+class DynamicNode(Node):
+    def __init__(self):
+        super().__init__('dynamic_node')
+        self.declare_parameter('speed', 1.0)
+
+        # Parameter change callback
+        self.add_on_set_parameters_callback(self.param_callback)
+
+    def param_callback(self, params):
+        for param in params:
+            if param.name == 'speed':
+                self.get_logger().info(f'رفتار تبدیل: {param.value}')
+        return SetParametersResult(successful=True)
+```
+
+## 3.2 Launch Files
+
+### Python Launch File
+
+```python
+# launch/robot_launch.py
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+
+def generate_launch_description():
+    # Launch arguments
+    robot_name_arg = DeclareLaunchArgument(
+        'robot_name',
+        default_value='my_robot',
+        description='روبوٹ کا نام'
+    )
+
+    # Nodes
+    sensor_node = Node(
+        package='my_package',
+        executable='sensor_node',
+        name='sensor',
+        parameters=[{
+            'update_rate': 10.0,
+            'robot_name': LaunchConfiguration('robot_name')
+        }]
+    )
+
+    control_node = Node(
+        package='my_package',
+        executable='control_node',
+        name='controller',
+        parameters=[{
+            'max_velocity': 2.0
+        }]
+    )
+
+    return LaunchDescription([
+        robot_name_arg,
+        sensor_node,
+        control_node
+    ])
+```
+
+### Parameter File کے ساتھ Launch
+
+```python
+# launch/with_params_launch.py
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    config = os.path.join(
+        get_package_share_directory('my_package'),
+        'config',
+        'robot_params.yaml'
+    )
+
+    return LaunchDescription([
+        Node(
+            package='my_package',
+            executable='robot_node',
+            name='robot',
+            parameters=[config]
+        )
+    ])
+```
+
+## 3.3 Namespaces اور Remapping
+
+### Namespace استعمال کرنا
+
+```python
+# launch/namespaced_launch.py
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    # دو روبوٹ مختلف namespaces میں
+    robot1 = Node(
+        package='my_package',
+        executable='robot_node',
+        namespace='robot1',
+        name='controller'
+    )
+
+    robot2 = Node(
+        package='my_package',
+        executable='robot_node',
+        namespace='robot2',
+        name='controller'
+    )
+
+    return LaunchDescription([robot1, robot2])
+```
+
+### Topic Remapping
+
+```python
+robot_node = Node(
+    package='my_package',
+    executable='robot_node',
+    remappings=[
+        ('input_topic', 'sensor_data'),
+        ('output_topic', 'control_commands')
+    ]
+)
+```
+
+## 3.4 Conditional Launch
+
+```python
+# launch/conditional_launch.py
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    simulation_arg = DeclareLaunchArgument(
+        'simulation',
+        default_value='false',
+        description='Simulation mode'
+    )
+
+    # Real hardware node
+    hardware_node = Node(
+        package='my_package',
+        executable='hardware_driver',
+        condition=UnlessCondition(LaunchConfiguration('simulation'))
+    )
+
+    # Simulation node
+    sim_node = Node(
+        package='my_package',
+        executable='simulator',
+        condition=IfCondition(LaunchConfiguration('simulation'))
+    )
+
+    return LaunchDescription([
+        simulation_arg,
+        hardware_node,
+        sim_node
+    ])
+```
+
+## مشقیں
+
+### مشق 3.1: Multi-Robot Launch (درمیانی)
+
+**مقصد**: ایک launch file بنائیں جو 3 روبوٹ instances شروع کرے
+
+#### حل
+```python
+# test: true
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    nodes = []
+
+    for i in range(3):
+        robot = Node(
+            package='my_package',
+            executable='robot_node',
+            namespace=f'robot_{i}',
+            name='controller',
+            parameters=[{
+                'robot_id': i,
+                'max_speed': 1.0 + (i * 0.5)
+            }]
+        )
+        nodes.append(robot)
+
+    return LaunchDescription(nodes)
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- Parameters کا declaration اور استعمال
+- YAML configuration files
+- Python launch files
+- Namespaces اور remapping
+- Conditional node launching
+
+:::info اگلے اقدامات
+آپ نے ROS 2 کی بنیادیں سیکھ لی ہیں۔ [ماڈیول 2: Isaac Sim](/docs/module-2-isaac-sim/chapter-1-introduction) میں ہم سیمولیشن سیکھیں گے۔
+:::

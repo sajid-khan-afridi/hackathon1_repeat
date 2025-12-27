@@ -1,0 +1,316 @@
+---
+title: "باب 3: سینسر سیمولیشن"
+sidebar_position: 3
+description: "Isaac Sim میں مختلف سینسرز کی سیمولیشن سیکھیں - cameras، LiDAR، IMU، اور مزید"
+keywords:
+  - sensors
+  - camera
+  - lidar
+  - IMU
+  - Isaac Sim
+  - simulation
+  - perception
+tags:
+  - sensors
+  - simulation
+  - isaac-sim
+  - perception
+difficulty_level: intermediate
+ros_version: humble
+---
+
+# باب 3: سینسر سیمولیشن
+
+## تعارف
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+سینسرز روبوٹ کی "آنکھیں اور کان" ہیں۔ یہ روبوٹ کو اپنے ماحول کو "دیکھنے" اور "محسوس کرنے" کی اجازت دیتے ہیں۔ Isaac Sim میں ہم ان سینسرز کی نقل کر سکتے ہیں تاکہ روبوٹ کو حقیقی دنیا میں لے جانے سے پہلے ٹیسٹ کر سکیں۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Isaac Sim RTX-accelerated sensor simulation فراہم کرتا ہے جس میں physically accurate rendering، ray-traced LiDAR، اور synthetic data generation شامل ہے۔ یہ باب camera intrinsics، LiDAR point clouds، IMU noise models، اور ROS 2 integration کا احاطہ کرتا ہے۔
+</PersonalizedSection>
+
+## 3.1 Camera Sensors
+
+### RGB Camera
+
+```python
+# test: true
+# Isaac Sim میں Camera سیٹ اپ
+from omni.isaac.sensor import Camera
+from omni.isaac.core import World
+import numpy as np
+
+# World بنائیں
+world = World()
+
+# Camera بنائیں
+camera = Camera(
+    prim_path="/World/Camera",
+    name="rgb_camera",
+    frequency=30,
+    resolution=(640, 480)
+)
+
+# Camera کی پوزیشن سیٹ کریں
+camera.set_world_pose(
+    position=np.array([0, 0, 1.0]),
+    orientation=np.array([0, 0, 0, 1])
+)
+
+# Initialize کریں
+camera.initialize()
+
+# RGB image حاصل کریں
+rgb_image = camera.get_rgba()
+print(f"Image shape: {rgb_image.shape}")
+```
+
+### Depth Camera
+
+```python
+# test: true
+from omni.isaac.sensor import Camera
+
+# Depth camera
+depth_camera = Camera(
+    prim_path="/World/DepthCamera",
+    name="depth_camera",
+    frequency=30,
+    resolution=(640, 480)
+)
+
+depth_camera.initialize()
+
+# Depth data حاصل کریں
+depth_data = depth_camera.get_depth()
+print(f"Depth range: {depth_data.min():.2f} - {depth_data.max():.2f} meters")
+```
+
+### Camera Parameters
+
+```python
+# Camera intrinsics سیٹ کریں
+camera.set_focal_length(2.12)  # mm
+camera.set_focus_distance(1.0)  # meters
+camera.set_horizontal_aperture(20.955)  # mm
+
+# Clipping planes
+camera.set_clipping_range(0.1, 100.0)  # near, far
+```
+
+## 3.2 LiDAR Sensors
+
+### Rotating LiDAR
+
+```python
+# test: true
+from omni.isaac.sensor import RotatingLidarPhysX
+from omni.isaac.core import World
+import numpy as np
+
+world = World()
+
+# LiDAR بنائیں
+lidar = RotatingLidarPhysX(
+    prim_path="/World/Lidar",
+    name="lidar",
+    min_range=0.1,
+    max_range=100.0,
+    horizontal_fov=360.0,
+    vertical_fov=30.0,
+    horizontal_resolution=0.4,
+    vertical_resolution=2.0,
+    rotation_rate=10.0  # Hz
+)
+
+lidar.initialize()
+
+# Point cloud حاصل کریں
+point_cloud = lidar.get_point_cloud()
+print(f"Points: {len(point_cloud)}")
+```
+
+### Solid State LiDAR
+
+```python
+# Solid state (non-rotating) LiDAR
+from omni.isaac.sensor import SolidStateLidar
+
+solid_lidar = SolidStateLidar(
+    prim_path="/World/SolidLidar",
+    name="solid_lidar",
+    min_range=0.1,
+    max_range=50.0,
+    horizontal_fov=120.0,
+    vertical_fov=30.0
+)
+```
+
+## 3.3 IMU Sensor
+
+### IMU Setup
+
+```python
+# test: true
+from omni.isaac.sensor import IMUSensor
+import numpy as np
+
+imu = IMUSensor(
+    prim_path="/World/Robot/imu_link",
+    name="imu",
+    frequency=100  # Hz
+)
+
+imu.initialize()
+
+# IMU data حاصل کریں
+imu_data = imu.get_current_frame()
+
+# Linear acceleration (m/s²)
+linear_acc = imu_data['lin_acc']
+print(f"Linear Acc: x={linear_acc[0]:.2f}, y={linear_acc[1]:.2f}, z={linear_acc[2]:.2f}")
+
+# Angular velocity (rad/s)
+angular_vel = imu_data['ang_vel']
+print(f"Angular Vel: x={angular_vel[0]:.2f}, y={angular_vel[1]:.2f}, z={angular_vel[2]:.2f}")
+
+# Orientation (quaternion)
+orientation = imu_data['orientation']
+```
+
+### IMU Noise Model
+
+```python
+# Noise parameters سیٹ کریں
+imu.set_linear_acceleration_noise_std(0.01)  # m/s²
+imu.set_angular_velocity_noise_std(0.001)  # rad/s
+imu.set_orientation_noise_std(0.0001)  # quaternion
+```
+
+## 3.4 Contact Sensors
+
+```python
+# test: true
+from omni.isaac.sensor import ContactSensor
+
+# Contact sensor (چھونے کا سینسر)
+contact = ContactSensor(
+    prim_path="/World/Robot/foot_link",
+    name="foot_contact",
+    min_threshold=0.1,  # N
+    max_threshold=1000.0  # N
+)
+
+contact.initialize()
+
+# Contact data حاصل کریں
+contact_data = contact.get_current_frame()
+is_touching = contact_data['in_contact']
+contact_force = contact_data['force']
+
+print(f"In contact: {is_touching}")
+print(f"Force: {np.linalg.norm(contact_force):.2f} N")
+```
+
+## 3.5 ROS 2 Integration
+
+### Camera Publisher
+
+```python
+# test: true
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image, CameraInfo
+from cv_bridge import CvBridge
+
+class CameraPublisher(Node):
+    def __init__(self, camera):
+        super().__init__('camera_publisher')
+        self.camera = camera
+        self.bridge = CvBridge()
+
+        # Publishers
+        self.image_pub = self.create_publisher(Image, '/camera/image_raw', 10)
+        self.info_pub = self.create_publisher(CameraInfo, '/camera/camera_info', 10)
+
+        # Timer
+        self.timer = self.create_timer(1.0/30.0, self.publish_image)
+
+    def publish_image(self):
+        # RGB image حاصل کریں
+        rgb = self.camera.get_rgba()[:, :, :3]
+
+        # ROS message بنائیں
+        msg = self.bridge.cv2_to_imgmsg(rgb, 'rgb8')
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'camera_link'
+
+        self.image_pub.publish(msg)
+```
+
+### LiDAR Publisher
+
+```python
+# test: true
+from sensor_msgs.msg import PointCloud2
+import sensor_msgs_py.point_cloud2 as pc2
+
+class LidarPublisher(Node):
+    def __init__(self, lidar):
+        super().__init__('lidar_publisher')
+        self.lidar = lidar
+
+        self.pc_pub = self.create_publisher(PointCloud2, '/lidar/points', 10)
+        self.timer = self.create_timer(0.1, self.publish_pointcloud)
+
+    def publish_pointcloud(self):
+        points = self.lidar.get_point_cloud()
+
+        # PointCloud2 message بنائیں
+        header = Header()
+        header.stamp = self.get_clock().now().to_msg()
+        header.frame_id = 'lidar_link'
+
+        msg = pc2.create_cloud_xyz32(header, points)
+        self.pc_pub.publish(msg)
+```
+
+## 3.6 Semantic Segmentation
+
+```python
+# test: true
+# Semantic camera
+semantic_camera = Camera(
+    prim_path="/World/SemanticCamera",
+    name="semantic",
+    frequency=30,
+    resolution=(640, 480)
+)
+
+semantic_camera.initialize()
+
+# Semantic segmentation حاصل کریں
+semantic_data = semantic_camera.get_semantic_segmentation()
+
+# Instance segmentation
+instance_data = semantic_camera.get_instance_segmentation()
+
+# Object detection (bounding boxes)
+detections = semantic_camera.get_object_detection()
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- RGB اور Depth cameras کی سیمولیشن
+- LiDAR sensors (rotating اور solid state)
+- IMU sensors اور noise models
+- Contact sensors
+- ROS 2 میں sensor data publish کرنا
+- Semantic اور instance segmentation
+
+:::info اگلا ماڈیول
+[ماڈیول 3: Applications](/docs/module-3-applications/chapter-1-kinematics) میں ہم عملی robotics applications سیکھیں گے۔
+:::

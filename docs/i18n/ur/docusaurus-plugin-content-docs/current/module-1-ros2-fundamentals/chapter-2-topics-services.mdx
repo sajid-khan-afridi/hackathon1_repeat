@@ -1,0 +1,330 @@
+---
+title: "باب 2: ROS 2 Topics اور Services"
+sidebar_position: 2
+description: "ROS 2 مواصلاتی نمونے سیکھیں - ڈیٹا سٹریمز کے لیے publish-subscribe اور service calls کے لیے request-response"
+keywords:
+  - ROS2
+  - topics
+  - publishers
+  - subscribers
+  - services
+  - QoS
+  - publish-subscribe
+  - request-response
+tags:
+  - ros2
+  - fundamentals
+  - communication
+  - topics
+  - services
+difficulty_level: beginner
+ros_version: humble
+---
+
+# باب 2: ROS 2 Topics اور Services
+
+## تعارف
+
+<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip> دو بنیادی مواصلاتی نمونے فراہم کرتا ہے: **topics** جو publish-subscribe ماڈل کے لیے اور **services** جو request-response تعاملات کے لیے ہیں۔ یہ سمجھنا کہ ہر نمونہ کب اور کیسے استعمال کرنا ہے، مؤثر روبوٹکس ایپلیکیشنز بنانے کے لیے بنیادی ہے۔
+
+<PersonalizedSection level="beginner" rosFamiliarity="novice">
+Topics کو ریڈیو نشریات کی طرح سوچیں - ایک node معلومات شائع (broadcast) کرتا ہے اور کوئی بھی تعداد میں nodes سن (subscribe) سکتے ہیں۔ Services فون کال کی طرح ہیں - آپ درخواست بھیجتے ہیں اور مخصوص جواب کا انتظار کرتے ہیں۔
+</PersonalizedSection>
+
+<PersonalizedSection level="advanced" rosFamiliarity="expert">
+Topics DDS مڈل ویئر کا استعمال کرتے ہوئے many-to-many تقسیم شدہ ڈیٹا بس کو نافذ کرتے ہیں، جو scalable، loosely-coupled مواصلاتی نمونوں کو فعال کرتے ہیں۔ Services type safety اور خودکار کوڈ جنریشن کے ساتھ synchronous request-response semantics فراہم کرتی ہیں۔
+</PersonalizedSection>
+
+## 2.1 Topics اور Publish-Subscribe نمونہ
+
+<GlossaryTooltip termId="topic">Topics</GlossaryTooltip> نامزد بسیں ہیں جن پر nodes پیغامات کا تبادلہ کرتے ہیں۔ یہ مسلسل ڈیٹا سٹریمز جیسے سینسر ریڈنگز یا موٹر کمانڈز کے لیے مثالی ہیں۔
+
+### Publisher بنانا
+
+آئیے ایک publisher بناتے ہیں جو سینسر ڈیٹا بھیجتا ہے:
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, sensor_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+import math
+import time
+
+class ImuPublisher(Node):
+    """سمیولیٹڈ IMU ڈیٹا شائع کرتا ہے۔"""
+
+    def __init__(self):
+        super().__init__('imu_publisher')
+
+        # QoS پروفائل کے ساتھ publisher بنائیں
+        self.publisher = self.create_publisher(
+            Imu,
+            'imu/data',
+            10  # Queue سائز
+        )
+
+        # وقتاً فوقتاً publishing کے لیے timer
+        self.timer = self.create_timer(0.01, self.timer_callback)  # 100 Hz
+        self.time_stamp = time.time()
+
+        self.get_logger().info('IMU Publisher شروع ہو گیا')
+
+    def timer_callback(self):
+        """IMU ڈیٹا بنائیں اور شائع کریں۔"""
+        msg = Imu()
+        current_time = time.time()
+
+        # Orientation سمیولیٹ کریں (quaternion)
+        angle = current_time * 0.5
+        msg.orientation.w = math.cos(angle * 0.5)
+        msg.orientation.x = 0.0
+        msg.orientation.y = math.sin(angle * 0.5)
+        msg.orientation.z = 0.0
+
+        # Angular velocity سمیولیٹ کریں
+        msg.angular_velocity.x = math.sin(current_time) * 0.1
+        msg.angular_velocity.y = math.cos(current_time) * 0.1
+        msg.angular_velocity.z = 0.0
+
+        # Linear acceleration سمیولیٹ کریں
+        msg.linear_acceleration.x = math.cos(current_time * 2) * 0.5
+        msg.linear_acceleration.y = math.sin(current_time * 2) * 0.5
+        msg.linear_acceleration.z = 9.81 + math.sin(current_time * 3) * 0.2
+
+        # Timestamp سیٹ کریں
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'imu_link'
+
+        # پیغام شائع کریں
+        self.publisher.publish(msg)
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher = ImuPublisher()
+    try:
+        rclpy.spin(publisher)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        publisher.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Subscriber بنانا
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, sensor_msgs
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+
+class ImuSubscriber(Node):
+    """IMU ڈیٹا وصول اور پروسیس کرتا ہے۔"""
+
+    def __init__(self):
+        super().__init__('imu_subscriber')
+
+        # Subscriber بنائیں
+        self.subscription = self.create_subscription(
+            Imu,
+            'imu/data',
+            self.listener_callback,
+            10  # Queue سائز
+        )
+
+        self.get_logger().info('IMU Subscriber شروع ہو گیا')
+
+    def listener_callback(self, msg: Imu):
+        """آنے والے IMU پیغامات کو پروسیس کریں۔"""
+        import math
+        w, x, y, z = msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z
+
+        # Roll اور Pitch quaternion سے نکالیں
+        roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
+        pitch = math.asin(2 * (w * y - z * x))
+
+        self.get_logger().info(
+            f'Roll: {math.degrees(roll):.1f}°, '
+            f'Pitch: {math.degrees(pitch):.1f}°'
+        )
+
+def main(args=None):
+    rclpy.init(args=args)
+    subscriber = ImuSubscriber()
+    try:
+        rclpy.spin(subscriber)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        subscriber.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 2.2 Request-Response مواصلات کے لیے Services
+
+Services اس وقت استعمال ہوتی ہیں جب آپ کو درخواست کا فوری جواب چاہیے، جیسے کوئی عمل شروع کرنا یا کوئی مخصوص معلومات پوچھنا۔
+
+### Service Server بنانا
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, example_interfaces
+from example_interfaces.srv import AddTwoInts
+import rclpy
+from rclpy.node import Node
+
+class AddTwoIntsServer(Node):
+    """Service server جو دو integers جمع کرتا ہے۔"""
+
+    def __init__(self):
+        super().__init__('add_two_ints_server')
+
+        # Service بنائیں
+        self.srv = self.create_service(
+            AddTwoInts,
+            'add_two_ints',
+            self.add_two_ints_callback
+        )
+
+        self.get_logger().info('AddTwoInts server تیار ہے')
+
+    def add_two_ints_callback(self, request, response):
+        """Service درخواستیں ہینڈل کریں۔"""
+        response.sum = request.a + request.b
+
+        self.get_logger().info(
+            f'درخواست موصول: a={request.a}, b={request.b}'
+        )
+        self.get_logger().info(
+            f'جواب بھیج رہا ہوں: [sum={response.sum}]'
+        )
+
+        return response
+
+def main(args=None):
+    rclpy.init(args=args)
+    server = AddTwoIntsServer()
+    try:
+        rclpy.spin(server)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## 2.3 Quality of Service (QoS)
+
+<GlossaryTooltip termId="qos">QoS</GlossaryTooltip> پالیسیاں کنٹرول کرتی ہیں کہ nodes کے درمیان ڈیٹا کا تبادلہ کیسے ہوتا ہے۔ یہ روبوٹکس سسٹمز میں قابل اعتماد مواصلات کو یقینی بنانے کے لیے اہم ہیں۔
+
+<PersonalizedSection level="beginner">
+QoS پیغامات کی ترسیل کے قواعد طے کرنے جیسا ہے۔ کیا آپ کو ہر پیغام چاہیے (reliable)؟ کیا کچھ چھوٹ سکتے ہیں (best effort)؟ پیغامات کتنے پرانے ہو سکتے ہیں (deadline)؟
+</PersonalizedSection>
+
+### QoS پروفائلز کی مثال
+
+```python
+# test: true
+# ROS 2 Humble | Python 3.10+
+# Dependencies: rclpy, std_msgs
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy
+from std_msgs.msg import String
+
+class QoSDemoNode(Node):
+    """مختلف QoS پروفائلز کا مظاہرہ۔"""
+
+    def __init__(self):
+        super().__init__('qos_demo_node')
+
+        # Best effort QoS (سینسر ڈیٹا کے لیے جہاں تازگی اہم ہے)
+        self.best_effort_qos = QoSProfile(
+            depth=10,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE
+        )
+
+        # Reliable QoS (کمانڈز کے لیے جہاں ترسیل اہم ہے)
+        self.reliable_qos = QoSProfile(
+            depth=10,
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            durability=QoSDurabilityPolicy.VOLATILE
+        )
+
+        # مختلف QoS کے ساتھ publishers بنائیں
+        self.sensor_publisher = self.create_publisher(
+            String,
+            'sensor_data',
+            qos_profile=self.best_effort_qos
+        )
+
+        self.command_publisher = self.create_publisher(
+            String,
+            'robot_commands',
+            qos_profile=self.reliable_qos
+        )
+
+        self.timer = self.create_timer(0.1, self.timer_callback)
+        self.count = 0
+
+    def timer_callback(self):
+        # Best effort کے ساتھ سینسر ڈیٹا شائع کریں
+        sensor_msg = String()
+        sensor_msg.data = f'سینسر ریڈنگ {self.count}'
+        self.sensor_publisher.publish(sensor_msg)
+
+        # Reliable ترسیل کے ساتھ کمانڈز شائع کریں
+        if self.count % 10 == 0:
+            cmd_msg = String()
+            cmd_msg.data = 'EXECUTE_TASK'
+            self.command_publisher.publish(cmd_msg)
+
+        self.count += 1
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = QoSDemoNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## خلاصہ
+
+اس باب میں ہم نے سیکھا:
+- مسلسل ڈیٹا سٹریمز کے لیے publish-subscribe نمونے کو نافذ کرنا
+- Request-response مواصلات کے لیے ROS 2 services بنانا اور استعمال کرنا
+- مختلف منظرناموں کے لیے Quality of Service (QoS) پروفائلز ترتیب دینا
+- Topics بمقابلہ services کب استعمال کریں
+
+اہم نکات:
+- Topics مسلسل ڈیٹا سٹریمز کے لیے مثالی ہیں (سینسرز، actuator کمانڈز)
+- Services request-response تعاملات کے لیے بہترین ہیں (کنفیگریشن، سوالات)
+- QoS پالیسیاں مواصلات کی قابل اعتمادی اور کارکردگی پر نمایاں اثر ڈالتی ہیں
+
+:::info اگلا باب
+[باب 3: Parameters اور Launch](/docs/module-1-ros2-fundamentals/chapter-3-parameters-launch) میں ہم ROS 2 پیرامیٹرز اور لانچ فائلز سیکھیں گے۔
+:::

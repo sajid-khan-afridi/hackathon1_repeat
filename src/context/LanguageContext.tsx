@@ -38,12 +38,45 @@ interface LanguageProviderProps {
 }
 
 /**
+ * Detect locale from current URL path
+ */
+function detectLocaleFromUrl(): LanguageCode | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  const pathname = window.location.pathname;
+  const baseUrl = '/hackathon1_repeat';
+
+  let pathWithoutBase = pathname;
+  if (pathname.startsWith(baseUrl)) {
+    pathWithoutBase = pathname.slice(baseUrl.length) || '/';
+  }
+
+  // Check if URL starts with a locale prefix
+  const localeMatch = pathWithoutBase.match(/^\/(ur)(\/|$)/);
+  if (localeMatch) {
+    return localeMatch[1] as LanguageCode;
+  }
+
+  return null; // Default locale (English) has no prefix
+}
+
+/**
  * Safely read language from localStorage with validation
+ * URL locale takes precedence over localStorage
  */
 function loadFromStorage(): LanguageCode {
   if (typeof window === 'undefined') {
     return DEFAULT_LANGUAGE;
   }
+
+  // First check URL for locale
+  const urlLocale = detectLocaleFromUrl();
+  if (urlLocale) {
+    return urlLocale;
+  }
+
+  // Then check localStorage
   try {
     const saved = localStorage.getItem(LANGUAGE_PREFERENCE_KEY);
     if (saved) {
@@ -94,6 +127,50 @@ function updateDocumentDirection(lang: LanguageCode): void {
   const config = LANGUAGE_CONFIGS[lang];
   document.documentElement.setAttribute('dir', config.direction);
   document.documentElement.setAttribute('lang', config.htmlLang);
+}
+
+/**
+ * Navigate to the corresponding locale URL
+ * Docusaurus serves translations at /{locale}/... URLs
+ */
+function navigateToLocale(lang: LanguageCode): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const currentPath = window.location.pathname;
+  const baseUrl = '/hackathon1_repeat'; // Docusaurus baseUrl
+
+  // Remove baseUrl prefix if present
+  let pathWithoutBase = currentPath;
+  if (currentPath.startsWith(baseUrl)) {
+    pathWithoutBase = currentPath.slice(baseUrl.length) || '/';
+  }
+
+  // Check if currently on a locale path
+  const localeMatch = pathWithoutBase.match(/^\/(en|ur)(\/|$)/);
+  const currentLocale = localeMatch ? localeMatch[1] : 'en';
+
+  // Remove current locale prefix if present
+  let pathWithoutLocale = pathWithoutBase;
+  if (localeMatch) {
+    pathWithoutLocale = pathWithoutBase.slice(localeMatch[0].length - 1) || '/';
+  }
+
+  // Build new URL
+  let newPath: string;
+  if (lang === 'en') {
+    // English is default locale, no prefix needed
+    newPath = baseUrl + pathWithoutLocale;
+  } else {
+    // Add locale prefix for non-default locales
+    newPath = baseUrl + '/' + lang + pathWithoutLocale;
+  }
+
+  // Only navigate if URL actually changes
+  if (newPath !== currentPath) {
+    window.location.href = newPath;
+  }
 }
 
 /**
@@ -152,11 +229,13 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     saveToStorage(lang);
     updateDocumentDirection(lang);
 
-    // Announce change if language actually changed
+    // Announce change and navigate if language actually changed
     if (previousLang !== lang) {
       announceLanguageChange(lang);
       // Clear any previous translation errors on language change
       setTranslationError(false);
+      // Navigate to the corresponding locale URL
+      navigateToLocale(lang);
     }
   }, [language]);
 

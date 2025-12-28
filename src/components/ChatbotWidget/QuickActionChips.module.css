@@ -1,8 +1,9 @@
 /**
- * QuickActionChips Styles
+ * QuickActionChips Styles - App Brand Design
  *
- * Responsive chip grid layout with:
+ * Responsive chip grid layout aligned with app styling:
  * - Mobile-first grid (2 columns on mobile, 4 on desktop)
+ * - App brand colors (#2563eb primary, matching app)
  * - Interactive hover/focus states
  * - Smooth transitions
  * - Dark mode support
@@ -10,26 +11,36 @@
  * - WCAG 2.1 AA compliance
  */
 
-/* ==================== CSS Variables ==================== */
+/* ==================== App Brand Design Tokens ==================== */
 
 .quickActionChips {
-  --chip-color-bg: #f1f3f4;
-  --chip-color-bg-hover: #e8eaed;
-  --chip-color-text: #202124;
-  --chip-color-border: #dadce0;
-  --chip-border-radius: 20px;
+  /* App Brand Colors - Aligned with main app palette */
+  --zoom-primary: #2563eb;
+  --zoom-primary-hover: #1d4ed8;
+  --zoom-primary-light: rgba(37, 99, 235, 0.1);
+
+  /* Chip Colors - Zoom Style */
+  --chip-color-bg: #F7F8FA;
+  --chip-color-bg-hover: #E8F0FE;
+  --chip-color-text: #232333;
+  --chip-color-border: #E4E6EB;
+  --chip-border-radius: 9999px;
   --chip-padding-x: 16px;
   --chip-padding-y: 10px;
   --chip-gap: 8px;
-  --chip-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --chip-transition: 150ms ease-out;
 }
 
-/* Dark theme overrides */
+/* Dark theme overrides - App Dark Mode */
 [data-theme='dark'] .quickActionChips {
-  --chip-color-bg: #292a2d;
-  --chip-color-bg-hover: #3c4043;
-  --chip-color-text: #e8eaed;
-  --chip-color-border: #3c4043;
+  --zoom-primary: #60a5fa;
+  --zoom-primary-hover: #3b82f6;
+  --zoom-primary-light: rgba(96, 165, 250, 0.2);
+
+  --chip-color-bg: #2D2D44;
+  --chip-color-bg-hover: #1E3A5F;
+  --chip-color-text: #E8EAED;
+  --chip-color-border: #3D3D54;
 }
 
 /* ==================== Container ==================== */
@@ -84,23 +95,23 @@
   will-change: transform, background-color;
 }
 
-/* Hover state */
+/* Hover state - App Brand Style */
 .chip:hover {
   background-color: var(--chip-color-bg-hover);
-  border-color: #1a73e8;
+  border-color: var(--zoom-primary);
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
 [data-theme='dark'] .chip:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.25);
 }
 
-/* Focus state */
+/* Focus state - Zoom Style */
 .chip:focus-visible {
-  outline: 2px solid #1a73e8;
+  outline: 2px solid var(--zoom-primary);
   outline-offset: 2px;
-  border-color: #1a73e8;
+  border-color: var(--zoom-primary);
 }
 
 /* Active/pressed state */

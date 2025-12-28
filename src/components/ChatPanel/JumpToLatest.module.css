@@ -1,8 +1,14 @@
 /**
- * JumpToLatest Styles
+ * JumpToLatest Styles - Zoom App Inspired Design
+ *
+ * Floating button with Zoom Workplace UI styling.
  */
 
 .button {
+  /* App Brand Colors */
+  --zoom-primary: #2563eb;
+  --zoom-primary-hover: #1d4ed8;
+
   position: absolute;
   inset-inline-start: 50%;
   inset-block-end: 80px;
@@ -15,11 +21,11 @@
   gap: 0.25rem;
 
   padding: 0.5rem 1rem;
-  background-color: var(--ifm-color-primary);
+  background: linear-gradient(135deg, var(--zoom-primary) 0%, var(--zoom-primary-hover) 100%);
   color: white;
   border: none;
   border-radius: 9999px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 
   cursor: pointer;
   font-size: 0.875rem;
@@ -27,9 +33,9 @@
 
   animation: fadeUp 200ms ease-out forwards;
   transition:
-    background-color var(--animation-duration-fast, 150ms) ease,
-    box-shadow var(--animation-duration-fast, 150ms) ease,
-    transform var(--animation-duration-fast, 150ms) ease;
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    transform 150ms ease-out;
 }
 
 @keyframes fadeUp {
@@ -43,9 +49,10 @@
   }
 }
 
+/* Hover state - App Brand Style */
 .button:hover {
-  background-color: var(--ifm-color-primary-dark);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, var(--zoom-primary-hover) 0%, #1e40af 100%);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
 .button:active {
@@ -57,6 +64,7 @@
   outline-offset: 2px;
 }
 
+/* Count badge - Zoom Style */
 .count {
   display: inline-flex;
   align-items: center;
@@ -65,7 +73,7 @@
   height: 1.25rem;
   padding: 0 0.35rem;
   background-color: white;
-  color: var(--ifm-color-primary);
+  color: var(--zoom-primary);
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 9999px;

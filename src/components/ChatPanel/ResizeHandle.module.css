@@ -1,8 +1,15 @@
 /**
- * ResizeHandle Styles
+ * ResizeHandle Styles - Zoom App Inspired Design
+ *
+ * Resize handle with Zoom Workplace UI styling.
  */
 
 .handle {
+  /* App Brand Colors */
+  --zoom-primary: #2563eb;
+  --zoom-primary-light: rgba(37, 99, 235, 0.1);
+  --zoom-primary-medium: rgba(37, 99, 235, 0.2);
+
   position: absolute;
   inset-block-start: 0;
   inset-block-end: 0;
@@ -13,7 +20,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  transition: background-color var(--animation-duration-fast, 150ms) ease;
+  transition: background-color 150ms ease-out;
   z-index: 10;
 }
 
@@ -23,23 +30,24 @@
   inset-inline-end: 0;
 }
 
+/* Hover/Resizing state - Zoom Style */
 .handle:hover,
 .handle.resizing {
-  background-color: rgba(37, 99, 235, 0.1);
+  background-color: var(--zoom-primary-light);
 }
 
 .handle:focus-visible {
   outline: none;
-  background-color: rgba(37, 99, 235, 0.2);
+  background-color: var(--zoom-primary-medium);
 }
 
 .handleIndicator {
   width: 4px;
   height: 40px;
   border-radius: 2px;
-  background-color: var(--ifm-color-emphasis-400);
+  background-color: #9AA0A6;
   opacity: 0;
-  transition: opacity var(--animation-duration-fast, 150ms) ease;
+  transition: opacity 150ms ease-out;
 }
 
 .handle:hover .handleIndicator,
@@ -48,8 +56,9 @@
   opacity: 1;
 }
 
+/* Active resizing state - Zoom Style */
 .handle.resizing .handleIndicator {
-  background-color: var(--ifm-color-primary);
+  background-color: var(--zoom-primary);
 }
 
 /* Reduced motion */

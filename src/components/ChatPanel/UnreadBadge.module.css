@@ -1,12 +1,18 @@
 /**
- * UnreadBadge Styles
+ * UnreadBadge Styles - Zoom App Inspired Design
+ *
+ * Notification badge with Zoom Workplace UI styling.
  */
 
 .badge {
+  /* Zoom Brand Colors */
+  --zoom-error: #D32F2F;
+  --zoom-error-pulse: rgba(211, 47, 47, 0.4);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--robotics-danger, #ef4444);
+  background-color: var(--zoom-error);
   color: white;
   font-weight: 600;
   border-radius: 9999px;
@@ -34,20 +40,20 @@
   height: 1.5rem;
 }
 
-/* Pulse animation */
+/* Pulse animation - Zoom Style */
 .animate {
-  animation: pulse 2s ease-in-out infinite;
+  animation: zoomPulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
+@keyframes zoomPulse {
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 0 0 var(--zoom-error-pulse);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 4px rgba(211, 47, 47, 0);
   }
 }
 

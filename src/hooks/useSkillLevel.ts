@@ -80,7 +80,9 @@ export function useSkillLevel(): UseSkillLevelReturn {
 
   const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null);
   const [calculatedAt, setCalculatedAt] = useState<string | null>(null);
-  const [profileSnapshot, setProfileSnapshot] = useState<SkillLevelResponse['based_on_profile'] | null>(null);
+  const [profileSnapshot, setProfileSnapshot] = useState<
+    SkillLevelResponse['based_on_profile'] | null
+  >(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRecalculating, setIsRecalculating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

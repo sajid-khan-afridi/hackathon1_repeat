@@ -36,28 +36,28 @@ const DEFAULT_ACTIONS: QuickAction[] = [
   {
     label: 'Ask a question',
     query: 'What can you help me with?',
-    icon: '💬'
+    icon: '💬',
   },
   {
     label: 'Find a module',
     query: 'Show me the available modules',
-    icon: '📚'
+    icon: '📚',
   },
   {
     label: 'ROS 2 help',
     query: 'Explain ROS 2 basics',
-    icon: '🤖'
+    icon: '🤖',
   },
   {
     label: 'Search docs',
     query: 'How do I search the documentation?',
-    icon: '🔍'
-  }
+    icon: '🔍',
+  },
 ];
 
 export default function QuickActionChips({
   actions = DEFAULT_ACTIONS,
-  onActionClick
+  onActionClick,
 }: QuickActionChipsProps): React.ReactElement {
   return (
     <div className={styles.quickActionChips} role="group" aria-label="Quick actions">

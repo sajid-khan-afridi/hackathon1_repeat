@@ -45,7 +45,7 @@
   width: 4px;
   height: 40px;
   border-radius: 2px;
-  background-color: #9AA0A6;
+  background-color: #9aa0a6;
   opacity: 0;
   transition: opacity 150ms ease-out;
 }

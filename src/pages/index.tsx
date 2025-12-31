@@ -25,8 +25,8 @@ function HomepageHeader() {
           </FadeIn>
           <FadeIn variant="fade-up" staggerIndex={2} triggerOnScroll={false}>
             <p className={styles.heroSubtitle}>
-              Comprehensive textbook covering ROS 2, NVIDIA Isaac Sim, and advanced robotics concepts.
-              From fundamentals to real-world applications.
+              Comprehensive textbook covering ROS 2, NVIDIA Isaac Sim, and advanced robotics
+              concepts. From fundamentals to real-world applications.
             </p>
           </FadeIn>
           <FadeIn variant="fade-up" staggerIndex={3} triggerOnScroll={false}>

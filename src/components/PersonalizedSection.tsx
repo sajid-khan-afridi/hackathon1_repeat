@@ -15,7 +15,9 @@ interface PersonalizedSectionProps {
 /**
  * Maps AuthContext ROSFamiliarity to PersonalizedSection rosFamiliarity values
  */
-function mapRosFamiliarity(ros: ROSFamiliarity | null | undefined): 'novice' | 'intermediate' | 'expert' | undefined {
+function mapRosFamiliarity(
+  ros: ROSFamiliarity | null | undefined
+): 'novice' | 'intermediate' | 'expert' | undefined {
   switch (ros) {
     case 'none':
       return 'novice';
@@ -128,7 +130,10 @@ export default function PersonalizedSection({
       // Special case: If user prefers "both", show all code examples
       if (effectiveProfile.preferredLanguage === 'both') {
         // Allow language-specific content to be shown
-      } else if (effectiveProfile.preferredLanguage && effectiveProfile.preferredLanguage !== language) {
+      } else if (
+        effectiveProfile.preferredLanguage &&
+        effectiveProfile.preferredLanguage !== language
+      ) {
         return false; // Hide if language doesn't match user preference
       }
     }
@@ -166,7 +171,16 @@ export default function PersonalizedSection({
     }
 
     return true; // Show content if all filters pass
-  }, [userProfile, authProfile, isAuthenticated, level, rosFamiliarity, hardwareAccess, language, hardware]);
+  }, [
+    userProfile,
+    authProfile,
+    isAuthenticated,
+    level,
+    rosFamiliarity,
+    hardwareAccess,
+    language,
+    hardware,
+  ]);
 
   // Generate accessible label describing the personalization criteria (WCAG 2.1 AA)
   const ariaLabel = useMemo(() => {

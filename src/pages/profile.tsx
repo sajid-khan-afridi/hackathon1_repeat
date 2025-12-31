@@ -58,13 +58,7 @@ export default function ProfilePage(): JSX.Element {
  * Implementation: T059 - User Story 3 (Smart Chapter Recommendations)
  */
 function RecommendationsSection(): JSX.Element {
-  const {
-    recommendations,
-    isLoading,
-    error,
-    fromCache,
-    forceRefresh,
-  } = useRecommendations();
+  const { recommendations, isLoading, error, fromCache, forceRefresh } = useRecommendations();
   const history = useHistory();
 
   const handleRecommendationClick = (chapterId: string) => {
@@ -74,10 +68,15 @@ function RecommendationsSection(): JSX.Element {
 
   return (
     <div style={{ marginTop: '3rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 600 }}>
-          📚 Recommended For You
-        </h2>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem',
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 600 }}>📚 Recommended For You</h2>
         <button
           onClick={forceRefresh}
           disabled={isLoading}
@@ -129,8 +128,8 @@ function RecommendationsSection(): JSX.Element {
       {!isLoading && !error && recommendations.length === 0 && (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
           <p>
-            No recommendations available at this time. Complete more chapters or update your profile to get
-            personalized suggestions!
+            No recommendations available at this time. Complete more chapters or update your profile
+            to get personalized suggestions!
           </p>
         </div>
       )}
@@ -149,7 +148,9 @@ function RecommendationsSection(): JSX.Element {
       )}
 
       {recommendations.length > 0 && (
-        <p style={{ fontSize: '0.875rem', color: '#6c757d', marginTop: '1rem', textAlign: 'center' }}>
+        <p
+          style={{ fontSize: '0.875rem', color: '#6c757d', marginTop: '1rem', textAlign: 'center' }}
+        >
           💡 Recommendations are based on your skill level, learning goals, and progress
         </p>
       )}

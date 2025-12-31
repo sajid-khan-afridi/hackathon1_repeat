@@ -25,12 +25,12 @@ interface ModuleFilterProps {
 const MODULE_INFO: Record<number, string> = {
   1: 'Module 1: ROS 2 Fundamentals',
   2: 'Module 2: Isaac Sim',
-  3: 'Module 3: Applications'
+  3: 'Module 3: Applications',
 };
 
 export default function ModuleFilter({
   selectedModule,
-  onModuleChange
+  onModuleChange,
 }: ModuleFilterProps): React.ReactElement {
   /**
    * Handle dropdown selection change
@@ -77,14 +77,8 @@ export default function ModuleFilter({
             aria-label="Clear module filter"
             title="Clear filter"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm4 10.59L10.59 12 8 9.41 5.41 12 4 10.59 6.59 8 4 5.41 5.41 4 8 6.59 10.59 4 12 5.41 9.41 8 12 10.59z"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm4 10.59L10.59 12 8 9.41 5.41 12 4 10.59 6.59 8 4 5.41 5.41 4 8 6.59 10.59 4 12 5.41 9.41 8 12 10.59z" />
             </svg>
           </button>
         )}

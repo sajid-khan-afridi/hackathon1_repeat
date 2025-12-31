@@ -161,12 +161,7 @@ export function MobileDrawer({
           style={{ paddingLeft: `${1 + depth * 0.75}rem` }}
         >
           {item.icon && (
-            <NavbarIcon
-              name={item.icon}
-              size={20}
-              decorative
-              className={styles.navIcon}
-            />
+            <NavbarIcon name={item.icon} size={20} decorative className={styles.navIcon} />
           )}
           <span>{item.label}</span>
         </ItemTag>
@@ -184,11 +179,7 @@ export function MobileDrawer({
   }
 
   return (
-    <div
-      className={styles.overlay}
-      onClick={onClose}
-      aria-hidden="true"
-    >
+    <div className={styles.overlay} onClick={onClose} aria-hidden="true">
       <div
         ref={drawerRef}
         className={clsx(styles.drawer, className)}
@@ -217,9 +208,7 @@ export function MobileDrawer({
 
         {/* Navigation */}
         <nav className={styles.nav}>
-          <ul className={styles.navList}>
-            {items.map((item) => renderItem(item))}
-          </ul>
+          <ul className={styles.navList}>{items.map((item) => renderItem(item))}</ul>
         </nav>
       </div>
     </div>

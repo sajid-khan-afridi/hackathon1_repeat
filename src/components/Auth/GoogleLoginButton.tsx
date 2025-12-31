@@ -17,8 +17,9 @@ const getApiUrl = (): string => {
       return PRODUCTION_API_URL;
     }
 
-    const envUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
-                   (typeof process !== 'undefined' && process.env?.API_URL);
+    const envUrl =
+      (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
+      (typeof process !== 'undefined' && process.env?.API_URL);
     if (envUrl) return envUrl;
 
     const docusaurusConfig = (window as any).__DOCUSAURUS__;

@@ -135,10 +135,7 @@ export default function GlobalFloatingChat(): React.ReactElement | null {
         <div className={styles.buttonWrapper}>
           <FloatingChatButton onClick={handleOpen} isExpanded={false} />
           {state.unreadCount > 0 && (
-            <UnreadBadge
-              count={state.unreadCount}
-              className={styles.unreadBadge}
-            />
+            <UnreadBadge count={state.unreadCount} className={styles.unreadBadge} />
           )}
         </div>
       )}

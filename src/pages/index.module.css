@@ -156,7 +156,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  transition: transform var(--animation-duration-base, 250ms) var(--animation-easing-decelerate, ease);
+  transition: transform var(--animation-duration-base, 250ms)
+    var(--animation-easing-decelerate, ease);
   will-change: transform;
   backface-visibility: hidden;
 }

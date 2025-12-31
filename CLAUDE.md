@@ -128,12 +128,22 @@ You are not expected to solve every problem autonomously. You MUST invoke the us
 
 When running `/sp.implement`, treat `CLAUDE.md` as the authoritative project memory and keep it in sync.
 
+**MANDATORY: Skills are required for every `tasks.md` task**
+
+- Before starting any work, open `tasks.md` and pick **at least one relevant Skill** for the specific task you are about to execute.
+- For each task you perform, explicitly record a **Skills Used:** line in the task entry (or directly under it) naming the Skill(s) applied.
+- If no suitable project Skill exists, you MUST:
+  1. search available **Plugin Skills**, and use one if it fits, OR
+  2. create a small project Skill in `.claude/skills/` (minimum: correct `SKILL.md` with `name` + `description`) and then proceed.
+- No task may be implemented without first invoking at least one relevant Skill; after Skills are applied, the task must be implemented directly by **Claude Code** itself (no agent delegation).
+
 **Skill Invocation (Direct - No Agents):**
 
-- Invoke the **relevant skills** directly from `.claude/skills/` that help this implementation.
+- Invoke the **relevant skills directly** that help this implementation (project skills first).
+- **Also search through Plugin Skills** (e.g., `/plugin-name:skill-name` patterns such as `example-skills:frontend-design`, `example-skills:pdf`, etc.) when project skills don't cover the requirement.
 - Do NOT invoke agents from `.claude/agents/`. Skills should be used directly without agent delegation.
 - Use only skills that directly help this implementation; do not use unrelated skills.
-- Reference each skill's `skill.json` and `README.md` for parameters and usage.
+- For each Skill used, consult the Skill’s canonical instructions in `SKILL.md` (and any referenced resource files). If your repo also provides `skill.json` and/or `README.md`, use them for parameters/usage as supplemental guidance.
 
 ## Default policies (must follow)
 
@@ -293,6 +303,30 @@ Every skill MUST have these files:
 | `fastapi-backend`          | FastAPI endpoint creation     | backend-api-agent                      |
 | `react-components`         | React component generation    | ui-component-agent                     |
 | `contextual-keyword-chips` | Keyword extraction UI         | ui-component-agent                     |
+
+### Available Plugin Skills (17)
+
+When project skills don't cover the requirement, also search through these Plugin Skills:
+
+| Plugin Skill                           | Purpose                                                    |
+| -------------------------------------- | ---------------------------------------------------------- |
+| `example-skills:algorithmic-art`       | Create algorithmic art using p5.js with seeded randomness  |
+| `example-skills:brand-guidelines`      | Apply Anthropic's official brand colors and typography     |
+| `example-skills:canvas-design`         | Create visual art in .png and .pdf using design philosophy |
+| `example-skills:doc-coauthoring`       | Structured workflow for co-authoring documentation         |
+| `example-skills:docx`                  | Word document creation, editing, tracked changes, comments |
+| `example-skills:frontend-design`       | Create production-grade frontend interfaces                |
+| `example-skills:internal-comms`        | Write internal communications (status reports, updates)    |
+| `example-skills:mcp-builder`           | Guide for creating high-quality MCP servers                |
+| `example-skills:pdf`                   | PDF manipulation: extract, create, merge, split, forms     |
+| `example-skills:pptx`                  | PowerPoint presentation creation, editing, and analysis    |
+| `example-skills:skill-creator`         | Guide for creating effective Claude Code skills            |
+| `example-skills:slack-gif-creator`     | Create animated GIFs optimized for Slack                   |
+| `example-skills:theme-factory`         | Style artifacts with 10 pre-set themes or custom themes    |
+| `example-skills:web-artifacts-builder` | Multi-component HTML artifacts (React, Tailwind, shadcn)   |
+| `example-skills:webapp-testing`        | Test local web apps using Playwright (screenshots, logs)   |
+| `example-skills:xlsx`                  | Excel spreadsheet creation, formulas, formatting, analysis |
+| `frontend-design:frontend-design`      | Create distinctive, polished frontend interfaces           |
 
 ### Available Agents (7)
 

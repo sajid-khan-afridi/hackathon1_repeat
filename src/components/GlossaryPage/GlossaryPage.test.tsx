@@ -73,15 +73,16 @@ jest.mock('../../hooks/useGlossary', () => ({
     let filteredTerms = mockTerms;
 
     if (categoryFilter) {
-      filteredTerms = filteredTerms.filter(t => t.category === categoryFilter);
+      filteredTerms = filteredTerms.filter((t) => t.category === categoryFilter);
     }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filteredTerms = filteredTerms.filter(t =>
-        t.english.toLowerCase().includes(query) ||
-        t.urduTransliteration.includes(query) ||
-        t.definition.toLowerCase().includes(query)
+      filteredTerms = filteredTerms.filter(
+        (t) =>
+          t.english.toLowerCase().includes(query) ||
+          t.urduTransliteration.includes(query) ||
+          t.definition.toLowerCase().includes(query)
       );
     }
 
@@ -93,15 +94,13 @@ jest.mock('../../hooks/useGlossary', () => ({
       categoryFilter,
       setCategoryFilter,
       categories: ['Middleware', 'Simulation', 'Standards', 'Programming'],
-      getTermById: (id: string) => mockTerms.find(t => t.id === id),
+      getTermById: (id: string) => mockTerms.find((t) => t.id === id),
       getRelatedTerms: (id: string) => {
-        const term = mockTerms.find(t => t.id === id);
+        const term = mockTerms.find((t) => t.id === id);
         if (!term?.relatedTerms) return [];
-        return term.relatedTerms
-          .map(rid => mockTerms.find(t => t.id === rid))
-          .filter(Boolean);
+        return term.relatedTerms.map((rid) => mockTerms.find((t) => t.id === rid)).filter(Boolean);
       },
-      hasTerm: (id: string) => mockTerms.some(t => t.id === id),
+      hasTerm: (id: string) => mockTerms.some((t) => t.id === id),
       isLoading: false,
       error: null,
     };
@@ -109,10 +108,7 @@ jest.mock('../../hooks/useGlossary', () => ({
 }));
 
 // Custom render with LanguageContext
-const renderWithLanguage = (
-  ui: React.ReactElement,
-  language: LanguageCode = 'en'
-) => {
+const renderWithLanguage = (ui: React.ReactElement, language: LanguageCode = 'en') => {
   return render(
     <LanguageContext.Provider
       value={{

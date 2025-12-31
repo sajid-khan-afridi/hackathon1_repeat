@@ -121,12 +121,7 @@ export function AuthModal({
     >
       <div className={styles.modalBackdrop} onClick={handleBackdropClick} />
       <div className={styles.modalContent}>
-        <button
-          className={styles.modalClose}
-          onClick={onClose}
-          aria-label="Close"
-          type="button"
-        >
+        <button className={styles.modalClose} onClick={onClose} aria-label="Close" type="button">
           ×
         </button>
         <h2 id="auth-modal-title" className="visually-hidden">

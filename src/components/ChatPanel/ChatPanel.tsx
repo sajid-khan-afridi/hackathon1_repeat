@@ -134,7 +134,11 @@ export function ChatPanel({
   }, []);
 
   // Animation state
-  const { phase, shouldRender, style: animationStyle } = useAnimationState({
+  const {
+    phase,
+    shouldRender,
+    style: animationStyle,
+  } = useAnimationState({
     isVisible: isOpen,
     enterDuration: 300,
     exitDuration: 200,

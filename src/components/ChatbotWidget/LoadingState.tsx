@@ -25,11 +25,9 @@ interface LoadingStateProps {
 
 export default function LoadingState({
   isStreaming = false,
-  message
+  message,
 }: LoadingStateProps): React.ReactElement {
-  const defaultMessage = isStreaming
-    ? 'Streaming response...'
-    : 'Thinking...';
+  const defaultMessage = isStreaming ? 'Streaming response...' : 'Thinking...';
 
   return (
     <div
@@ -40,15 +38,10 @@ export default function LoadingState({
     >
       <div className={styles.loadingContent}>
         {/* Typing indicator - uses TypingIndicator from SkeletonLoader */}
-        <TypingIndicator
-          size="small"
-          label={message || defaultMessage}
-        />
+        <TypingIndicator size="small" label={message || defaultMessage} />
 
         {/* Loading text */}
-        <span className={styles.loadingText}>
-          {message || defaultMessage}
-        </span>
+        <span className={styles.loadingText}>{message || defaultMessage}</span>
       </div>
     </div>
   );

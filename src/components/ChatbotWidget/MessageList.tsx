@@ -40,10 +40,7 @@ function formatTimestamp(date: Date): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export default function MessageList({
-  messages,
-  isLoading
-}: MessageListProps): React.ReactElement {
+export default function MessageList({ messages, isLoading }: MessageListProps): React.ReactElement {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -116,17 +113,12 @@ export default function MessageList({
             <span className={styles.messageRole}>
               {message.role === 'user' ? 'You' : 'Assistant'}
             </span>
-            <time
-              className={styles.messageTimestamp}
-              dateTime={message.timestamp.toISOString()}
-            >
+            <time className={styles.messageTimestamp} dateTime={message.timestamp.toISOString()}>
               {formatTimestamp(message.timestamp)}
             </time>
           </div>
 
-          <div className={styles.messageContent}>
-            {message.content}
-          </div>
+          <div className={styles.messageContent}>{message.content}</div>
 
           {/* Assistant-only metadata */}
           {message.role === 'assistant' && (
@@ -151,7 +143,8 @@ export default function MessageList({
                   <span className={styles.tokenUsageValue}>
                     {message.tokens_used.total_tokens}
                     <span className={styles.tokenUsageBreakdown}>
-                      ({message.tokens_used.input_tokens} in / {message.tokens_used.output_tokens} out)
+                      ({message.tokens_used.input_tokens} in / {message.tokens_used.output_tokens}{' '}
+                      out)
                     </span>
                   </span>
                 </div>
@@ -185,7 +178,7 @@ export default function MessageList({
                           onClick={() => {
                             // Dispatch custom event for parent to handle
                             const event = new CustomEvent('chatbot-suggested-term', {
-                              detail: { term }
+                              detail: { term },
                             });
                             window.dispatchEvent(event);
                           }}

@@ -44,7 +44,7 @@ function getConfidenceExplanation(confidence: number): string {
 
 export default function ConfidenceIndicator({
   confidence,
-  showWarning = false
+  showWarning = false,
 }: ConfidenceIndicatorProps): React.ReactElement | null {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const level = getConfidenceLevel(confidence);
@@ -55,11 +55,7 @@ export default function ConfidenceIndicator({
     <div className={styles.confidenceContainer}>
       {/* Warning banner for low confidence (0.2-0.3) */}
       {showWarning && confidence >= 0.2 && confidence < 0.3 && (
-        <div
-          className={styles.confidenceWarning}
-          role="alert"
-          aria-live="assertive"
-        >
+        <div className={styles.confidenceWarning} role="alert" aria-live="assertive">
           <svg
             width="20"
             height="20"

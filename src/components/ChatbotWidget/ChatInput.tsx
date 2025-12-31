@@ -28,7 +28,7 @@ const MAX_ROWS = 6;
 export default function ChatInput({
   onSubmit,
   isLoading,
-  inputId = 'chatbot-input'
+  inputId = 'chatbot-input',
 }: ChatInputProps): React.ReactElement {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -122,11 +122,7 @@ export default function ChatInput({
           aria-live="polite"
           aria-atomic="true"
         >
-          {isNearLimit && (
-            <span>
-              {remainingChars} characters remaining
-            </span>
-          )}
+          {isNearLimit && <span>{remainingChars} characters remaining</span>}
         </div>
       </div>
 
@@ -142,13 +138,7 @@ export default function ChatInput({
             ···
           </span>
         ) : (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M2 3l16 7-16 7V3zm2 11.5V5.5l10.5 4.5L4 14.5z" />
           </svg>
         )}

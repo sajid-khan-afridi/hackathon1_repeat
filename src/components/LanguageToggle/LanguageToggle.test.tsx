@@ -30,10 +30,7 @@ const localStorageMock = (() => {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 // Custom render with provider
-const renderWithProvider = (
-  ui: React.ReactElement,
-  initialLanguage: LanguageCode = 'en'
-) => {
+const renderWithProvider = (ui: React.ReactElement, initialLanguage: LanguageCode = 'en') => {
   const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [language, setLanguageState] = React.useState<LanguageCode>(initialLanguage);
 

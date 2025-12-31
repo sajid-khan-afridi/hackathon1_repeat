@@ -66,12 +66,15 @@ export default function ContentWrapper(props: Props): ReactNode {
           />
 
           {/* Action Buttons */}
-          <div className="chapter-actions" style={{
-            display: 'flex',
-            gap: '0.5rem',
-            marginTop: '1rem',
-            flexWrap: 'wrap',
-          }}>
+          <div
+            className="chapter-actions"
+            style={{
+              display: 'flex',
+              gap: '0.5rem',
+              marginTop: '1rem',
+              flexWrap: 'wrap',
+            }}
+          >
             {/* Bookmark Button */}
             <button
               onClick={toggleBookmark}
@@ -119,4 +122,3 @@ export default function ContentWrapper(props: Props): ReactNode {
     </>
   );
 }
-

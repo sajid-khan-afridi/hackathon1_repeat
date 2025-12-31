@@ -12,10 +12,7 @@ interface LogoutButtonProps {
   showIcon?: boolean;
 }
 
-export function LogoutButton({
-  className,
-  showIcon = true,
-}: LogoutButtonProps): JSX.Element {
+export function LogoutButton({ className, showIcon = true }: LogoutButtonProps): JSX.Element {
   const { logout, isLoading } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -28,9 +25,7 @@ export function LogoutButton({
     }
   }, [logout]);
 
-  const buttonClasses = className
-    ? `${styles.logoutButton} ${className}`
-    : styles.logoutButton;
+  const buttonClasses = className ? `${styles.logoutButton} ${className}` : styles.logoutButton;
 
   return (
     <button

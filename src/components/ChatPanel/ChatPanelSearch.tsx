@@ -119,9 +119,7 @@ export function ChatPanelSearch({
       <div className={styles.results} id="search-results-count">
         {query.length >= 2 && (
           <span className={styles.resultCount}>
-            {resultCount > 0
-              ? `${activeIndex + 1}/${resultCount}`
-              : 'No results'}
+            {resultCount > 0 ? `${activeIndex + 1}/${resultCount}` : 'No results'}
           </span>
         )}
       </div>

@@ -108,7 +108,15 @@ export type ChatAction =
   | { type: 'ADD_ASSISTANT_MESSAGE'; payload: QueryResponse }
   | { type: 'START_STREAMING'; payload: { messageId: string } }
   | { type: 'APPEND_STREAM_CHUNK'; payload: { chunk: string } }
-  | { type: 'COMPLETE_STREAM'; payload: { sources: SourceCitation[]; confidence: number; session_id: string; tokens_used: TokenUsage } }
+  | {
+      type: 'COMPLETE_STREAM';
+      payload: {
+        sources: SourceCitation[];
+        confidence: number;
+        session_id: string;
+        tokens_used: TokenUsage;
+      };
+    }
   | { type: 'INTERRUPT_STREAM'; payload: { error?: string } }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }

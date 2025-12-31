@@ -40,9 +40,21 @@ const QUESTIONS = [
     id: 'experienceLevel' as const,
     question: 'What is your programming experience level?',
     options: [
-      { value: 'beginner' as const, label: 'Beginner', description: 'New to programming or just starting out' },
-      { value: 'intermediate' as const, label: 'Intermediate', description: 'Comfortable with basic programming concepts' },
-      { value: 'advanced' as const, label: 'Advanced', description: 'Experienced programmer with strong fundamentals' },
+      {
+        value: 'beginner' as const,
+        label: 'Beginner',
+        description: 'New to programming or just starting out',
+      },
+      {
+        value: 'intermediate' as const,
+        label: 'Intermediate',
+        description: 'Comfortable with basic programming concepts',
+      },
+      {
+        value: 'advanced' as const,
+        label: 'Advanced',
+        description: 'Experienced programmer with strong fundamentals',
+      },
     ],
   },
   {
@@ -51,25 +63,53 @@ const QUESTIONS = [
     options: [
       { value: 'none' as const, label: 'None', description: 'Never used ROS before' },
       { value: 'basic' as const, label: 'Basic', description: 'Some exposure to ROS concepts' },
-      { value: 'proficient' as const, label: 'Proficient', description: 'Comfortable working with ROS' },
+      {
+        value: 'proficient' as const,
+        label: 'Proficient',
+        description: 'Comfortable working with ROS',
+      },
     ],
   },
   {
     id: 'hardwareAccess' as const,
     question: 'What hardware do you have access to?',
     options: [
-      { value: 'simulation_only' as const, label: 'Simulation Only', description: 'No physical robot hardware' },
-      { value: 'jetson_kit' as const, label: 'Jetson Kit', description: 'Have access to Jetson development kit' },
-      { value: 'full_robot_lab' as const, label: 'Full Robot Lab', description: 'Access to complete robotics lab' },
+      {
+        value: 'simulation_only' as const,
+        label: 'Simulation Only',
+        description: 'No physical robot hardware',
+      },
+      {
+        value: 'jetson_kit' as const,
+        label: 'Jetson Kit',
+        description: 'Have access to Jetson development kit',
+      },
+      {
+        value: 'full_robot_lab' as const,
+        label: 'Full Robot Lab',
+        description: 'Access to complete robotics lab',
+      },
     ],
   },
   {
     id: 'learningGoal' as const,
     question: 'What is your primary learning goal?',
     options: [
-      { value: 'career_transition' as const, label: 'Career Transition', description: 'Looking to switch to robotics field' },
-      { value: 'academic_research' as const, label: 'Academic Research', description: 'Pursuing research in robotics' },
-      { value: 'hobby' as const, label: 'Hobby/Personal', description: 'Learning for personal interest' },
+      {
+        value: 'career_transition' as const,
+        label: 'Career Transition',
+        description: 'Looking to switch to robotics field',
+      },
+      {
+        value: 'academic_research' as const,
+        label: 'Academic Research',
+        description: 'Pursuing research in robotics',
+      },
+      {
+        value: 'hobby' as const,
+        label: 'Hobby/Personal',
+        description: 'Learning for personal interest',
+      },
     ],
   },
   {

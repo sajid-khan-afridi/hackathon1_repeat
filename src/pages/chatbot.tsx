@@ -21,8 +21,8 @@ export default function ChatbotPage(): JSX.Element {
           <header className={styles.chatbotPageHeader}>
             <h1>Ask the Robotics AI Assistant</h1>
             <p className={styles.chatbotDescription}>
-              Get instant answers about ROS 2, NVIDIA Isaac Sim, and robotics concepts
-              from our AI-powered assistant trained on the complete textbook.
+              Get instant answers about ROS 2, NVIDIA Isaac Sim, and robotics concepts from our
+              AI-powered assistant trained on the complete textbook.
             </p>
           </header>
 

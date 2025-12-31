@@ -52,9 +52,7 @@ export function JumpToLatest({
       }
     >
       <ChevronDown size={20} aria-hidden="true" />
-      {newMessageCount > 0 && (
-        <span className={styles.count}>{newMessageCount}</span>
-      )}
+      {newMessageCount > 0 && <span className={styles.count}>{newMessageCount}</span>}
     </button>
   );
 }

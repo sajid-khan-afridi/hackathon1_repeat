@@ -34,6 +34,6 @@
   text-align: center;
 }
 
-[data-theme="dark"] .oauthError {
+[data-theme='dark'] .oauthError {
   background-color: rgba(var(--ifm-color-danger-rgb), 0.15);
 }

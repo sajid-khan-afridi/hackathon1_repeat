@@ -110,10 +110,7 @@ export interface UseChatPanelStateReturn {
  * Validates and clamps panel width to allowed range
  */
 function validatePanelWidth(width: number): number {
-  return Math.max(
-    PANEL_WIDTH_CONSTRAINTS.MIN,
-    Math.min(PANEL_WIDTH_CONSTRAINTS.MAX, width)
-  );
+  return Math.max(PANEL_WIDTH_CONSTRAINTS.MIN, Math.min(PANEL_WIDTH_CONSTRAINTS.MAX, width));
 }
 
 /**
@@ -147,11 +144,9 @@ function validatePanelWidth(width: number): number {
  */
 export function useChatPanelState(): UseChatPanelStateReturn {
   // Persisted state: isOpen (survives refresh)
-  const [isOpen, setIsOpen] = usePersistedState<boolean>(
-    STORAGE_KEYS.CHAT_PANEL_OPEN,
-    false,
-    { storage: 'localStorage' }
-  );
+  const [isOpen, setIsOpen] = usePersistedState<boolean>(STORAGE_KEYS.CHAT_PANEL_OPEN, false, {
+    storage: 'localStorage',
+  });
 
   // Persisted state: width (user preference)
   const [width, setWidthState] = usePersistedState<number>(
@@ -202,7 +197,16 @@ export function useChatPanelState(): UseChatPanelStateReturn {
       searchResults,
       activeSearchIndex,
     }),
-    [isOpen, isMinimized, width, unreadCount, scrollPosition, searchQuery, searchResults, activeSearchIndex]
+    [
+      isOpen,
+      isMinimized,
+      width,
+      unreadCount,
+      scrollPosition,
+      searchQuery,
+      searchResults,
+      activeSearchIndex,
+    ]
   );
 
   // Actions
@@ -270,16 +274,12 @@ export function useChatPanelState(): UseChatPanelStateReturn {
 
   const nextSearchResult = useCallback(() => {
     if (searchResults.length === 0) return;
-    setActiveSearchIndex((prev) =>
-      prev >= searchResults.length - 1 ? 0 : prev + 1
-    );
+    setActiveSearchIndex((prev) => (prev >= searchResults.length - 1 ? 0 : prev + 1));
   }, [searchResults.length]);
 
   const prevSearchResult = useCallback(() => {
     if (searchResults.length === 0) return;
-    setActiveSearchIndex((prev) =>
-      prev <= 0 ? searchResults.length - 1 : prev - 1
-    );
+    setActiveSearchIndex((prev) => (prev <= 0 ? searchResults.length - 1 : prev - 1));
   }, [searchResults.length]);
 
   return {

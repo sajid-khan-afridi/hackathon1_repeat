@@ -16,20 +16,20 @@
   /* App Brand Colors - Aligned with main app palette */
   --zoom-primary: #2563eb;
   --zoom-primary-hover: #1d4ed8;
-  --zoom-bg-primary: #FFFFFF;
-  --zoom-bg-secondary: #F7F8FA;
-  --zoom-bg-chat: #FAFBFC;
-  --zoom-border: #E4E6EB;
-  --zoom-border-light: #F0F2F5;
+  --zoom-bg-primary: #ffffff;
+  --zoom-bg-secondary: #f7f8fa;
+  --zoom-bg-chat: #fafbfc;
+  --zoom-border: #e4e6eb;
+  --zoom-border-light: #f0f2f5;
   --zoom-text-primary: #232333;
-  --zoom-text-secondary: #6E6E7D;
+  --zoom-text-secondary: #6e6e7d;
   --zoom-shadow: rgba(0, 0, 0, 0.08);
   --zoom-shadow-lg: rgba(0, 0, 0, 0.12);
 
   /* Dark mode */
-  --zoom-dark-bg-primary: #1A1A2E;
+  --zoom-dark-bg-primary: #1a1a2e;
   --zoom-dark-bg-secondary: #232338;
-  --zoom-dark-border: #3D3D54;
+  --zoom-dark-border: #3d3d54;
 }
 
 /* ============================================
@@ -98,12 +98,12 @@
 
 /* Dark mode adjustments - Zoom Dark Theme */
 [data-theme='dark'] .panel {
-  --zoom-bg-chat: #1E1E32;
+  --zoom-bg-chat: #1e1e32;
   --zoom-bg-secondary: #232338;
-  --zoom-border: #3D3D54;
-  --zoom-border-light: #4A4A62;
-  --zoom-text-primary: #E8EAED;
-  --zoom-text-secondary: #9AA0A6;
+  --zoom-border: #3d3d54;
+  --zoom-border-light: #4a4a62;
+  --zoom-text-primary: #e8eaed;
+  --zoom-text-secondary: #9aa0a6;
   --zoom-shadow-lg: rgba(0, 0, 0, 0.4);
 
   background-color: var(--zoom-bg-chat);

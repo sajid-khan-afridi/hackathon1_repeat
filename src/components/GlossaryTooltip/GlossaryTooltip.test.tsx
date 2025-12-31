@@ -24,7 +24,7 @@ jest.mock('../../hooks/useGlossary', () => ({
           category: 'Middleware',
           relatedTerms: ['urdf', 'gazebo'],
         },
-        'urdf': {
+        urdf: {
           id: 'urdf',
           english: 'URDF',
           urduTransliteration: 'یو آر ڈی ایف',
@@ -33,7 +33,7 @@ jest.mock('../../hooks/useGlossary', () => ({
           category: 'Standards',
           relatedTerms: [],
         },
-        'gazebo': {
+        gazebo: {
           id: 'gazebo',
           english: 'Gazebo',
           urduTransliteration: 'گزیبو',
@@ -82,10 +82,7 @@ jest.mock('../../hooks/useGlossary', () => ({
 }));
 
 // Custom render with LanguageContext
-const renderWithLanguage = (
-  ui: React.ReactElement,
-  language: LanguageCode = 'en'
-) => {
+const renderWithLanguage = (ui: React.ReactElement, language: LanguageCode = 'en') => {
   return render(
     <LanguageContext.Provider
       value={{
@@ -115,16 +112,12 @@ describe('GlossaryTooltip', () => {
 
   describe('Rendering', () => {
     it('renders children text', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       expect(screen.getByText('ROS 2')).toBeInTheDocument();
     });
 
     it('renders as inline span', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       const container = screen.getByText('ROS 2').parentElement;
       expect(container?.tagName.toLowerCase()).toBe('span');
     });
@@ -140,9 +133,7 @@ describe('GlossaryTooltip', () => {
     });
 
     it('renders plain text for unknown term', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="unknown-term">Unknown</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="unknown-term">Unknown</GlossaryTooltip>);
       expect(screen.getByText('Unknown')).toBeInTheDocument();
       // Should not have technical term styling
       expect(screen.getByText('Unknown')).not.toHaveAttribute('data-technical-term');
@@ -152,9 +143,7 @@ describe('GlossaryTooltip', () => {
   describe('Tooltip Display', () => {
     it('shows tooltip on hover', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const term = screen.getByText('ROS 2');
       await user.hover(term.parentElement!);
@@ -166,9 +155,7 @@ describe('GlossaryTooltip', () => {
 
     it('hides tooltip on mouse leave', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -179,17 +166,17 @@ describe('GlossaryTooltip', () => {
 
       await user.unhover(container!);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
 
     it('shows English definition in English mode', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>,
-        'en'
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>, 'en');
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -201,10 +188,7 @@ describe('GlossaryTooltip', () => {
 
     it('shows Urdu definition in Urdu mode', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>,
-        'ur'
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>, 'ur');
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -216,9 +200,7 @@ describe('GlossaryTooltip', () => {
 
     it('shows related terms in tooltip', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -231,9 +213,7 @@ describe('GlossaryTooltip', () => {
 
     it('shows category badge in tooltip', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -246,26 +226,20 @@ describe('GlossaryTooltip', () => {
 
   describe('Accessibility', () => {
     it('has tabIndex for keyboard access', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       const term = screen.getByText('ROS 2');
       expect(term).toHaveAttribute('tabIndex', '0');
     });
 
     it('has button role', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       const term = screen.getByRole('button');
       expect(term).toBeInTheDocument();
     });
 
     it('shows tooltip on focus', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const term = screen.getByText('ROS 2');
       fireEvent.focus(term.parentElement!);
@@ -276,9 +250,7 @@ describe('GlossaryTooltip', () => {
     });
 
     it('hides tooltip on blur', async () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       fireEvent.focus(container!);
@@ -289,16 +261,17 @@ describe('GlossaryTooltip', () => {
 
       fireEvent.blur(container!);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
 
     it('closes tooltip on Escape key', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       fireEvent.focus(container!);
@@ -316,9 +289,7 @@ describe('GlossaryTooltip', () => {
 
     it('has aria-describedby when tooltip is visible', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -331,9 +302,7 @@ describe('GlossaryTooltip', () => {
 
     it('tooltip has id matching aria-describedby', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -347,17 +316,13 @@ describe('GlossaryTooltip', () => {
 
   describe('Styling', () => {
     it('has visual distinction for technical terms', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       const term = screen.getByText('ROS 2');
       expect(term).toHaveAttribute('data-technical-term');
     });
 
     it('has cursor help style', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
       const term = screen.getByText('ROS 2');
       expect(term).toHaveClass('term');
     });
@@ -366,10 +331,7 @@ describe('GlossaryTooltip', () => {
   describe('RTL Support', () => {
     it('works in RTL mode', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>,
-        'ur'
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>, 'ur');
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -381,10 +343,7 @@ describe('GlossaryTooltip', () => {
 
     it('shows Urdu transliteration in Urdu mode', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>,
-        'ur'
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>, 'ur');
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);
@@ -397,24 +356,18 @@ describe('GlossaryTooltip', () => {
 
   describe('Edge Cases', () => {
     it('handles undefined term gracefully', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="nonexistent">Text</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="nonexistent">Text</GlossaryTooltip>);
       expect(screen.getByText('Text')).toBeInTheDocument();
     });
 
     it('handles empty children', () => {
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">{''}</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">{''}</GlossaryTooltip>);
       // Should not throw
     });
 
     it('handles rapid hover in/out', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
 
@@ -431,9 +384,7 @@ describe('GlossaryTooltip', () => {
 
     it('allows moving mouse to tooltip', async () => {
       const user = userEvent.setup();
-      renderWithLanguage(
-        <GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>
-      );
+      renderWithLanguage(<GlossaryTooltip termId="ros-2">ROS 2</GlossaryTooltip>);
 
       const container = screen.getByText('ROS 2').closest('.container');
       await user.hover(container!);

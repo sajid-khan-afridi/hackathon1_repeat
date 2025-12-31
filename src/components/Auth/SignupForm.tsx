@@ -35,10 +35,7 @@ const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   },
 ];
 
-export function SignupForm({
-  onSuccess,
-  onLoginClick,
-}: SignupFormProps): JSX.Element {
+export function SignupForm({ onSuccess, onLoginClick }: SignupFormProps): JSX.Element {
   const { signup, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -132,8 +129,7 @@ export function SignupForm({
             const newFieldErrors: typeof fieldErrors = {};
             err.details.forEach((detail) => {
               if (detail.field === 'email') newFieldErrors.email = detail.message;
-              if (detail.field === 'password')
-                newFieldErrors.password = detail.message;
+              if (detail.field === 'password') newFieldErrors.password = detail.message;
             });
             setFieldErrors(newFieldErrors);
           } else {
@@ -219,26 +215,17 @@ export function SignupForm({
             aria-label="Password requirements"
           >
             {passwordChecks.map((req, index) => (
-              <li
-                key={index}
-                className={req.passed ? styles.requirementMet : styles.requirement}
-              >
+              <li key={index} className={req.passed ? styles.requirementMet : styles.requirement}>
                 <span className={styles.requirementIcon} aria-hidden="true">
                   {req.passed ? '✓' : '○'}
                 </span>
-                <span className={req.passed ? styles.requirementTextMet : ''}>
-                  {req.label}
-                </span>
+                <span className={req.passed ? styles.requirementTextMet : ''}>{req.label}</span>
               </li>
             ))}
           </ul>
         )}
         {fieldErrors.password && (
-          <span
-            id="signup-password-error"
-            className={styles.fieldError}
-            role="alert"
-          >
+          <span id="signup-password-error" className={styles.fieldError} role="alert">
             {fieldErrors.password}
           </span>
         )}
@@ -257,29 +244,19 @@ export function SignupForm({
           className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
           placeholder="Confirm your password"
           autoComplete="new-password"
-          aria-describedby={
-            fieldErrors.confirmPassword ? 'signup-confirm-error' : undefined
-          }
+          aria-describedby={fieldErrors.confirmPassword ? 'signup-confirm-error' : undefined}
           aria-invalid={!!fieldErrors.confirmPassword}
           disabled={isLoading}
           required
         />
         {fieldErrors.confirmPassword && (
-          <span
-            id="signup-confirm-error"
-            className={styles.fieldError}
-            role="alert"
-          >
+          <span id="signup-confirm-error" className={styles.fieldError} role="alert">
             {fieldErrors.confirmPassword}
           </span>
         )}
       </div>
 
-      <button
-        type="submit"
-        className={styles.submitButton}
-        disabled={isLoading}
-      >
+      <button type="submit" className={styles.submitButton} disabled={isLoading}>
         {isLoading ? 'Creating account...' : 'Create Account'}
       </button>
 
@@ -294,11 +271,7 @@ export function SignupForm({
       {onLoginClick && (
         <p className={styles.switchText}>
           Already have an account?{' '}
-          <button
-            type="button"
-            onClick={onLoginClick}
-            className={styles.linkButton}
-          >
+          <button type="button" onClick={onLoginClick} className={styles.linkButton}>
             Log in
           </button>
         </p>

@@ -6,3 +6,13 @@
 
 # Python scripts should also use LF
 *.py text eol=lf
+
+# Source code files should use LF
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.mdx text eol=lf

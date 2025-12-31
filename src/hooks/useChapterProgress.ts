@@ -313,7 +313,14 @@ export function useChapterProgress({
     ) {
       markCompleted();
     }
-  }, [autoMarkCompleted, progress?.status, timeSpent, scrollDepth, autoCompleteThresholdMs, markCompleted]);
+  }, [
+    autoMarkCompleted,
+    progress?.status,
+    timeSpent,
+    scrollDepth,
+    autoCompleteThresholdMs,
+    markCompleted,
+  ]);
 
   /**
    * Fetch progress on mount.

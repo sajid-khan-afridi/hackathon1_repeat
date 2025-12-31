@@ -48,9 +48,9 @@ const createMockResponse = (data: any, ok = true, status = 200) => ({
         return 'application/json'; // Not streaming, so falls back to JSON
       }
       return null;
-    }
+    },
   },
-  json: async () => data
+  json: async () => data,
 });
 
 // Mock localStorage
@@ -66,12 +66,12 @@ const localStorageMock = (() => {
     },
     clear: () => {
       store = {};
-    }
+    },
   };
 })();
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 describe('ChatbotWidget', () => {
@@ -84,7 +84,9 @@ describe('ChatbotWidget', () => {
     test('renders with title and empty state', () => {
       render(<ChatbotWidget />);
 
-      expect(screen.getByRole('region', { name: /robotics textbook chatbot/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('region', { name: /robotics textbook chatbot/i })
+      ).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: /ask about robotics/i })).toBeInTheDocument();
       expect(screen.getByText(/ask a question about the robotics textbook/i)).toBeInTheDocument();
     });
@@ -137,16 +139,16 @@ describe('ChatbotWidget', () => {
             chapter_title: 'Introduction to Kinematics',
             relevance_score: 0.92,
             excerpt: 'Inverse kinematics calculates joint parameters...',
-            position: 1
-          }
+            position: 1,
+          },
         ],
         confidence: 0.85,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
         tokens_used: {
           input_tokens: 50,
           output_tokens: 100,
-          total_tokens: 150
-        }
+          total_tokens: 150,
+        },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -172,7 +174,7 @@ describe('ChatbotWidget', () => {
         'http://localhost:8000/api/v1/query',
         expect.objectContaining({
           method: 'POST',
-          body: expect.stringContaining('What is inverse kinematics?')
+          body: expect.stringContaining('What is inverse kinematics?'),
         })
       );
     });
@@ -184,14 +186,16 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.8,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
 
       render(<ChatbotWidget />);
 
-      const input = screen.getByPlaceholderText(/ask a question about robotics/i) as HTMLTextAreaElement;
+      const input = screen.getByPlaceholderText(
+        /ask a question about robotics/i
+      ) as HTMLTextAreaElement;
 
       // Type and press Enter (should submit)
       await user.type(input, 'Test query{Enter}');
@@ -206,7 +210,9 @@ describe('ChatbotWidget', () => {
     test('enforces 1000 character limit', async () => {
       render(<ChatbotWidget />);
 
-      const input = screen.getByPlaceholderText(/ask a question about robotics/i) as HTMLTextAreaElement;
+      const input = screen.getByPlaceholderText(
+        /ask a question about robotics/i
+      ) as HTMLTextAreaElement;
 
       // First set exactly 1000 characters (at the limit)
       const exactLimit = 'a'.repeat(1000);
@@ -242,14 +248,16 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.8,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
 
       render(<ChatbotWidget />);
 
-      const input = screen.getByPlaceholderText(/ask a question about robotics/i) as HTMLTextAreaElement;
+      const input = screen.getByPlaceholderText(
+        /ask a question about robotics/i
+      ) as HTMLTextAreaElement;
       const submitButton = screen.getByRole('button', { name: /send message/i });
 
       await user.type(input, 'Test query');
@@ -270,7 +278,7 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.8,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -282,7 +290,9 @@ describe('ChatbotWidget', () => {
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
-        expect(localStorageMock.getItem('chatbot-session-id')).toBe('123e4567-e89b-12d3-a456-426614174000');
+        expect(localStorageMock.getItem('chatbot-session-id')).toBe(
+          '123e4567-e89b-12d3-a456-426614174000'
+        );
       });
     });
 
@@ -297,7 +307,7 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.8,
         session_id: sessionId,
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -312,7 +322,7 @@ describe('ChatbotWidget', () => {
         expect(global.fetch).toHaveBeenCalledWith(
           'http://localhost:8000/api/v1/query',
           expect.objectContaining({
-            body: expect.stringContaining(`"session_id":"${sessionId}"`)
+            body: expect.stringContaining(`"session_id":"${sessionId}"`),
           })
         );
       });
@@ -328,7 +338,7 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.8,
         session_id: sessionId,
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock)
@@ -374,7 +384,7 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.85,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -397,7 +407,7 @@ describe('ChatbotWidget', () => {
         sources: [],
         confidence: 0.25,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -424,12 +434,12 @@ describe('ChatbotWidget', () => {
             chapter_title: 'Introduction to Kinematics',
             relevance_score: 0.92,
             excerpt: 'Relevant excerpt...',
-            position: 1
-          }
+            position: 1,
+          },
         ],
         confidence: 0.85,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -463,8 +473,8 @@ describe('ChatbotWidget', () => {
         tokens_used: {
           input_tokens: 50,
           output_tokens: 100,
-          total_tokens: 150
-        }
+          total_tokens: 150,
+        },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -489,7 +499,7 @@ describe('ChatbotWidget', () => {
         confidence: 0.15,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
         tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
-        suggested_terms: ['ROS', 'kinematics', 'motion planning']
+        suggested_terms: ['ROS', 'kinematics', 'motion planning'],
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -530,13 +540,15 @@ describe('ChatbotWidget', () => {
 
       (global.fetch as jest.Mock)
         .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce(createMockResponse({
-          answer: 'Test answer',
-          sources: [],
-          confidence: 0.8,
-          session_id: '123e4567-e89b-12d3-a456-426614174000',
-          tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
-        }));
+        .mockResolvedValueOnce(
+          createMockResponse({
+            answer: 'Test answer',
+            sources: [],
+            confidence: 0.8,
+            session_id: '123e4567-e89b-12d3-a456-426614174000',
+            tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
+          })
+        );
 
       render(<ChatbotWidget />);
 
@@ -583,7 +595,9 @@ describe('ChatbotWidget', () => {
       render(<ChatbotWidget />);
 
       // Main container
-      expect(screen.getByRole('region', { name: /robotics textbook chatbot/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('region', { name: /robotics textbook chatbot/i })
+      ).toBeInTheDocument();
 
       // There are two elements with role="search":
       // 1. ModuleFilter (no aria-label, so accessible name is empty)
@@ -592,8 +606,8 @@ describe('ChatbotWidget', () => {
       expect(searchForms.length).toBe(2);
 
       // The input form should have the specific aria-label
-      const inputForm = searchForms.find(el =>
-        el.getAttribute('aria-label') === 'Ask a question about the textbook'
+      const inputForm = searchForms.find(
+        (el) => el.getAttribute('aria-label') === 'Ask a question about the textbook'
       );
       expect(inputForm).toBeInTheDocument();
 
@@ -623,13 +637,22 @@ describe('ChatbotWidget', () => {
 
       // Mock slow response
       (global.fetch as jest.Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(createMockResponse({
-          answer: 'Test answer',
-          sources: [],
-          confidence: 0.8,
-          session_id: '123e4567-e89b-12d3-a456-426614174000',
-          tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
-        })), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({
+                    answer: 'Test answer',
+                    sources: [],
+                    confidence: 0.8,
+                    session_id: '123e4567-e89b-12d3-a456-426614174000',
+                    tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
+                  })
+                ),
+              100
+            )
+          )
       );
 
       render(<ChatbotWidget />);
@@ -652,12 +675,12 @@ describe('ChatbotWidget', () => {
             chapter_title: 'Introduction to Kinematics',
             relevance_score: 0.92,
             excerpt: 'Relevant excerpt...',
-            position: 1
-          }
+            position: 1,
+          },
         ],
         confidence: 0.85,
         session_id: '123e4567-e89b-12d3-a456-426614174000',
-        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
+        tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(mockResponse));
@@ -691,18 +714,29 @@ describe('ChatbotWidget', () => {
 
       // Mock slow response
       (global.fetch as jest.Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(createMockResponse({
-          answer: 'Test answer',
-          sources: [],
-          confidence: 0.8,
-          session_id: '123e4567-e89b-12d3-a456-426614174000',
-          tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
-        })), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({
+                    answer: 'Test answer',
+                    sources: [],
+                    confidence: 0.8,
+                    session_id: '123e4567-e89b-12d3-a456-426614174000',
+                    tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
+                  })
+                ),
+              100
+            )
+          )
       );
 
       render(<ChatbotWidget />);
 
-      const input = screen.getByPlaceholderText(/ask a question about robotics/i) as HTMLTextAreaElement;
+      const input = screen.getByPlaceholderText(
+        /ask a question about robotics/i
+      ) as HTMLTextAreaElement;
       const submitButton = screen.getByRole('button', { name: /send message/i });
 
       await user.type(input, 'Test query');
@@ -723,13 +757,22 @@ describe('ChatbotWidget', () => {
 
       // Mock slow response
       (global.fetch as jest.Mock).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(createMockResponse({
-          answer: 'Test answer',
-          sources: [],
-          confidence: 0.8,
-          session_id: '123e4567-e89b-12d3-a456-426614174000',
-          tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 }
-        })), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({
+                    answer: 'Test answer',
+                    sources: [],
+                    confidence: 0.8,
+                    session_id: '123e4567-e89b-12d3-a456-426614174000',
+                    tokens_used: { input_tokens: 10, output_tokens: 20, total_tokens: 30 },
+                  })
+                ),
+              100
+            )
+          )
       );
 
       render(<ChatbotWidget />);

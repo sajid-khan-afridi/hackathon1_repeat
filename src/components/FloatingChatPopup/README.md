@@ -5,6 +5,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 ## Features
 
 ### 1. Floating Action Button (FAB)
+
 - **Position**: Fixed bottom-right corner
 - **Size**: 56-64px circular button (meets WCAG 44px minimum)
 - **Effects**: Subtle shadow, hover scale, ripple animation on click
@@ -12,12 +13,14 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 - **Visibility**: Stays above all content, consistent across pages
 
 ### 2. Chat Window
+
 - **Dimensions**: 380-420px wide, max 70vh height
 - **Animations**: Smooth slide/scale with fade on open/close (350ms open, 250ms close)
 - **State Persistence**: Remembers open/closed state via localStorage
 - **Responsive**: Mobile (full-screen bottom sheet), Tablet (360px), Desktop (400px)
 
 ### 3. Branded Header
+
 - **Design**: Gradient background (#2563eb to #1d4ed8)
 - **Title**: "Robotics AI Assistant"
 - **Avatar**: Bot icon with backdrop blur
@@ -25,12 +28,14 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 - **Drag Indicator**: Visual cue for desktop drag-to-move
 
 ### 4. Bot Identity Message
+
 - **Content**: Clear introduction explaining capabilities and limitations
 - **Styling**: Gradient background matching brand colors
 - **Accessibility**: Semantic HTML with proper heading structure
 - **Animation**: Slides in from top on first load
 
 ### 5. Quick Action Chips
+
 - **Purpose**: Fast-start guided conversation flows
 - **Actions**:
   - "Ask a question" - General inquiry starter
@@ -41,6 +46,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 - **Interaction**: Hover effects, focus states, accessible keyboard navigation
 
 ### 6. Message UI
+
 - **Components**:
   - Avatar for bot/user
   - Clean message bubbles with timestamps
@@ -55,6 +61,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 - **Loading**: Typing indicator with animated dots
 
 ### 7. Input Field
+
 - **Design**: Large rounded text field with auto-resize (2-6 lines)
 - **Send Button**:
   - Disabled state when empty
@@ -67,6 +74,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
 - **Accessibility**: Proper ARIA labels, 44px minimum touch target
 
 ### 8. Responsive Design
+
 - **Mobile** (< 768px):
   - Near full-screen (90vh)
   - Bottom sheet with safe areas
@@ -81,6 +89,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
   - Minimize/maximize functionality
 
 ### 9. Accessibility (WCAG 2.1 AA/AAA)
+
 - **Dialog Semantics**:
   - `role="dialog"`
   - `aria-modal="true"`
@@ -103,6 +112,7 @@ Complete floating chatbot widget for Docusaurus sites with all 10 production-rea
   - Focus indicators (2px outline, 2px offset)
 
 ### 10. Alternative Access
+
 - **Navbar Link**: "AI Assistant" link in main navigation
 - **Mobile Menu**: Icon button in mobile hamburger menu
 - **Deep Linking**: `#ai-assistant` hash link support
@@ -147,9 +157,7 @@ Edit `docusaurus.config.js`:
 
 ```js
 module.exports = {
-  clientModules: [
-    require.resolve('./src/components/GlobalFloatingChat/clientModule.js')
-  ]
+  clientModules: [require.resolve('./src/components/GlobalFloatingChat/clientModule.js')],
 };
 ```
 
@@ -184,7 +192,7 @@ Edit `src/theme/Navbar/Content/index.tsx`:
 import NavbarChatLink from '@site/src/components/NavbarChatLink';
 
 // Add to navbar items
-<NavbarChatLink mode="link" label="AI Assistant" />
+<NavbarChatLink mode="link" label="AI Assistant" />;
 ```
 
 #### Using Custom CSS
@@ -216,13 +224,13 @@ const CUSTOM_ACTIONS: QuickAction[] = [
   {
     label: 'Getting Started',
     query: 'How do I get started with robotics?',
-    icon: '🚀'
+    icon: '🚀',
   },
   {
     label: 'Troubleshoot',
     query: 'Help me troubleshoot an issue',
-    icon: '🔧'
-  }
+    icon: '🔧',
+  },
 ];
 ```
 
@@ -281,14 +289,14 @@ Manual testing checklist:
 
 ## Browser Support
 
-| Browser | Version | Status |
-|---------|---------|--------|
-| Chrome | 90+ | ✅ Fully supported |
-| Firefox | 88+ | ✅ Fully supported |
-| Safari | 14+ | ✅ Fully supported |
-| Edge | 90+ | ✅ Fully supported |
-| iOS Safari | 14+ | ✅ Fully supported |
-| Android Chrome | 90+ | ✅ Fully supported |
+| Browser        | Version | Status             |
+| -------------- | ------- | ------------------ |
+| Chrome         | 90+     | ✅ Fully supported |
+| Firefox        | 88+     | ✅ Fully supported |
+| Safari         | 14+     | ✅ Fully supported |
+| Edge           | 90+     | ✅ Fully supported |
+| iOS Safari     | 14+     | ✅ Fully supported |
+| Android Chrome | 90+     | ✅ Fully supported |
 
 ## Performance
 
@@ -345,6 +353,7 @@ MIT License - see LICENSE file for details
 ## Credits
 
 Built with:
+
 - React 18
 - TypeScript
 - CSS Modules
@@ -352,6 +361,7 @@ Built with:
 - Jest
 
 Inspired by:
+
 - Material Design FAB patterns
 - Intercom chat widget
 - Drift chatbot
@@ -431,9 +441,11 @@ window.dispatchEvent(new CustomEvent('open-floating-chat'));
 window.dispatchEvent(new CustomEvent('chatbot-close'));
 
 // Trigger query from quick action
-window.dispatchEvent(new CustomEvent('chatbot-suggested-term', {
-  detail: { term: 'query text' }
-}));
+window.dispatchEvent(
+  new CustomEvent('chatbot-suggested-term', {
+    detail: { term: 'query text' },
+  })
+);
 
 // Clear chat history
 window.dispatchEvent(new CustomEvent('chatbot-clear-history'));

@@ -28,7 +28,7 @@ interface FloatingChatPopupProps {
 export default function FloatingChatPopup({
   isOpen,
   onClose,
-  animationState
+  animationState,
 }: FloatingChatPopupProps): JSX.Element | null {
   const popupRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -168,7 +168,7 @@ export default function FloatingChatPopup({
                 fill="currentColor"
                 aria-hidden="true"
               >
-                <path d="M14.348 5.652a.5.5 0 0 0-.707 0L10 9.293 6.354 5.652a.5.5 0 1 0-.707.707L9.293 10l-3.646 3.646a.5.5 0 0 0 .707.707L10 10.707l3.646 3.646a.5.5 0 0 0 .707-.707L10.707 10l3.646-3.646a.5.5 0 0 0 0-.707z"/>
+                <path d="M14.348 5.652a.5.5 0 0 0-.707 0L10 9.293 6.354 5.652a.5.5 0 1 0-.707.707L9.293 10l-3.646 3.646a.5.5 0 0 0 .707.707L10 10.707l3.646 3.646a.5.5 0 0 0 .707-.707L10.707 10l3.646-3.646a.5.5 0 0 0 0-.707z" />
               </svg>
             </button>
           </div>
@@ -176,7 +176,8 @@ export default function FloatingChatPopup({
 
         {/* Hidden description for screen readers */}
         <p id="floating-chat-description" className={styles.visuallyHidden}>
-          Ask questions about the robotics textbook and receive AI-powered answers with source citations.
+          Ask questions about the robotics textbook and receive AI-powered answers with source
+          citations.
         </p>
 
         {/* ChatbotWidget (popup mode) */}

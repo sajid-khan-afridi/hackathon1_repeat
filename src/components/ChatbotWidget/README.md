@@ -127,24 +127,21 @@ export default function DocItemLayout({ children }) {
 ```tsx
 import ChatbotWidget from '@site/src/components/ChatbotWidget';
 
-<ChatbotWidget />
+<ChatbotWidget />;
 ```
 
 ### With Filters
 
 ```tsx
-<ChatbotWidget
-  moduleFilter={2}
-  difficultyFilter="intermediate"
-/>
+<ChatbotWidget moduleFilter={2} difficultyFilter="intermediate" />
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `moduleFilter` | `number` (1-10) | `undefined` | Restrict queries to specific module |
-| `difficultyFilter` | `'beginner' \| 'intermediate' \| 'advanced'` | `undefined` | Filter by difficulty level |
+| Prop               | Type                                         | Default     | Description                         |
+| ------------------ | -------------------------------------------- | ----------- | ----------------------------------- |
+| `moduleFilter`     | `number` (1-10)                              | `undefined` | Restrict queries to specific module |
+| `difficultyFilter` | `'beginner' \| 'intermediate' \| 'advanced'` | `undefined` | Filter by difficulty level          |
 
 ## API Integration
 
@@ -357,6 +354,7 @@ export default function LazyChat() {
 **Problem**: `Failed to fetch` error
 
 **Solutions**:
+
 - Verify backend is running: `curl http://localhost:8000/health`
 - Check CORS configuration in FastAPI (allow frontend origin)
 - Set correct `CHATBOT_API_URL` if not using `localhost:8000`
@@ -366,6 +364,7 @@ export default function LazyChat() {
 **Problem**: New session created on every page load
 
 **Solutions**:
+
 - Check browser's localStorage is enabled (not in private/incognito mode)
 - Verify `chatbot-session-id` key exists: `localStorage.getItem('chatbot-session-id')`
 - Check browser console for errors during session storage
@@ -375,6 +374,7 @@ export default function LazyChat() {
 **Problem**: Component renders but looks unstyled
 
 **Solutions**:
+
 - Ensure CSS module is imported: `import styles from './ChatbotWidget.module.css'`
 - Verify Docusaurus CSS module support is enabled (default in v3.9+)
 - Check for CSS variable conflicts with global styles
@@ -384,6 +384,7 @@ export default function LazyChat() {
 **Problem**: Jest/Testing Library warnings about accessibility
 
 **Solutions**:
+
 - Run `npm run test` to see specific warnings
 - Verify all interactive elements have ARIA labels
 - Check color contrast ratios with browser DevTools

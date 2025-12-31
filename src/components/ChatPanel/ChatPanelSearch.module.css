@@ -7,12 +7,12 @@
 .container {
   /* App Brand Colors */
   --zoom-primary: #2563eb;
-  --zoom-bg-primary: #FFFFFF;
-  --zoom-bg-secondary: #F7F8FA;
-  --zoom-border: #E4E6EB;
+  --zoom-bg-primary: #ffffff;
+  --zoom-bg-secondary: #f7f8fa;
+  --zoom-border: #e4e6eb;
   --zoom-text-primary: #232333;
-  --zoom-text-secondary: #6E6E7D;
-  --zoom-error: #D32F2F;
+  --zoom-text-secondary: #6e6e7d;
+  --zoom-error: #d32f2f;
 
   display: flex;
   align-items: center;
@@ -25,12 +25,12 @@
 
 [data-theme='dark'] .container {
   --zoom-primary: #60a5fa;
-  --zoom-bg-primary: #1A1A2E;
+  --zoom-bg-primary: #1a1a2e;
   --zoom-bg-secondary: #232338;
-  --zoom-border: #3D3D54;
-  --zoom-text-primary: #E8EAED;
-  --zoom-text-secondary: #9AA0A6;
-  --zoom-error: #EF5350;
+  --zoom-border: #3d3d54;
+  --zoom-text-primary: #e8eaed;
+  --zoom-text-secondary: #9aa0a6;
+  --zoom-error: #ef5350;
 }
 
 @keyframes slideDown {

@@ -8,8 +8,17 @@
 
 // Hooks
 export { useReducedMotion, type UseReducedMotionReturn } from './useReducedMotion';
-export { useScrollReveal, type UseScrollRevealReturn, type ScrollRevealOptions } from './useScrollReveal';
-export { useAnimationState, type UseAnimationStateReturn, type AnimationConfig, type AnimationPhase } from './useAnimationState';
+export {
+  useScrollReveal,
+  type UseScrollRevealReturn,
+  type ScrollRevealOptions,
+} from './useScrollReveal';
+export {
+  useAnimationState,
+  type UseAnimationStateReturn,
+  type AnimationConfig,
+  type AnimationPhase,
+} from './useAnimationState';
 
 // Components
 export { FadeIn, type FadeInProps, type FadeInVariant } from './FadeIn';

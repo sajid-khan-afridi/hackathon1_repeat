@@ -61,9 +61,7 @@ export function ResizeHandle({
     (e: MouseEvent) => {
       if (!isResizing) return;
 
-      const deltaX = isRTL
-        ? e.clientX - startXRef.current
-        : startXRef.current - e.clientX;
+      const deltaX = isRTL ? e.clientX - startXRef.current : startXRef.current - e.clientX;
 
       const newWidth = Math.min(maxWidth, Math.max(minWidth, startWidthRef.current + deltaX));
       onResize(newWidth);

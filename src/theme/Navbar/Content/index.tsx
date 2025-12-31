@@ -99,10 +99,7 @@ function AuthNavItem(): ReactNode {
       <div className={styles.authNavItem}>
         <a
           href={profileUrl}
-          className={clsx(
-            styles.profileLink,
-            isOnProfilePage && styles.profileLinkActive
-          )}
+          className={clsx(styles.profileLink, isOnProfilePage && styles.profileLinkActive)}
           title="View Profile"
           aria-current={isOnProfilePage ? 'page' : undefined}
         >
@@ -135,9 +132,7 @@ export default function NavbarContent(): ReactNode {
   const [leftItems, rightItems] = splitNavbarItems(items);
 
   // Filter out the static "Login" item - we'll render AuthNavItem instead
-  const filteredRightItems = rightItems.filter(
-    (item) => !('to' in item && item.to === '/login')
-  );
+  const filteredRightItems = rightItems.filter((item) => !('to' in item && item.to === '/login'));
 
   const searchBarItem = items.find((item) => item.type === 'search');
 

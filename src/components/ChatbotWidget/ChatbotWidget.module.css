@@ -19,28 +19,28 @@
   --color-primary-light: rgba(37, 99, 235, 0.1);
 
   /* Semantic Colors */
-  --color-success: #2E7D32;
-  --color-success-light: #E8F5E9;
-  --color-warning: #ED6C02;
-  --color-warning-light: #FFF4E5;
-  --color-error: #D32F2F;
-  --color-error-light: #FFEBEE;
+  --color-success: #2e7d32;
+  --color-success-light: #e8f5e9;
+  --color-warning: #ed6c02;
+  --color-warning-light: #fff4e5;
+  --color-error: #d32f2f;
+  --color-error-light: #ffebee;
 
   /* Text Colors - Zoom Style */
   --color-text-primary: #232333;
-  --color-text-secondary: #6E6E7D;
-  --color-text-inverse: #FFFFFF;
+  --color-text-secondary: #6e6e7d;
+  --color-text-inverse: #ffffff;
   --color-text-link: #2563eb;
 
   /* Background Colors - Zoom Clean Aesthetic */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F7F8FA;
-  --color-bg-tertiary: #ECEEF1;
-  --color-bg-chat: #FAFBFC;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f7f8fa;
+  --color-bg-tertiary: #eceef1;
+  --color-bg-chat: #fafbfc;
 
   /* Border & Shadow - Subtle and Professional */
-  --color-border: #E4E6EB;
-  --color-border-light: #F0F2F5;
+  --color-border: #e4e6eb;
+  --color-border-light: #f0f2f5;
   --color-shadow: rgba(0, 0, 0, 0.08);
   --color-shadow-lg: rgba(0, 0, 0, 0.12);
 
@@ -53,7 +53,8 @@
   --spacing-2xl: 32px;
 
   /* Typography - Clean Sans-Serif */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Lato', 'Helvetica Neue', sans-serif;
+  --font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Lato', 'Helvetica Neue', sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.8125rem;
   --font-size-base: 0.9375rem;
@@ -79,8 +80,8 @@
 
   /* Message Bubbles - App Brand Style */
   --bubble-user-bg: #2563eb;
-  --bubble-user-text: #FFFFFF;
-  --bubble-assistant-bg: #F0F2F5;
+  --bubble-user-text: #ffffff;
+  --bubble-assistant-bg: #f0f2f5;
   --bubble-assistant-text: #232333;
   --bubble-max-width: 85%;
   --bubble-padding: 12px 16px;
@@ -94,29 +95,29 @@
   --color-primary-dark: #2563eb;
   --color-primary-light: rgba(96, 165, 250, 0.2);
 
-  --color-text-primary: #E8EAED;
-  --color-text-secondary: #9AA0A6;
-  --color-text-inverse: #FFFFFF;
+  --color-text-primary: #e8eaed;
+  --color-text-secondary: #9aa0a6;
+  --color-text-inverse: #ffffff;
   --color-text-link: #60a5fa;
 
-  --color-bg-primary: #1A1A2E;
+  --color-bg-primary: #1a1a2e;
   --color-bg-secondary: #232338;
-  --color-bg-tertiary: #2D2D44;
-  --color-bg-chat: #1E1E32;
+  --color-bg-tertiary: #2d2d44;
+  --color-bg-chat: #1e1e32;
 
-  --color-border: #3D3D54;
-  --color-border-light: #4A4A62;
+  --color-border: #3d3d54;
+  --color-border-light: #4a4a62;
   --color-shadow: rgba(0, 0, 0, 0.3);
   --color-shadow-lg: rgba(0, 0, 0, 0.4);
 
   --bubble-user-bg: #2563eb;
-  --bubble-user-text: #FFFFFF;
-  --bubble-assistant-bg: #2D2D44;
-  --bubble-assistant-text: #E8EAED;
+  --bubble-user-text: #ffffff;
+  --bubble-assistant-bg: #2d2d44;
+  --bubble-assistant-text: #e8eaed;
 
-  --color-success-light: #1B3D1F;
-  --color-warning-light: #3D2A0F;
-  --color-error-light: #3D1F1F;
+  --color-success-light: #1b3d1f;
+  --color-warning-light: #3d2a0f;
+  --color-error-light: #3d1f1f;
 }
 
 /* ==================== Main Widget Container - Zoom Style ==================== */
@@ -309,14 +310,14 @@
   padding: var(--spacing-md) var(--spacing-xl);
   background-color: var(--color-warning-light);
   border-bottom: 1px solid var(--color-warning);
-  color: #7A4100;
+  color: #7a4100;
   font-size: var(--font-size-sm);
 }
 
 [data-theme='dark'] .errorBanner {
   background-color: var(--color-warning-light);
   border-color: var(--color-warning);
-  color: #FFB74D;
+  color: #ffb74d;
 }
 
 .errorBanner svg {
@@ -328,7 +329,7 @@
   margin-left: auto;
   min-height: 36px;
   padding: var(--spacing-sm) var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-warning) 0%, #E65100 100%);
+  background: linear-gradient(135deg, var(--color-warning) 0%, #e65100 100%);
   border: none;
   border-radius: var(--border-radius-full);
   color: white;
@@ -354,7 +355,7 @@
   padding: var(--spacing-lg) var(--spacing-xl);
   background-color: var(--color-warning-light);
   border-bottom: 1px solid var(--color-warning);
-  color: #7A4100;
+  color: #7a4100;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
 }
@@ -362,7 +363,7 @@
 [data-theme='dark'] .rateLimitBanner {
   background-color: var(--color-warning-light);
   border-color: var(--color-warning);
-  color: #FFB74D;
+  color: #ffb74d;
 }
 
 .rateLimitBanner svg {
@@ -523,14 +524,14 @@
   background-color: var(--color-warning-light);
   border: 1px solid var(--color-warning);
   border-radius: var(--border-radius-md);
-  color: #7A4100;
+  color: #7a4100;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
 }
 
 [data-theme='dark'] .confidenceWarning {
   background-color: var(--color-warning-light);
-  color: #FFB74D;
+  color: #ffb74d;
 }
 
 .warningIcon {
@@ -574,7 +575,7 @@
 
 .confidence-medium {
   background-color: var(--color-warning-light);
-  color: #7A4100;
+  color: #7a4100;
 }
 
 .confidence-low {
@@ -584,17 +585,17 @@
 
 [data-theme='dark'] .confidence-high {
   background-color: var(--color-success-light);
-  color: #81C784;
+  color: #81c784;
 }
 
 [data-theme='dark'] .confidence-medium {
   background-color: var(--color-warning-light);
-  color: #FFB74D;
+  color: #ffb74d;
 }
 
 [data-theme='dark'] .confidence-low {
   background-color: var(--color-error-light);
-  color: #EF9A9A;
+  color: #ef9a9a;
 }
 
 .confidenceTooltip {
@@ -746,7 +747,7 @@
 
 .relevance-medium {
   background-color: var(--color-warning-light);
-  color: #7A4100;
+  color: #7a4100;
 }
 
 .relevance-low {
@@ -756,12 +757,12 @@
 
 [data-theme='dark'] .relevance-high {
   background-color: var(--color-success-light);
-  color: #81C784;
+  color: #81c784;
 }
 
 [data-theme='dark'] .relevance-medium {
   background-color: var(--color-warning-light);
-  color: #FFB74D;
+  color: #ffb74d;
 }
 
 [data-theme='dark'] .relevance-low {
@@ -949,7 +950,8 @@
 }
 
 @keyframes zoomTyping {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     opacity: 0.4;
   }

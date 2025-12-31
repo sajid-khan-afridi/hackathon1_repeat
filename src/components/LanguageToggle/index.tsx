@@ -28,7 +28,10 @@ export interface LanguageToggleProps {
   compact?: boolean;
 }
 
-export function LanguageToggle({ className, compact = false }: LanguageToggleProps): React.ReactElement {
+export function LanguageToggle({
+  className,
+  compact = false,
+}: LanguageToggleProps): React.ReactElement {
   const { language, setLanguage, isLoading } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

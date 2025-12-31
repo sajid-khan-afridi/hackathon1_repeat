@@ -39,7 +39,7 @@ describe('EnhancedFloatingChatPopup', () => {
   const defaultProps = {
     isOpen: true,
     onClose: jest.fn(),
-    animationState: 'open' as const
+    animationState: 'open' as const,
   };
 
   beforeEach(() => {
@@ -54,11 +54,7 @@ describe('EnhancedFloatingChatPopup', () => {
 
     it('should not render when closed', () => {
       render(
-        <EnhancedFloatingChatPopup
-          {...defaultProps}
-          isOpen={false}
-          animationState="closed"
-        />
+        <EnhancedFloatingChatPopup {...defaultProps} isOpen={false} animationState="closed" />
       );
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -218,7 +214,7 @@ describe('EnhancedFloatingChatPopup', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 1024
+        value: 1024,
       });
 
       render(<EnhancedFloatingChatPopup {...defaultProps} />);
@@ -262,7 +258,7 @@ describe('EnhancedFloatingChatPopup', () => {
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'chatbot-clear-history'
+          type: 'chatbot-clear-history',
         })
       );
     });
@@ -284,7 +280,7 @@ describe('EnhancedFloatingChatPopup', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 1024
+        value: 1024,
       });
     });
 
@@ -330,7 +326,7 @@ describe('EnhancedFloatingChatPopup', () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'chatbot-suggested-term',
-          detail: { term: 'test query' }
+          detail: { term: 'test query' },
         })
       );
     });
@@ -342,7 +338,7 @@ describe('EnhancedFloatingChatPopup', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 375
+        value: 375,
       });
 
       render(<EnhancedFloatingChatPopup {...defaultProps} />);
@@ -357,7 +353,7 @@ describe('EnhancedFloatingChatPopup', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 375
+        value: 375,
       });
 
       render(<EnhancedFloatingChatPopup {...defaultProps} />);
@@ -371,7 +367,7 @@ describe('EnhancedFloatingChatPopup', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
-        value: 1024
+        value: 1024,
       });
 
       render(<EnhancedFloatingChatPopup {...defaultProps} />);
@@ -382,24 +378,14 @@ describe('EnhancedFloatingChatPopup', () => {
 
   describe('Animation States', () => {
     it('should apply opening animation class', () => {
-      render(
-        <EnhancedFloatingChatPopup
-          {...defaultProps}
-          animationState="opening"
-        />
-      );
+      render(<EnhancedFloatingChatPopup {...defaultProps} animationState="opening" />);
       const popup = screen.getByRole('dialog');
 
       expect(popup.className).toContain('popup-opening');
     });
 
     it('should apply open animation class', () => {
-      render(
-        <EnhancedFloatingChatPopup
-          {...defaultProps}
-          animationState="open"
-        />
-      );
+      render(<EnhancedFloatingChatPopup {...defaultProps} animationState="open" />);
       const popup = screen.getByRole('dialog');
 
       expect(popup.className).toContain('popup-open');
@@ -407,11 +393,7 @@ describe('EnhancedFloatingChatPopup', () => {
 
     it('should apply closing animation class', () => {
       render(
-        <EnhancedFloatingChatPopup
-          {...defaultProps}
-          isOpen={true}
-          animationState="closing"
-        />
+        <EnhancedFloatingChatPopup {...defaultProps} isOpen={true} animationState="closing" />
       );
       const popup = screen.getByRole('dialog');
 
@@ -440,17 +422,11 @@ describe('EnhancedFloatingChatPopup', () => {
       document.body.appendChild(button);
       button.focus();
 
-      const { rerender } = render(
-        <EnhancedFloatingChatPopup {...defaultProps} />
-      );
+      const { rerender } = render(<EnhancedFloatingChatPopup {...defaultProps} />);
 
       // Close popup
       rerender(
-        <EnhancedFloatingChatPopup
-          {...defaultProps}
-          isOpen={false}
-          animationState="closed"
-        />
+        <EnhancedFloatingChatPopup {...defaultProps} isOpen={false} animationState="closed" />
       );
 
       // Focus should return to button (in real implementation)

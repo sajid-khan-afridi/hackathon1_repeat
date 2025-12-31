@@ -26,7 +26,7 @@ interface FloatingChatButtonProps {
 export default function FloatingChatButton({
   onClick,
   isExpanded,
-  unreadCount = 0
+  unreadCount = 0,
 }: FloatingChatButtonProps): JSX.Element {
   const hasUnread = unreadCount > 0;
   const ariaLabel = hasUnread
@@ -51,7 +51,7 @@ export default function FloatingChatButton({
         aria-hidden="true"
         className={styles.buttonIcon}
       >
-        <path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm224 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112-48v192c0 35.3-28.7 64-64 64h-86.7l-97.3 73-97.3-73H48c-35.3 0-64-28.7-64-64V160c0-35.3 28.7-64 64-64h368c35.3 0 64 28.7 64 64zm-32 0c0-17.6-14.4-32-32-32H48c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32h106.7L256 448l101.3-64H416c17.6 0 32-14.4 32-32V160z"/>
+        <path d="M144 208c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm224 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm112-48v192c0 35.3-28.7 64-64 64h-86.7l-97.3 73-97.3-73H48c-35.3 0-64-28.7-64-64V160c0-35.3 28.7-64 64-64h368c35.3 0 64 28.7 64 64zm-32 0c0-17.6-14.4-32-32-32H48c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32h106.7L256 448l101.3-64H416c17.6 0 32-14.4 32-32V160z" />
       </svg>
 
       {/* Label (visible on desktop) */}

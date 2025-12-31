@@ -92,9 +92,7 @@ export function useAnimationState(config: AnimationConfig): UseAnimationStateRet
     onExitComplete,
   } = config;
 
-  const [phase, setPhase] = useState<AnimationPhase>(() =>
-    isVisible ? 'entered' : 'initial'
-  );
+  const [phase, setPhase] = useState<AnimationPhase>(() => (isVisible ? 'entered' : 'initial'));
   const [shouldRender, setShouldRender] = useState(isVisible);
 
   const { prefersReducedMotion, getAdjustedDuration } = useReducedMotion();

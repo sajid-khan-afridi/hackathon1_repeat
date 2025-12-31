@@ -15,10 +15,7 @@ import type { ColorMode } from '@docusaurus/theme-common';
 
 import styles from './styles.module.css';
 
-function getNextColorMode(
-  colorMode: ColorMode | null,
-  respectPrefersColorScheme: boolean,
-) {
+function getNextColorMode(colorMode: ColorMode | null, respectPrefersColorScheme: boolean) {
   if (!respectPrefersColorScheme) {
     return colorMode === 'dark' ? 'light' : 'dark';
   }
@@ -69,21 +66,15 @@ function getColorModeAriaLabel(colorMode: ColorMode | null) {
     },
     {
       mode: getColorModeLabel(colorMode),
-    },
+    }
   );
 }
 
 function CurrentColorModeIcon(): ReactNode {
   return (
     <>
-      <IconLightMode
-        aria-hidden
-        className={clsx(styles.toggleIcon, styles.lightToggleIcon)}
-      />
-      <IconDarkMode
-        aria-hidden
-        className={clsx(styles.toggleIcon, styles.darkToggleIcon)}
-      />
+      <IconLightMode aria-hidden className={clsx(styles.toggleIcon, styles.lightToggleIcon)} />
+      <IconDarkMode aria-hidden className={clsx(styles.toggleIcon, styles.darkToggleIcon)} />
       <IconSystemColorMode
         aria-hidden
         className={clsx(styles.toggleIcon, styles.systemToggleIcon)}
@@ -102,15 +93,9 @@ function ColorModeToggle({
   return (
     <div className={clsx(styles.toggle, className)}>
       <button
-        className={clsx(
-          'clean-btn',
-          styles.toggleButton,
-          buttonClassName,
-        )}
+        className={clsx('clean-btn', styles.toggleButton, buttonClassName)}
         type="button"
-        onClick={() =>
-          onChange(getNextColorMode(value, respectPrefersColorScheme))
-        }
+        onClick={() => onChange(getNextColorMode(value, respectPrefersColorScheme))}
         // REMOVED: disabled={!isBrowser} - allows button to be clickable immediately
         title={getColorModeLabel(value)}
         aria-label={getColorModeAriaLabel(value)}

@@ -175,16 +175,11 @@ export function CountUp({
     };
   }, []);
 
-  const displayValue = formatNumber(
-    currentValue,
-    decimals,
-    separator,
-    separatorChar
-  );
+  const displayValue = formatNumber(currentValue, decimals, separator, separatorChar);
 
   return (
     <Component
-      ref={ref as React.RefObject<HTMLElement | null>}
+      ref={ref as React.Ref<HTMLElement>}
       className={clsx(styles.countUp, className)}
       aria-label={`${prefix}${formatNumber(end, decimals, separator, separatorChar)}${suffix}`}
     >

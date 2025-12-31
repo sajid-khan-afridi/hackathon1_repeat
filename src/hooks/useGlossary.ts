@@ -99,11 +99,12 @@ export function useGlossary(): UseGlossaryReturn {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      result = result.filter((term) =>
-        term.english.toLowerCase().includes(query) ||
-        term.urduTransliteration.includes(query) ||
-        term.definition.toLowerCase().includes(query) ||
-        term.definitionUrdu.includes(query)
+      result = result.filter(
+        (term) =>
+          term.english.toLowerCase().includes(query) ||
+          term.urduTransliteration.includes(query) ||
+          term.definition.toLowerCase().includes(query) ||
+          term.definitionUrdu.includes(query)
       );
     }
 

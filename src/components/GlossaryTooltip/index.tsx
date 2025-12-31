@@ -111,9 +111,7 @@ export function GlossaryTooltip({
             {language === 'ur' ? term.definitionUrdu : term.definition}
           </p>
 
-          {term.category && (
-            <span className={styles.category}>{term.category}</span>
-          )}
+          {term.category && <span className={styles.category}>{term.category}</span>}
 
           {relatedTerms.length > 0 && (
             <div className={styles.relatedTerms}>

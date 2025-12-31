@@ -224,7 +224,9 @@ export async function toggleChapterBookmark(chapterId: string): Promise<ChapterP
  * Get personalized chapter recommendations
  * GET /api/v1/recommendations?force_refresh=false
  */
-export async function getRecommendations(forceRefresh: boolean = false): Promise<RecommendationsResponse> {
+export async function getRecommendations(
+  forceRefresh: boolean = false
+): Promise<RecommendationsResponse> {
   const params = new URLSearchParams();
   if (forceRefresh) params.append('force_refresh', 'true');
 

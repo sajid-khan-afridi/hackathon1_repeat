@@ -206,7 +206,11 @@
 /* ==================== Branded Header ==================== */
 
 .headerBranded {
-  background: linear-gradient(135deg, var(--popup-gradient-start) 0%, var(--popup-gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--popup-gradient-start) 0%,
+    var(--popup-gradient-end) 100%
+  );
   color: var(--popup-header-text);
   flex-shrink: 0;
   cursor: grab;
@@ -387,11 +391,7 @@
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.05) 0%,
-    rgba(29, 78, 216, 0.05) 100%
-  );
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
   border-bottom: 1px solid var(--popup-color-border);
   animation: slideInFromTop 400ms ease;
 }
@@ -408,11 +408,7 @@
 }
 
 [data-theme='dark'] .botIdentity {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.1) 0%,
-    rgba(37, 99, 235, 0.1) 100%
-  );
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
 }
 
 .botIdentityIcon {

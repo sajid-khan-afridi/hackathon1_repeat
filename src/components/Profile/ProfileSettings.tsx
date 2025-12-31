@@ -94,13 +94,12 @@ export function ProfileSettings(): JSX.Element {
         {/* Skill Level Badge */}
         <div className={styles.skillLevelSection}>
           <h2 className={styles.sectionTitle}>Your Skill Level</h2>
-          <p className={styles.sectionDescription}>
-            Based on your profile, you're classified as:
-          </p>
+          <p className={styles.sectionDescription}>Based on your profile, you're classified as:</p>
           <SkillLevelBadge showRecalculate size="large" />
           <p className={styles.skillLevelHint}>
-            Your skill level is automatically calculated from your programming experience and ROS familiarity.
-            Update the fields below and click "Recalculate" to refresh your classification.
+            Your skill level is automatically calculated from your programming experience and ROS
+            familiarity. Update the fields below and click "Recalculate" to refresh your
+            classification.
           </p>
         </div>
 
@@ -210,11 +209,7 @@ export function ProfileSettings(): JSX.Element {
           )}
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isSubmitting}
-          >
+          <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>
         </form>

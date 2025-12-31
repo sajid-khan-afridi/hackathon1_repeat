@@ -118,8 +118,13 @@ export default function ProgressTracker({
       {showStats && (
         <div className="progress-tracker__stats">
           {timeSpent > 0 && (
-            <div className="progress-tracker__stat" aria-label={`Time spent: ${formatTime(timeSpent)}`}>
-              <span className="progress-tracker__stat-icon" aria-hidden="true">⏱</span>
+            <div
+              className="progress-tracker__stat"
+              aria-label={`Time spent: ${formatTime(timeSpent)}`}
+            >
+              <span className="progress-tracker__stat-icon" aria-hidden="true">
+                ⏱
+              </span>
               <span className="progress-tracker__stat-value">{formatTime(timeSpent)}</span>
             </div>
           )}
@@ -129,7 +134,9 @@ export default function ProgressTracker({
               className="progress-tracker__stat"
               aria-label={`Scroll progress: ${Math.floor(scrollDepth * 100)}%`}
             >
-              <span className="progress-tracker__stat-icon" aria-hidden="true">📊</span>
+              <span className="progress-tracker__stat-icon" aria-hidden="true">
+                📊
+              </span>
               <span className="progress-tracker__stat-value">{Math.floor(scrollDepth * 100)}%</span>
             </div>
           )}
@@ -139,7 +146,9 @@ export default function ProgressTracker({
               className="progress-tracker__stat"
               aria-label={`Started: ${new Date(progress.started_at).toLocaleDateString()}`}
             >
-              <span className="progress-tracker__stat-icon" aria-hidden="true">📅</span>
+              <span className="progress-tracker__stat-icon" aria-hidden="true">
+                📅
+              </span>
               <span className="progress-tracker__stat-value">
                 {new Date(progress.started_at).toLocaleDateString()}
               </span>
@@ -151,7 +160,9 @@ export default function ProgressTracker({
               className="progress-tracker__stat"
               aria-label={`Completed: ${new Date(progress.completed_at).toLocaleDateString()}`}
             >
-              <span className="progress-tracker__stat-icon" aria-hidden="true">🎉</span>
+              <span className="progress-tracker__stat-icon" aria-hidden="true">
+                🎉
+              </span>
               <span className="progress-tracker__stat-value">
                 {new Date(progress.completed_at).toLocaleDateString()}
               </span>
@@ -161,7 +172,7 @@ export default function ProgressTracker({
       )}
 
       {/* Inline styles (can be moved to CSS file) */}
-      <style jsx>{`
+      <style>{`
         .progress-tracker {
           padding: 1rem;
           border-radius: 0.5rem;
@@ -181,8 +192,13 @@ export default function ProgressTracker({
         }
 
         @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
         }
 
         .progress-tracker__status-row {

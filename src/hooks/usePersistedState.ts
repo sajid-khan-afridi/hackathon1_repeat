@@ -137,15 +137,12 @@ export function usePersistedState<T>(
   }, [key, state, storage, storageAvailable, serialize]);
 
   // Enhanced setter that supports functional updates
-  const setPersistedState = useCallback(
-    (value: T | ((prev: T) => T)) => {
-      setState((prevState) => {
-        const newState = typeof value === 'function' ? (value as (prev: T) => T)(prevState) : value;
-        return newState;
-      });
-    },
-    []
-  );
+  const setPersistedState = useCallback((value: T | ((prev: T) => T)) => {
+    setState((prevState) => {
+      const newState = typeof value === 'function' ? (value as (prev: T) => T)(prevState) : value;
+      return newState;
+    });
+  }, []);
 
   return [state, setPersistedState];
 }
@@ -153,10 +150,7 @@ export function usePersistedState<T>(
 /**
  * Clears a persisted state value from storage
  */
-export function clearPersistedState(
-  key: string,
-  storage: 'localStorage' | 'sessionStorage'
-): void {
+export function clearPersistedState(key: string, storage: 'localStorage' | 'sessionStorage'): void {
   if (typeof window === 'undefined') {
     return;
   }

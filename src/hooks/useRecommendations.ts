@@ -97,46 +97,49 @@ export function useRecommendations(): UseRecommendationsReturn {
   /**
    * Fetch recommendations from API
    */
-  const fetchRecommendations = useCallback(async (forceRefreshParam: boolean = false) => {
-    if (!user) {
-      // User not authenticated - clear state
-      setRecommendations([]);
-      setGeneratedAt(null);
-      setFromCache(false);
-      setError(null);
-      return;
-    }
-
-    // Set appropriate loading state
-    if (forceRefreshParam) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-    setError(null);
-
-    try {
-      const response: RecommendationsResponse = await getRecommendations(forceRefreshParam);
-      setRecommendations(response.recommendations);
-      setGeneratedAt(response.generated_at);
-      setFromCache(response.from_cache);
-
-      console.log(
-        `[useRecommendations] Fetched ${response.recommendations.length} recommendations, ` +
-        `from_cache=${response.from_cache}, force_refresh=${forceRefreshParam}`
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch recommendations';
-      setError(errorMessage);
-      console.error('[useRecommendations] Fetch error:', err);
-    } finally {
-      if (forceRefreshParam) {
-        setIsRefreshing(false);
-      } else {
-        setIsLoading(false);
+  const fetchRecommendations = useCallback(
+    async (forceRefreshParam: boolean = false) => {
+      if (!user) {
+        // User not authenticated - clear state
+        setRecommendations([]);
+        setGeneratedAt(null);
+        setFromCache(false);
+        setError(null);
+        return;
       }
-    }
-  }, [user]);
+
+      // Set appropriate loading state
+      if (forceRefreshParam) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      try {
+        const response: RecommendationsResponse = await getRecommendations(forceRefreshParam);
+        setRecommendations(response.recommendations);
+        setGeneratedAt(response.generated_at);
+        setFromCache(response.from_cache);
+
+        console.log(
+          `[useRecommendations] Fetched ${response.recommendations.length} recommendations, ` +
+            `from_cache=${response.from_cache}, force_refresh=${forceRefreshParam}`
+        );
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch recommendations';
+        setError(errorMessage);
+        console.error('[useRecommendations] Fetch error:', err);
+      } finally {
+        if (forceRefreshParam) {
+          setIsRefreshing(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [user]
+  );
 
   /**
    * Force refresh recommendations (bypass cache)

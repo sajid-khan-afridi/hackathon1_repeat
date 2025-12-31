@@ -76,9 +76,10 @@ export function SkeletonLoader({
     ...style,
     ...(width !== undefined && { width: typeof width === 'number' ? `${width}px` : width }),
     ...(height !== undefined && { height: typeof height === 'number' ? `${height}px` : height }),
-    ...(borderRadius !== undefined && {
-      '--skeleton-radius': typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius,
-    } as React.CSSProperties),
+    ...(borderRadius !== undefined &&
+      ({
+        '--skeleton-radius': typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius,
+      } as React.CSSProperties)),
   };
 
   const skeletonElement = (key?: number) => (

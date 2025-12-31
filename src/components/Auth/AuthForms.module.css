@@ -40,7 +40,9 @@
   background-color: var(--ifm-background-surface-color);
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 6px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .input:focus {
@@ -90,7 +92,9 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
 }
 
 .submitButton:hover:not(:disabled) {
@@ -238,7 +242,9 @@
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .logoutButton:hover {
@@ -279,7 +285,10 @@
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .googleButton:hover:not(:disabled) {
@@ -316,7 +325,7 @@
 
 .divider::before,
 .divider::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 1px;
   background-color: var(--ifm-color-emphasis-300);
@@ -330,12 +339,12 @@
   margin-left: 1rem;
 }
 
-[data-theme="dark"] .googleButton {
+[data-theme='dark'] .googleButton {
   background-color: var(--ifm-background-color);
   border-color: var(--ifm-color-emphasis-400);
 }
 
-[data-theme="dark"] .googleButton:hover:not(:disabled) {
+[data-theme='dark'] .googleButton:hover:not(:disabled) {
   background-color: var(--ifm-color-emphasis-200);
 }
 
@@ -354,7 +363,10 @@
   border: 1px solid #24292e;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .githubButton:hover:not(:disabled) {
@@ -380,12 +392,12 @@
   flex-shrink: 0;
 }
 
-[data-theme="dark"] .githubButton {
+[data-theme='dark'] .githubButton {
   background-color: #2f363d;
   border-color: #444d56;
 }
 
-[data-theme="dark"] .githubButton:hover:not(:disabled) {
+[data-theme='dark'] .githubButton:hover:not(:disabled) {
   background-color: #24292e;
   border-color: #24292e;
 }

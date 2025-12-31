@@ -8,11 +8,11 @@
 .header {
   --zoom-primary: #2563eb;
   --zoom-primary-hover: #1d4ed8;
-  --zoom-bg-primary: #FFFFFF;
-  --zoom-bg-secondary: #F7F8FA;
+  --zoom-bg-primary: #ffffff;
+  --zoom-bg-secondary: #f7f8fa;
   --zoom-text-primary: #232333;
-  --zoom-text-inverse: #FFFFFF;
-  --zoom-border: #E4E6EB;
+  --zoom-text-inverse: #ffffff;
+  --zoom-border: #e4e6eb;
 }
 
 .header {
@@ -28,8 +28,8 @@
 }
 
 [data-theme='dark'] .header {
-  background: linear-gradient(135deg, #1A1A2E 0%, #232338 100%);
-  border-bottom: 1px solid #3D3D54;
+  background: linear-gradient(135deg, #1a1a2e 0%, #232338 100%);
+  border-bottom: 1px solid #3d3d54;
 }
 
 .titleSection {

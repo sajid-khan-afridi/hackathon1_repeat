@@ -76,7 +76,8 @@ export function ProgressBar({
   const percentage = isIndeterminate ? 0 : Math.min(100, Math.max(0, (value / max) * 100));
   const displayPercentage = Math.round(percentage);
 
-  const accessibleLabel = ariaLabel || label || (isIndeterminate ? 'Loading...' : `${displayPercentage}% complete`);
+  const accessibleLabel =
+    ariaLabel || label || (isIndeterminate ? 'Loading...' : `${displayPercentage}% complete`);
 
   return (
     <div

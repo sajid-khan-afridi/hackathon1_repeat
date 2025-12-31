@@ -65,20 +65,16 @@ export function GlossaryPage({
   // Labels based on language
   const labels = {
     title: language === 'ur' ? 'تکنیکی اصطلاحات' : 'Technical Glossary',
-    subtitle: language === 'ur'
-      ? 'روبوٹکس اور AI کی دو لسانی اصطلاحات'
-      : 'Bilingual robotics and AI terminology',
-    searchPlaceholder: language === 'ur'
-      ? 'اصطلاحات تلاش کریں...'
-      : 'Search terms...',
+    subtitle:
+      language === 'ur'
+        ? 'روبوٹکس اور AI کی دو لسانی اصطلاحات'
+        : 'Bilingual robotics and AI terminology',
+    searchPlaceholder: language === 'ur' ? 'اصطلاحات تلاش کریں...' : 'Search terms...',
     allCategories: language === 'ur' ? 'تمام زمرے' : 'All categories',
     clearFilters: language === 'ur' ? 'فلٹرز صاف کریں' : 'Clear filters',
-    noResults: language === 'ur'
-      ? 'کوئی اصطلاح نہیں ملی'
-      : 'No terms found',
-    termsCount: language === 'ur'
-      ? `${filteredTerms.length} اصطلاحات`
-      : `${filteredTerms.length} terms`,
+    noResults: language === 'ur' ? 'کوئی اصطلاح نہیں ملی' : 'No terms found',
+    termsCount:
+      language === 'ur' ? `${filteredTerms.length} اصطلاحات` : `${filteredTerms.length} terms`,
     definition: language === 'ur' ? 'تعریف' : 'Definition',
     relatedTerms: language === 'ur' ? 'متعلقہ اصطلاحات' : 'Related terms',
   };
@@ -127,7 +123,14 @@ export function GlossaryPage({
             aria-label={labels.searchPlaceholder}
           />
           <span className={styles.searchIcon} aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -146,20 +149,18 @@ export function GlossaryPage({
             aria-label={labels.allCategories}
           >
             <option value="">{labels.allCategories}</option>
-            {categories.filter((c): c is NonNullable<typeof c> => c !== null).map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
+            {categories
+              .filter((c): c is NonNullable<typeof c> => c !== null)
+              .map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
           </select>
         </div>
 
         {(searchQuery || categoryFilter) && (
-          <button
-            type="button"
-            className={styles.clearButton}
-            onClick={handleClearFilters}
-          >
+          <button type="button" className={styles.clearButton} onClick={handleClearFilters}>
             {labels.clearFilters}
           </button>
         )}

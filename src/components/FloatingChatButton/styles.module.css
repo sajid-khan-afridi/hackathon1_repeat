@@ -24,8 +24,10 @@
   --fab-spacing-mobile: 16px;
   --fab-spacing-desktop: 24px;
   /* Use global animation tokens for consistency */
-  --fab-transition-fast: var(--animation-duration-fast, 150ms) var(--animation-easing-standard, cubic-bezier(0.4, 0, 0.2, 1));
-  --fab-transition-base: var(--animation-duration-base, 250ms) var(--animation-easing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  --fab-transition-fast: var(--animation-duration-fast, 150ms)
+    var(--animation-easing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  --fab-transition-base: var(--animation-duration-base, 250ms)
+    var(--animation-easing-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /* Dark theme overrides */
@@ -131,7 +133,8 @@
 
 /* Polish: Add subtle pulse animation for attention */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 4px 8px var(--fab-color-shadow),
       0 2px 4px rgba(0, 0, 0, 0.1),
@@ -148,7 +151,8 @@
 /* Dark mode pulse uses lighter blue */
 @media (prefers-color-scheme: dark) {
   @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow:
         0 4px 8px var(--fab-color-shadow),
         0 2px 4px rgba(0, 0, 0, 0.2),

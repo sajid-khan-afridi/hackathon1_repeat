@@ -45,18 +45,10 @@ function MobileAuthSection(): ReactNode {
           </svg>
           <span className={styles.mobileUserEmail}>{user.email}</span>
         </div>
-        <a
-          href={profileUrl}
-          className={styles.mobileProfileLink}
-          onClick={handleProfileClick}
-        >
+        <a href={profileUrl} className={styles.mobileProfileLink} onClick={handleProfileClick}>
           Profile Settings
         </a>
-        <button
-          className={styles.mobileLogoutButton}
-          onClick={handleLogout}
-          type="button"
-        >
+        <button className={styles.mobileLogoutButton} onClick={handleLogout} type="button">
           Logout
         </button>
       </div>
@@ -65,11 +57,7 @@ function MobileAuthSection(): ReactNode {
 
   return (
     <div className={styles.mobileAuthSection}>
-      <a
-        href={loginUrl}
-        className={styles.mobileLoginLink}
-        onClick={() => mobileSidebar.toggle()}
-      >
+      <a href={loginUrl} className={styles.mobileLoginLink} onClick={() => mobileSidebar.toggle()}>
         Login
       </a>
     </div>
@@ -88,7 +76,8 @@ export default function NavbarMobilePrimaryMenu(): ReactNode {
   const filteredItems = items.filter((item) => {
     // Filter out items that link to login page
     if ('to' in item && item.to === '/login') return false;
-    if ('href' in item && typeof item.href === 'string' && item.href.includes('/login')) return false;
+    if ('href' in item && typeof item.href === 'string' && item.href.includes('/login'))
+      return false;
     // Filter out items with label "Login"
     if ('label' in item && item.label === 'Login') return false;
     return true;

@@ -93,15 +93,18 @@ export function useLanguagePreference(): UseLanguagePreferenceReturn {
   }, []);
 
   // Set language with validation and persistence
-  const setLanguage = useCallback((lang: LanguageCode): void => {
-    if (!['en', 'ur'].includes(lang)) {
-      console.warn(`Invalid language: ${lang}. Defaulting to ${DEFAULT_LANGUAGE}`);
-      lang = DEFAULT_LANGUAGE;
-    }
+  const setLanguage = useCallback(
+    (lang: LanguageCode): void => {
+      if (!['en', 'ur'].includes(lang)) {
+        console.warn(`Invalid language: ${lang}. Defaulting to ${DEFAULT_LANGUAGE}`);
+        lang = DEFAULT_LANGUAGE;
+      }
 
-    setLanguageState(lang);
-    savePreference(lang);
-  }, [savePreference]);
+      setLanguageState(lang);
+      savePreference(lang);
+    },
+    [savePreference]
+  );
 
   // Clear stored preference
   const clearPreference = useCallback((): void => {

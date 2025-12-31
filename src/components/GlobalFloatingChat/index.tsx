@@ -136,11 +136,7 @@ export default function GlobalFloatingChat(): JSX.Element | null {
 
       {/* Popup (shown when open or animating) */}
       {(isOpen || animationState === 'closing') && (
-        <FloatingChatPopup
-          isOpen={isOpen}
-          onClose={closeChat}
-          animationState={animationState}
-        />
+        <FloatingChatPopup isOpen={isOpen} onClose={closeChat} animationState={animationState} />
       )}
     </>
   );

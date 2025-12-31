@@ -62,7 +62,9 @@
   border: 1px solid var(--ifm-color-emphasis-300, #e2e8f0);
   border-radius: 0.5rem;
 
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .searchInput:focus {
@@ -129,7 +131,9 @@
   border-radius: 0.5rem;
 
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .clearButton:hover {

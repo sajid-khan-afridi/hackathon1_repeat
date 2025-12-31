@@ -72,7 +72,7 @@ function getRelevanceClass(score: number): string {
 
 export default function SourceCitations({
   sources,
-  defaultExpanded = false
+  defaultExpanded = false,
 }: SourceCitationsProps): React.ReactElement | null {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
@@ -81,7 +81,7 @@ export default function SourceCitations({
   }
 
   const toggleExpanded = () => {
-    setIsExpanded(prev => !prev);
+    setIsExpanded((prev) => !prev);
   };
 
   return (
@@ -104,18 +104,12 @@ export default function SourceCitations({
         >
           <path d="M4 6l4 4 4-4z" />
         </svg>
-        <span className={styles.sourcesTitle}>
-          Sources ({sources.length})
-        </span>
+        <span className={styles.sourcesTitle}>Sources ({sources.length})</span>
       </button>
 
       {/* Collapsible content */}
       {isExpanded && (
-        <ol
-          id="sources-list"
-          className={styles.sourcesList}
-          aria-label="Source citations"
-        >
+        <ol id="sources-list" className={styles.sourcesList} aria-label="Source citations">
           {sources.map((source, index) => (
             <li key={`${source.chapter_id}-${index}`} className={styles.sourceItem}>
               {/* Position indicator */}
@@ -142,9 +136,7 @@ export default function SourceCitations({
                 </span>
 
                 {/* Excerpt preview */}
-                <p className={styles.sourceExcerpt}>
-                  {source.excerpt}
-                </p>
+                <p className={styles.sourceExcerpt}>{source.excerpt}</p>
               </div>
             </li>
           ))}

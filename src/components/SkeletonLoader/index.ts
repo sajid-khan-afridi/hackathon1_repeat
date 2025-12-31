@@ -7,5 +7,14 @@
  */
 
 export { SkeletonLoader, type SkeletonLoaderProps, type SkeletonVariant } from './SkeletonLoader';
-export { TypingIndicator, type TypingIndicatorProps, type TypingIndicatorSize } from './TypingIndicator';
-export { ProgressBar, type ProgressBarProps, type ProgressBarSize, type ProgressBarColor } from './ProgressBar';
+export {
+  TypingIndicator,
+  type TypingIndicatorProps,
+  type TypingIndicatorSize,
+} from './TypingIndicator';
+export {
+  ProgressBar,
+  type ProgressBarProps,
+  type ProgressBarSize,
+  type ProgressBarColor,
+} from './ProgressBar';

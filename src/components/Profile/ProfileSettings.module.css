@@ -65,7 +65,9 @@
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 6px;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .select:focus {
@@ -111,7 +113,9 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
 }
 
 .submitButton:hover:not(:disabled) {

@@ -150,9 +150,7 @@ export default function RecommendationCard({
       {/* Module number (if available) */}
       {recommendation.module_number && (
         <div className="recommendation-card__meta" aria-label="Module information">
-          <span className="recommendation-card__module">
-            Module {recommendation.module_number}
-          </span>
+          <span className="recommendation-card__module">Module {recommendation.module_number}</span>
         </div>
       )}
     </div>

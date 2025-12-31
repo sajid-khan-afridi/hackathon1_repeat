@@ -25,7 +25,7 @@ import type {
   ErrorResponse,
   RateLimitError,
   RateLimitState,
-  StreamChunk
+  StreamChunk,
 } from './types';
 import ChatInput from './ChatInput';
 import MessageList from './MessageList';
@@ -78,11 +78,11 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
             id: `user-${Date.now()}`,
             role: 'user',
             content: action.payload.content,
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         ],
         error: null,
-        streamError: null
+        streamError: null,
       };
 
     case 'ADD_ASSISTANT_MESSAGE':
@@ -99,14 +99,14 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
             confidence: action.payload.confidence,
             tokens_used: action.payload.tokens_used,
             filter_message: action.payload.filter_message,
-            suggested_terms: action.payload.suggested_terms
-          }
+            suggested_terms: action.payload.suggested_terms,
+          },
         ],
         sessionId: action.payload.session_id,
         isLoading: false,
         isStreaming: false,
         error: null,
-        streamError: null
+        streamError: null,
       };
 
     case 'START_STREAMING':
@@ -124,9 +124,9 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
             id: action.payload.messageId,
             role: 'assistant',
             content: '',
-            timestamp: new Date()
-          }
-        ]
+            timestamp: new Date(),
+          },
+        ],
       };
 
     case 'APPEND_STREAM_CHUNK':
@@ -135,11 +135,11 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         streamingContent: state.streamingContent + action.payload.chunk,
-        messages: state.messages.map(msg =>
+        messages: state.messages.map((msg) =>
           msg.id === state.streamingMessageId
             ? { ...msg, content: state.streamingContent + action.payload.chunk }
             : msg
-        )
+        ),
       };
 
     case 'COMPLETE_STREAM':
@@ -151,24 +151,26 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         streamingMessageId: null,
         streamingContent: '',
         sessionId: action.payload.session_id,
-        messages: state.messages.map(msg =>
+        messages: state.messages.map((msg) =>
           msg.id === state.streamingMessageId
             ? {
                 ...msg,
                 sources: action.payload.sources,
                 confidence: action.payload.confidence,
-                tokens_used: action.payload.tokens_used
+                tokens_used: action.payload.tokens_used,
               }
             : msg
-        )
+        ),
       };
 
     case 'INTERRUPT_STREAM':
       return {
         ...state,
         isStreaming: false,
-        streamError: action.payload.error || 'Stream was interrupted. You can retry to get the complete response.',
-        isLoading: false
+        streamError:
+          action.payload.error ||
+          'Stream was interrupted. You can retry to get the complete response.',
+        isLoading: false,
       };
 
     case 'RETRY_STREAM':
@@ -176,13 +178,13 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         streamError: null,
         isLoading: false,
-        isStreaming: false
+        isStreaming: false,
       };
 
     case 'SET_LOADING':
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       };
 
     case 'SET_ERROR':
@@ -190,19 +192,19 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         error: action.payload,
         isLoading: false,
-        isStreaming: false
+        isStreaming: false,
       };
 
     case 'SET_SESSION_ID':
       return {
         ...state,
-        sessionId: action.payload
+        sessionId: action.payload,
       };
 
     case 'SET_MODULE_FILTER':
       return {
         ...state,
-        moduleFilter: action.payload
+        moduleFilter: action.payload,
       };
 
     case 'SET_RATE_LIMIT':
@@ -210,7 +212,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         rateLimitState: action.payload,
         isLoading: false,
-        isStreaming: false
+        isStreaming: false,
       };
 
     case 'CLEAR_HISTORY':
@@ -227,8 +229,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         rateLimitState: {
           isRateLimited: false,
           retryAfter: 0,
-          resetTime: null
-        }
+          resetTime: null,
+        },
       };
 
     default:
@@ -243,7 +245,7 @@ function getInitialState(): ChatState {
   const defaultRateLimitState: RateLimitState = {
     isRateLimited: false,
     retryAfter: 0,
-    resetTime: null
+    resetTime: null,
   };
 
   // SSR compatibility check
@@ -258,7 +260,7 @@ function getInitialState(): ChatState {
       error: null,
       streamError: null,
       moduleFilter: null,
-      rateLimitState: defaultRateLimitState
+      rateLimitState: defaultRateLimitState,
     };
   }
 
@@ -275,7 +277,7 @@ function getInitialState(): ChatState {
     error: null,
     streamError: null,
     moduleFilter: null,
-    rateLimitState: defaultRateLimitState
+    rateLimitState: defaultRateLimitState,
   };
 }
 
@@ -288,7 +290,7 @@ interface ChatbotWidgetProps {
 
 export default function ChatbotWidget({
   moduleFilter,
-  difficultyFilter
+  difficultyFilter,
 }: ChatbotWidgetProps = {}): React.ReactElement {
   const [state, dispatch] = useReducer(chatReducer, null, getInitialState);
   const { isAuthenticated } = useAuthContext();
@@ -324,119 +326,171 @@ export default function ChatbotWidget({
   /**
    * Submit query with streaming support using EventSource (SSE)
    */
-  const handleSubmit = useCallback(async (query: string) => {
-    // Add user message to UI
-    dispatch({ type: 'ADD_USER_MESSAGE', payload: { content: query } });
-    dispatch({ type: 'SET_LOADING', payload: true });
+  const handleSubmit = useCallback(
+    async (query: string) => {
+      // Add user message to UI
+      dispatch({ type: 'ADD_USER_MESSAGE', payload: { content: query } });
+      dispatch({ type: 'SET_LOADING', payload: true });
 
-    try {
-      const requestBody: QueryRequest = {
-        query,
-        session_id: state.sessionId || undefined,
-        top_k: 5
-      };
-
-      // Apply filters if provided (use state moduleFilter instead of prop)
-      if (state.moduleFilter || difficultyFilter) {
-        requestBody.filters = {
-          module: state.moduleFilter || undefined,
-          difficulty: difficultyFilter
+      try {
+        const requestBody: QueryRequest = {
+          query,
+          session_id: state.sessionId || undefined,
+          top_k: 5,
         };
-      }
 
-      // Try streaming first
-      const response = await fetch(`${API_BASE_URL}/api/v1/query`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream'  // Request streaming
-        },
-        body: JSON.stringify(requestBody)
-      });
+        // Apply filters if provided (use state moduleFilter instead of prop)
+        if (state.moduleFilter || difficultyFilter) {
+          requestBody.filters = {
+            module: state.moduleFilter || undefined,
+            difficulty: difficultyFilter,
+          };
+        }
 
-      if (!response.ok) {
-        // Handle rate limit errors (429) specially
-        if (response.status === 429) {
-          try {
-            const rateLimitData: RateLimitError = await response.json();
-            const resetTime = new Date(Date.now() + rateLimitData.retry_after * 1000);
+        // Try streaming first
+        const response = await fetch(`${API_BASE_URL}/api/v1/query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream', // Request streaming
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-            dispatch({
-              type: 'SET_RATE_LIMIT',
-              payload: {
-                isRateLimited: true,
-                retryAfter: rateLimitData.retry_after,
-                resetTime
-              }
-            });
+        if (!response.ok) {
+          // Handle rate limit errors (429) specially
+          if (response.status === 429) {
+            try {
+              const rateLimitData: RateLimitError = await response.json();
+              const resetTime = new Date(Date.now() + rateLimitData.retry_after * 1000);
 
-            return; // Don't throw error, just set rate limit state
-          } catch (parseError) {
-            // Fallback if JSON parsing fails
-            dispatch({
-              type: 'SET_RATE_LIMIT',
-              payload: {
-                isRateLimited: true,
-                retryAfter: 3600, // Default 1 hour
-                resetTime: new Date(Date.now() + 3600000)
-              }
-            });
-            return;
+              dispatch({
+                type: 'SET_RATE_LIMIT',
+                payload: {
+                  isRateLimited: true,
+                  retryAfter: rateLimitData.retry_after,
+                  resetTime,
+                },
+              });
+
+              return; // Don't throw error, just set rate limit state
+            } catch (parseError) {
+              // Fallback if JSON parsing fails
+              dispatch({
+                type: 'SET_RATE_LIMIT',
+                payload: {
+                  isRateLimited: true,
+                  retryAfter: 3600, // Default 1 hour
+                  resetTime: new Date(Date.now() + 3600000),
+                },
+              });
+              return;
+            }
           }
+
+          // Handle other HTTP errors
+          let errorMessage = `Server error: ${response.status}`;
+
+          try {
+            const errorData: ErrorResponse = await response.json();
+            errorMessage = errorData.detail || errorMessage;
+          } catch {
+            // Ignore JSON parse errors
+          }
+
+          throw new Error(errorMessage);
         }
 
-        // Handle other HTTP errors
-        let errorMessage = `Server error: ${response.status}`;
+        // Check if response is streaming
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('text/event-stream')) {
+          // Handle streaming response
+          const messageId = `assistant-${Date.now()}`;
+          dispatch({ type: 'START_STREAMING', payload: { messageId } });
 
-        try {
-          const errorData: ErrorResponse = await response.json();
-          errorMessage = errorData.detail || errorMessage;
-        } catch {
-          // Ignore JSON parse errors
-        }
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
 
-        throw new Error(errorMessage);
-      }
+          if (!reader) {
+            throw new Error('Response body is not readable');
+          }
 
-      // Check if response is streaming
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('text/event-stream')) {
-        // Handle streaming response
-        const messageId = `assistant-${Date.now()}`;
-        dispatch({ type: 'START_STREAMING', payload: { messageId } });
+          try {
+            let buffer = '';
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
+            while (true) {
+              const { done, value } = await reader.read();
 
-        if (!reader) {
-          throw new Error('Response body is not readable');
-        }
+              if (done) {
+                if (buffer.trim()) {
+                  // Process any remaining data in buffer
+                  const lines = buffer.split('\n');
+                  for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                      try {
+                        const chunk: StreamChunk = JSON.parse(line.substring(6));
+                        if (chunk.done) {
+                          dispatch({
+                            type: 'COMPLETE_STREAM',
+                            payload: {
+                              sources: chunk.sources || [],
+                              confidence: chunk.confidence || 0,
+                              session_id: chunk.session_id || state.sessionId || '',
+                              tokens_used: chunk.tokens_used || {
+                                input_tokens: 0,
+                                output_tokens: 0,
+                                total_tokens: 0,
+                              },
+                            },
+                          });
+                        } else if (chunk.chunk) {
+                          dispatch({
+                            type: 'APPEND_STREAM_CHUNK',
+                            payload: { chunk: chunk.chunk },
+                          });
+                        }
+                      } catch (e) {
+                        console.error('Failed to parse SSE chunk:', e);
+                      }
+                    }
+                  }
+                }
+                break;
+              }
 
-        try {
-          let buffer = '';
+              // Decode and add to buffer
+              buffer += decoder.decode(value, { stream: true });
 
-          while (true) {
-            const { done, value } = await reader.read();
+              // Process complete SSE messages (separated by \n\n)
+              const messages = buffer.split('\n\n');
+              buffer = messages.pop() || ''; // Keep incomplete message in buffer
 
-            if (done) {
-              if (buffer.trim()) {
-                // Process any remaining data in buffer
-                const lines = buffer.split('\n');
+              for (const message of messages) {
+                if (!message.trim()) continue;
+
+                const lines = message.split('\n');
                 for (const line of lines) {
                   if (line.startsWith('data: ')) {
                     try {
                       const chunk: StreamChunk = JSON.parse(line.substring(6));
+
                       if (chunk.done) {
+                        // Final chunk with metadata
                         dispatch({
                           type: 'COMPLETE_STREAM',
                           payload: {
                             sources: chunk.sources || [],
                             confidence: chunk.confidence || 0,
                             session_id: chunk.session_id || state.sessionId || '',
-                            tokens_used: chunk.tokens_used || { input_tokens: 0, output_tokens: 0, total_tokens: 0 }
-                          }
+                            tokens_used: chunk.tokens_used || {
+                              input_tokens: 0,
+                              output_tokens: 0,
+                              total_tokens: 0,
+                            },
+                          },
                         });
                       } else if (chunk.chunk) {
+                        // Text chunk
                         dispatch({ type: 'APPEND_STREAM_CHUNK', payload: { chunk: chunk.chunk } });
                       }
                     } catch (e) {
@@ -445,67 +499,30 @@ export default function ChatbotWidget({
                   }
                 }
               }
-              break;
             }
-
-            // Decode and add to buffer
-            buffer += decoder.decode(value, { stream: true });
-
-            // Process complete SSE messages (separated by \n\n)
-            const messages = buffer.split('\n\n');
-            buffer = messages.pop() || ''; // Keep incomplete message in buffer
-
-            for (const message of messages) {
-              if (!message.trim()) continue;
-
-              const lines = message.split('\n');
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  try {
-                    const chunk: StreamChunk = JSON.parse(line.substring(6));
-
-                    if (chunk.done) {
-                      // Final chunk with metadata
-                      dispatch({
-                        type: 'COMPLETE_STREAM',
-                        payload: {
-                          sources: chunk.sources || [],
-                          confidence: chunk.confidence || 0,
-                          session_id: chunk.session_id || state.sessionId || '',
-                          tokens_used: chunk.tokens_used || { input_tokens: 0, output_tokens: 0, total_tokens: 0 }
-                        }
-                      });
-                    } else if (chunk.chunk) {
-                      // Text chunk
-                      dispatch({ type: 'APPEND_STREAM_CHUNK', payload: { chunk: chunk.chunk } });
-                    }
-                  } catch (e) {
-                    console.error('Failed to parse SSE chunk:', e);
-                  }
-                }
-              }
-            }
+          } catch (streamError) {
+            console.error('Stream reading error:', streamError);
+            dispatch({
+              type: 'INTERRUPT_STREAM',
+              payload: {
+                error: 'Stream was interrupted. Click retry to get the complete response.',
+              },
+            });
           }
-        } catch (streamError) {
-          console.error('Stream reading error:', streamError);
-          dispatch({
-            type: 'INTERRUPT_STREAM',
-            payload: { error: 'Stream was interrupted. Click retry to get the complete response.' }
-          });
+        } else {
+          // Fallback to non-streaming JSON response
+          const data: QueryResponse = await response.json();
+          dispatch({ type: 'ADD_ASSISTANT_MESSAGE', payload: data });
         }
-      } else {
-        // Fallback to non-streaming JSON response
-        const data: QueryResponse = await response.json();
-        dispatch({ type: 'ADD_ASSISTANT_MESSAGE', payload: data });
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : 'Failed to get response. Please try again.';
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to get response. Please try again.';
 
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-    }
-  }, [state.sessionId, state.moduleFilter, difficultyFilter]);
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      }
+    },
+    [state.sessionId, state.moduleFilter, difficultyFilter]
+  );
 
   /**
    * Clear chat history (UI + backend)
@@ -523,7 +540,7 @@ export default function ChatbotWidget({
     try {
       // Call backend DELETE endpoint
       await fetch(`${API_BASE_URL}/api/v1/chat/sessions/${state.sessionId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       // Clear local state
@@ -554,9 +571,7 @@ export default function ChatbotWidget({
   const handleRetry = useCallback(() => {
     dispatch({ type: 'SET_ERROR', payload: null });
     // Re-submit last user message if it exists
-    const lastUserMessage = [...state.messages]
-      .reverse()
-      .find(m => m.role === 'user');
+    const lastUserMessage = [...state.messages].reverse().find((m) => m.role === 'user');
 
     if (lastUserMessage) {
       handleSubmit(lastUserMessage.content);
@@ -582,9 +597,7 @@ export default function ChatbotWidget({
     }
 
     // Re-submit last user message
-    const lastUserMessage = [...state.messages]
-      .reverse()
-      .find(m => m.role === 'user');
+    const lastUserMessage = [...state.messages].reverse().find((m) => m.role === 'user');
 
     if (lastUserMessage) {
       handleSubmit(lastUserMessage.content);
@@ -611,8 +624,8 @@ export default function ChatbotWidget({
           payload: {
             isRateLimited: false,
             retryAfter: 0,
-            resetTime: null
-          }
+            resetTime: null,
+          },
         });
       } else {
         // Update remaining time
@@ -621,8 +634,8 @@ export default function ChatbotWidget({
           payload: {
             isRateLimited: true,
             retryAfter: remainingSeconds,
-            resetTime: state.rateLimitState.resetTime
-          }
+            resetTime: state.rateLimitState.resetTime,
+          },
         });
       }
     }, 1000); // Update every second
@@ -656,16 +669,10 @@ export default function ChatbotWidget({
   }
 
   return (
-    <div
-      className={styles.chatbotWidget}
-      role="region"
-      aria-label="Robotics textbook chatbot"
-    >
+    <div className={styles.chatbotWidget} role="region" aria-label="Robotics textbook chatbot">
       {/* Header */}
       <div className={styles.chatbotHeader}>
-        <h2 className={styles.chatbotTitle}>
-          Ask About Robotics
-        </h2>
+        <h2 className={styles.chatbotTitle}>Ask About Robotics</h2>
 
         {state.messages.length > 0 && (
           <button
@@ -680,25 +687,12 @@ export default function ChatbotWidget({
       </div>
 
       {/* Module Filter */}
-      <ModuleFilter
-        selectedModule={state.moduleFilter}
-        onModuleChange={handleModuleFilterChange}
-      />
+      <ModuleFilter selectedModule={state.moduleFilter} onModuleChange={handleModuleFilterChange} />
 
       {/* Rate limit banner */}
       {state.rateLimitState.isRateLimited && (
-        <div
-          className={styles.rateLimitBanner}
-          role="alert"
-          aria-live="polite"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+        <div className={styles.rateLimitBanner} role="alert" aria-live="polite">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H9v6l5.25 3.15.75-1.23-4.5-2.67z" />
           </svg>
           <div>
@@ -711,9 +705,11 @@ export default function ChatbotWidget({
             </div>
             {!isAuthenticated && (
               <div style={{ marginTop: '8px', fontSize: '0.9em' }}>
-                💡 <Link to="/signup" style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
+                💡{' '}
+                <Link to="/signup" style={{ fontWeight: 'bold', textDecoration: 'underline' }}>
                   Create a free account
-                </Link> to get 50 queries/hour (5x more than anonymous users)
+                </Link>{' '}
+                to get 50 queries/hour (5x more than anonymous users)
               </div>
             )}
           </div>
@@ -722,26 +718,12 @@ export default function ChatbotWidget({
 
       {/* Error banner */}
       {state.error && (
-        <div
-          className={styles.errorBanner}
-          role="alert"
-          aria-live="assertive"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+        <div className={styles.errorBanner} role="alert" aria-live="assertive">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z" />
           </svg>
           <span>{state.error}</span>
-          <button
-            onClick={handleRetry}
-            className={styles.retryButton}
-            type="button"
-          >
+          <button onClick={handleRetry} className={styles.retryButton} type="button">
             Retry
           </button>
         </div>
@@ -749,18 +731,8 @@ export default function ChatbotWidget({
 
       {/* Stream interruption banner */}
       {state.streamError && (
-        <div
-          className={styles.errorBanner}
-          role="alert"
-          aria-live="assertive"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+        <div className={styles.errorBanner} role="alert" aria-live="assertive">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z" />
           </svg>
           <span>{state.streamError}</span>
@@ -776,15 +748,10 @@ export default function ChatbotWidget({
       )}
 
       {/* Message list */}
-      <MessageList
-        messages={state.messages}
-        isLoading={state.isLoading}
-      />
+      <MessageList messages={state.messages} isLoading={state.isLoading} />
 
       {/* Streaming indicator */}
-      {state.isStreaming && (
-        <LoadingState isStreaming={true} />
-      )}
+      {state.isStreaming && <LoadingState isStreaming={true} />}
 
       {/* Input form */}
       <ChatInput

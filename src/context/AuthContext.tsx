@@ -11,13 +11,7 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import type {
-  AuthState,
-  User,
-  UserProfile,
-  LoginRequest,
-  SignupRequest,
-} from '../types/auth';
+import type { AuthState, User, UserProfile, LoginRequest, SignupRequest } from '../types/auth';
 import * as authApi from '../services/authApi';
 
 // ============================================
@@ -177,9 +171,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     setState((prev) => ({
       ...prev,
       profile,
-      user: prev.user
-        ? { ...prev.user, profileComplete: profile.isComplete }
-        : null,
+      user: prev.user ? { ...prev.user, profileComplete: profile.isComplete } : null,
     }));
   }, []);
 

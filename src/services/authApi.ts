@@ -88,8 +88,9 @@ const getApiUrl = (): string => {
     }
 
     // Check for environment variable first (safe browser check)
-    const envUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
-                   (typeof process !== 'undefined' && process.env?.API_URL);
+    const envUrl =
+      (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) ||
+      (typeof process !== 'undefined' && process.env?.API_URL);
     if (envUrl) return envUrl;
 
     // Check for Docusaurus config
@@ -167,7 +168,11 @@ async function apiRequest<T>(
   };
 
   // Include CSRF token for POST, PUT, DELETE, PATCH requests
-  if (csrfToken && options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
+  if (
+    csrfToken &&
+    options.method &&
+    ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())
+  ) {
     headers['X-CSRF-Token'] = csrfToken;
   }
 
@@ -302,9 +307,7 @@ export async function checkAuth(): Promise<AuthResponse | null> {
  * Attempt to refresh token and retry the original request.
  * Used by interceptor pattern for handling 401 errors.
  */
-export async function withTokenRefresh<T>(
-  request: () => Promise<T>
-): Promise<T> {
+export async function withTokenRefresh<T>(request: () => Promise<T>): Promise<T> {
   try {
     return await request();
   } catch (error) {

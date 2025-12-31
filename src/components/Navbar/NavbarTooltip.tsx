@@ -13,6 +13,14 @@ import styles from './NavbarTooltip.module.css';
 
 export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
+interface ChildProps {
+  onMouseEnter?: (e: React.MouseEvent) => void;
+  onMouseLeave?: (e: React.MouseEvent) => void;
+  onFocus?: (e: React.FocusEvent) => void;
+  onBlur?: (e: React.FocusEvent) => void;
+  'aria-describedby'?: string;
+}
+
 export interface NavbarTooltipProps {
   /** Tooltip content */
   content: string;
@@ -27,7 +35,7 @@ export interface NavbarTooltipProps {
   hideDelay?: number;
 
   /** Children that trigger the tooltip */
-  children: React.ReactElement;
+  children: React.ReactElement<ChildProps>;
 
   /** Additional CSS classes for tooltip */
   className?: string;
@@ -116,11 +124,7 @@ export function NavbarTooltip({
         <div
           id={tooltipId}
           role="tooltip"
-          className={clsx(
-            styles.tooltip,
-            styles[position],
-            className
-          )}
+          className={clsx(styles.tooltip, styles[position], className)}
         >
           {content}
           <span className={styles.arrow} aria-hidden="true" />

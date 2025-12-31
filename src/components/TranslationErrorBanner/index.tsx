@@ -8,11 +8,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useLanguageContext } from '../../context/LanguageContext';
 import styles from './TranslationErrorBanner.module.css';
 
-export type TranslationErrorType =
-  | 'unavailable'
-  | 'loading_failed'
-  | 'in_progress'
-  | 'offline';
+export type TranslationErrorType = 'unavailable' | 'loading_failed' | 'in_progress' | 'offline';
 
 export interface TranslationErrorBannerProps {
   /** Type of error to display */

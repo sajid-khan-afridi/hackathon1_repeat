@@ -182,9 +182,8 @@ function announceLanguageChange(lang: LanguageCode): void {
   }
 
   const config = LANGUAGE_CONFIGS[lang];
-  const announcement = lang === 'ur'
-    ? 'زبان اردو میں تبدیل کی گئی'
-    : `Language changed to ${config.label}`;
+  const announcement =
+    lang === 'ur' ? 'زبان اردو میں تبدیل کی گئی' : `Language changed to ${config.label}`;
 
   // Create or update aria-live region
   let liveRegion = document.getElementById('language-announcer');
@@ -193,7 +192,8 @@ function announceLanguageChange(lang: LanguageCode): void {
     liveRegion.id = 'language-announcer';
     liveRegion.setAttribute('aria-live', 'polite');
     liveRegion.setAttribute('aria-atomic', 'true');
-    liveRegion.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
+    liveRegion.style.cssText =
+      'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
     document.body.appendChild(liveRegion);
   }
 
@@ -218,26 +218,29 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   }, []);
 
   // Memoized setter that validates, persists, and updates document
-  const setLanguage = useCallback((lang: LanguageCode) => {
-    if (!VALID_LANGUAGES.includes(lang)) {
-      console.warn(`Invalid language: ${lang}. Defaulting to ${DEFAULT_LANGUAGE}`);
-      lang = DEFAULT_LANGUAGE;
-    }
+  const setLanguage = useCallback(
+    (lang: LanguageCode) => {
+      if (!VALID_LANGUAGES.includes(lang)) {
+        console.warn(`Invalid language: ${lang}. Defaulting to ${DEFAULT_LANGUAGE}`);
+        lang = DEFAULT_LANGUAGE;
+      }
 
-    const previousLang = language;
-    setLanguageState(lang);
-    saveToStorage(lang);
-    updateDocumentDirection(lang);
+      const previousLang = language;
+      setLanguageState(lang);
+      saveToStorage(lang);
+      updateDocumentDirection(lang);
 
-    // Announce change and navigate if language actually changed
-    if (previousLang !== lang) {
-      announceLanguageChange(lang);
-      // Clear any previous translation errors on language change
-      setTranslationError(false);
-      // Navigate to the corresponding locale URL
-      navigateToLocale(lang);
-    }
-  }, [language]);
+      // Announce change and navigate if language actually changed
+      if (previousLang !== lang) {
+        announceLanguageChange(lang);
+        // Clear any previous translation errors on language change
+        setTranslationError(false);
+        // Navigate to the corresponding locale URL
+        navigateToLocale(lang);
+      }
+    },
+    [language]
+  );
 
   const config = LANGUAGE_CONFIGS[language];
 

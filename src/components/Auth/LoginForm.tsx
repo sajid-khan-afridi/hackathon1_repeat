@@ -15,10 +15,7 @@ interface LoginFormProps {
   onSignupClick?: () => void;
 }
 
-export function LoginForm({
-  onSuccess,
-  onSignupClick,
-}: LoginFormProps): JSX.Element {
+export function LoginForm({ onSuccess, onSignupClick }: LoginFormProps): JSX.Element {
   const { login, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -72,9 +69,7 @@ export function LoginForm({
       } catch (err) {
         if (err instanceof AuthApiError) {
           if (err.code === 'ACCOUNT_LOCKED') {
-            const retryMinutes = err.retryAfter
-              ? Math.ceil(err.retryAfter / 60)
-              : 15;
+            const retryMinutes = err.retryAfter ? Math.ceil(err.retryAfter / 60) : 15;
             setError(
               `Account locked due to too many failed attempts. Please try again in ${retryMinutes} minutes.`
             );
@@ -150,29 +145,19 @@ export function LoginForm({
           className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
           placeholder="Enter your password"
           autoComplete="current-password"
-          aria-describedby={
-            fieldErrors.password ? 'login-password-error' : undefined
-          }
+          aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
           aria-invalid={!!fieldErrors.password}
           disabled={isLoading}
           required
         />
         {fieldErrors.password && (
-          <span
-            id="login-password-error"
-            className={styles.fieldError}
-            role="alert"
-          >
+          <span id="login-password-error" className={styles.fieldError} role="alert">
             {fieldErrors.password}
           </span>
         )}
       </div>
 
-      <button
-        type="submit"
-        className={styles.submitButton}
-        disabled={isLoading}
-      >
+      <button type="submit" className={styles.submitButton} disabled={isLoading}>
         {isLoading ? 'Logging in...' : 'Log In'}
       </button>
 
@@ -187,11 +172,7 @@ export function LoginForm({
       {onSignupClick && (
         <p className={styles.switchText}>
           Don't have an account?{' '}
-          <button
-            type="button"
-            onClick={onSignupClick}
-            className={styles.linkButton}
-          >
+          <button type="button" onClick={onSignupClick} className={styles.linkButton}>
             Sign up
           </button>
         </p>

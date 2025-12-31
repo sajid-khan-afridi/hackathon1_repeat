@@ -121,7 +121,11 @@ export function SlideIn({
   }, [direction, rtlAware, isRTL]);
 
   // Use animation state hook
-  const { phase, shouldRender, style: animationStyle } = useAnimationState({
+  const {
+    phase,
+    shouldRender,
+    style: animationStyle,
+  } = useAnimationState({
     isVisible,
     enterDuration,
     exitDuration,
